@@ -1,0 +1,7 @@
+import {AppException} from "./AppException";
+
+export class TurnoInvalido extends AppException {
+    constructor(mensaje) {
+        super(`Turno inválido: ${mensaje}`, "Turno creado inválido");
+    }
+}
