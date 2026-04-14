@@ -31,7 +31,7 @@ export class Turno {
         if (
             [id, medico, paciente, fechaHora, sede, practica, estado, costo]
                 .some(v => !v)) {
-            throw new TurnoInvalido(`El turno necesita id, medico, paciente, fechaHora, sede, practica, estado, costo.
+            throw new TurnoInvalido(`El turno necesita id, medico, paciente, fechaHora, sede, practica, estado, costo.\n
                 Se recibió medico: ${medico}, paciente: ${paciente}, fechaHora: ${fechaHora}, 
                 sede: ${sede}, practica: ${practica}, estado: ${estado}, costo: ${costo}`);
         }
