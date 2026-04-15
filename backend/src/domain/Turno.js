@@ -27,6 +27,10 @@ export class Turno {
         }
     }
 
+    static build(){
+        return new Turno({sinParametros:true});
+    }
+
     validarParametros(id, medico, paciente, fechaHora, sede, practica, estado, costo) {
         if (
             [id, medico, paciente, fechaHora, sede, practica, estado, costo]

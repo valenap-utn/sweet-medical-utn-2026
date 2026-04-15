@@ -10,18 +10,16 @@ export class Medico {
     sedes;
     disponibilidades;
 
-    constructor({id, usuario, matricula, nombre, sinParametros}) {
-        if(!sinParametros) {
-            this.validarParametros(id, usuario, matricula, nombre)
-            this.id = id;
-            this.usuario = usuario;
-            this.matricula = matricula;
-            this.nombre = nombre;
-            this.especialidades = [];
-            this.practicas = [];
-            this.sedes = [];
-            this.disponibilidades = [];
-        }
+    constructor({id, usuario, matricula, nombre}) {
+        this.validarParametros(id, usuario, matricula, nombre)
+        this.id = id;
+        this.usuario = usuario;
+        this.matricula = matricula;
+        this.nombre = nombre;
+        this.especialidades = [];
+        this.practicas = [];
+        this.sedes = [];
+        this.disponibilidades = [];
     }
 
     validarParametros(id, usuario, matricula, nombre) {

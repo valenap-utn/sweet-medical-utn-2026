@@ -8,17 +8,17 @@ export class Paciente {
     obraSocial;
     plan;
 
-    constructor({id,usuario,dni, nombre,obraSocial,plan, sinParametros}) {
-        if(!sinParametros){
-            this.validarParametros(id,usuario,dni, nombre,obraSocial,plan)
-            this.id = id;
-            this.usuario = usuario;
-            this.dni = dni;
-            this.nombre = nombre;
-            this.obraSocial = obraSocial;
-            this.plan = plan;
-        }
+    constructor({id,usuario,dni, nombre,obraSocial,plan}) {
+        this.validarParametros(id,usuario,dni, nombre,obraSocial,plan)
+        this.id = id;
+        this.usuario = usuario;
+        this.dni = dni;
+        this.nombre = nombre;
+        this.obraSocial = obraSocial;
+        this.plan = plan;
     }
+
+    static build
 
     validarParametros(id,usuario,dni, nombre,obraSocial,plan) {
         if ([id,usuario,dni, nombre,obraSocial,plan].some(v => !v)) {
