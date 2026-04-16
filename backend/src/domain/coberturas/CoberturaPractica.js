@@ -13,7 +13,11 @@ export class CoberturaPractica{
     validarParametros(practica, nivel) {
         if ([practica, nivel].some(v => !v)) {
             throw new PracticaInvalida(`La cobertura necesita práctica y nivel.\n
-                Se recibió especialidad: ${practica}, nivel: ${nivel}`);
+                Se recibió práctica: ${practica}, nivel: ${nivel}`);
         }
+    }
+
+    get nivel() {
+        return this.nivel;
     }
 }
