@@ -1,8 +1,8 @@
 import {PlanInvalido} from "../../exceptions/PlanInvalido.js";
 import {NivelCobertura} from "../enums/NivelCobertura.js";
-import {CoberturaEspecialidad} from "./CoberturaEspecialidad.js";
-import {CoberturaPractica} from "./CoberturaPractica.js";
 import {CoberturaInvalida} from "../../exceptions/CoberturaInvalida.js";
+import {Especialidad} from "./Especialidad.js";
+import {Practica} from "./Practica.js";
 
 export class Plan {
     id;
@@ -25,15 +25,15 @@ export class Plan {
         }
     }
 
-    obtenerCobertura(tipoCobertura){
-        let cobertura;
-        if(tipoCobertura instanceof CoberturaEspecialidad){
-            cobertura = this.coberturasEspecialidad.find(c => c.especialidad === tipoCobertura);
-        }else if(tipoCobertura instanceof CoberturaPractica){
-            cobertura = this.coberturasPractica.find(c => c.practica === tipoCobertura);
-        }else throw new CoberturaInvalida(`La cobertura para ${tipoCobertura} no pudo ser encontrada`);
+    obtenerCobertura(cobertura){
+        let tipoCobertura;
+        if(cobertura instanceof Especialidad){
+            tipoCobertura = this.coberturasEspecialidad.find(c => c.especialidad === cobertura);
+        }else if(cobertura instanceof Practica){
+            tipoCobertura = this.coberturasPractica.find(c => c.practica === cobertura);
+        }else throw new CoberturaInvalida(`La cobertura para ${cobertura} no pudo ser encontrada`);
 
-        return cobertura ? cobertura.nivel : NivelCobertura.NO_CUBIERTA;
+        return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
     }
 
     agregarEspecialidad(coberturaEspecialidad) {
