@@ -1,12 +1,13 @@
 import {UsuarioInvalido} from "../../exceptions/UsuarioInvalido";
 
 export class Usuario {
-    id
-    nombreUsuario
-    password
+    id;
+    nombreUsuario;
+    password;
 
     constructor(id, nombreUsuario, password ) {
         // this.id = id;
+        this.validarDatosIngresados(nombreUsuario,password);
         this.nombreUsuario = nombreUsuario;
         this.password  = password;
     }
