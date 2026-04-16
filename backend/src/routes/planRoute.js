@@ -1,5 +1,5 @@
 import express from "express";
-import {obtenerEspecialidades, obtenerPracticas} from "../controllers/planController.js";
+// import {obtenerEspecialidades, obtenerPracticas} from "../controllers/planController.js";
 
 const planRouter = express.Router();
 
