@@ -16,4 +16,8 @@ export class CoberturaEspecialidad {
                 Se recibió especialidad: ${especialidad}, nivel: ${nivel}`);
         }
     }
+
+    get nivel() {
+        return this.nivel;
+    }
 }
