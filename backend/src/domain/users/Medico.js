@@ -10,8 +10,8 @@ export class Medico {
     sedes;
     disponibilidades;
 
-    constructor({id, usuario, matricula, nombre}) {
-        this.validarParametros(id, usuario, matricula, nombre)
+    constructor(id, usuario, nombre, matricula) {
+        this.validarParametros(usuario, nombre, matricula )
         this.id = id;
         this.usuario = usuario;
         this.matricula = matricula;
@@ -22,10 +22,10 @@ export class Medico {
         this.disponibilidades = [];
     }
 
-    validarParametros(id, usuario, matricula, nombre) {
-        if ([id, usuario, matricula, nombre].some(v => !v)) {
-            throw new UsuarioInvalido(`El médico necesita id, usuario, matricula, nombre.\n
-                Se recibió usuario: ${usuario}, matricula: ${matricula}, nombre: ${nombre}`);
+    validarParametros(usuario, nombre, matricula) {
+        if ([usuario, nombre, matricula].some(v => !v)) {
+            throw new UsuarioInvalido(`El médico necesita usuario y matricula.\n
+                Se recibió usuario: ${usuario.id}, nombre: ${nombre}, matricula: ${matricula}}`);
         }
     }
 

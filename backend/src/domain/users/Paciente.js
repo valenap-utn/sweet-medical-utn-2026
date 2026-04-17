@@ -8,7 +8,7 @@ export class Paciente {
     obraSocial;
     plan;
 
-    constructor({id,usuario,dni, nombre,obraSocial,plan}) {
+    constructor(id,usuario,dni, nombre,obraSocial,plan) {
         this.validarParametros(id,usuario,dni, nombre,obraSocial,plan)
         this.id = id;
         this.usuario = usuario;

@@ -3,4 +3,9 @@ export class Sede {
     nombre;
     direccion;
 
+    constructor(id,nombre,direccion) {
+        this.id = id;
+        this.nombre = nombre;
+        this.direccion = direccion;
+    }
 }
