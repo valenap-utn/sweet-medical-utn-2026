@@ -22,7 +22,7 @@ export class Turno {
             this.sede = sede;
             this.practica = practica;
             this.estado = estado;
-            this.costo = estado;
+            this.costo = costo;
             this.historialEstados = [];
         }
     }

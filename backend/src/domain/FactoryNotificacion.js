@@ -6,21 +6,23 @@ export class FactoryNotificacion {
         const notificacion = new Notificacion();
 
         switch(turno.estado){
-            case 'Disponible':
+            case 'RESERVADO':
                 notificacion.destinatario = turno.medico;
                 notificacion.remitente = turno.paciente;
-                notificacion.mensaje = 'Recibiste una reserva de ${turno.practica} para el ${turno.fechaHora}';
+                notificacion.mensaje = `Recibiste una reserva de ${turno.practica.nombre} para el ${turno.fechaHora}`;
                 break;
-            case 'Confirmado':
+            case 'CONFIRMADO':
                 notificacion.destinatario = turno.paciente;
                 notificacion.remitente = turno.medico;
-                notificacion.mensaje = 'Tu reserva de ${turno.practica} para el ${turno.fechaHora} fue recibida';
+                notificacion.mensaje = `Tu reserva de ${turno.practica.nombre} para el ${turno.fechaHora} fue recibida`;
                 break;
-            case 'Cancelado':
+            case 'CANCELADO':
                 notificacion.remitente = turno.historialEstados[turno.historialEstados.length - 1].usuario;
                 turno.historialEstados[turno.historialEstados.length - 1].usuario == turno.medico ? notificacion.destinatario = turno.paciente : notificacion.destinatario = turno.medico;
-                notificacion.mensaje = 'Tu reserva de ${turno.practica} para el ${turno.fechaHora} fue cancelada';
+                notificacion.mensaje = `Tu reserva de ${turno.practica.nombre} para el ${turno.fechaHora} fue cancelada`;
                 break;
+            default://Si es DISPONIBLE o REALIZADO no enviamos notificacion
+                return null;
         }
 
         return notificacion;
