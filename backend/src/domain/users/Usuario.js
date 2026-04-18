@@ -6,8 +6,8 @@ export class Usuario {
     password;
 
     constructor(id, nombreUsuario, password ) {
-        // this.id = id;
         this.validarDatosIngresados(nombreUsuario,password);
+        this.id = id;
         this.nombreUsuario = nombreUsuario;
         this.password  = password;
     }
