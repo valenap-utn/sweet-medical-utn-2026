@@ -25,4 +25,15 @@ export class Usuario {
             throw new UsuarioInvalido(`La contraseña ingresada tiene un formato inválido, debe contener al menos 8 caracteres, una letra mayúscula y una minúscula.`)
         }
     }
+    
+    static validarNombreDisponible(nombreUsuario, usuariosExistentes = []) {
+        const yaExiste = usuariosExistentes.some(
+            u => u.nombreUsuario.toLowerCase() === nombreUsuario.toLowerCase()
+        );
+        if (yaExiste) {
+            throw new UsuarioInvalido(
+                `El nombre de usuario '${nombreUsuario}' ya está en uso. Elegí otro.`
+            );
+        }
+    }
 }
