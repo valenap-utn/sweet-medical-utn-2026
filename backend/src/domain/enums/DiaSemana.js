@@ -9,11 +9,16 @@ export class DiaSemana {
     }
 }
 
-DiaSemana.LUNES = new DiaSemana("Lunes");
-DiaSemana.MARTES = new DiaSemana("Martes");
-DiaSemana.MIERCOLES = new DiaSemana("Miercoles");
-DiaSemana.JUEVES = new DiaSemana("Jueves");
-DiaSemana.VIERNES = new DiaSemana("Viernes");
-DiaSemana.SABADO = new DiaSemana("Sabado");
-DiaSemana.DOMINGO = new DiaSemana("Domingo");
+_nombreDiaSemanaES(getDay) {
+    const mapa = {
+         0: 'Domingo',
+         1: 'Lunes',
+         2: 'Martes',
+         3: 'Miercoles',
+         4: 'Jueves',
+         5: 'Viernes',
+         6: 'Sabado',
+     };
+     return mapa[getDay] ?? '';
+}
 
