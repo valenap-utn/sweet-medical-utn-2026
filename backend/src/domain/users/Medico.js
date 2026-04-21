@@ -10,6 +10,8 @@ export class Medico {
     sedes;
     disponibilidades;
 
+    turnosExistentes; // para 'Agenda'
+
     constructor(id, usuario, nombre, matricula) {
         this.validarParametros(usuario, nombre, matricula )
         this.id = id;
@@ -20,6 +22,8 @@ export class Medico {
         this.practicas = [];
         this.sedes = [];
         this.disponibilidades = [];
+
+        this.turnosExistentes = [];
     }
 
     validarParametros(usuario, nombre, matricula) {

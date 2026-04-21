@@ -1,6 +1,7 @@
 import { Turno } from '../Turno.js';
 import { EstadoTurno } from '../enums/EstadoTurno.js';
-import { DiaSemana } from '../enums/DiaSemana.js';
+import {Especialidad} from "./coberturas/Especialidad.js";
+import {Practica} from "./coberturas/Practica.js";
 
 /**
  * Agenda: genera y refresca turnos disponibles para un médico.
@@ -14,29 +15,27 @@ import { DiaSemana } from '../enums/DiaSemana.js';
 export class Agenda {
 
     /**
-     * Genera turnos para una especialidad y un médico.
+     * Genera turnos para una especialidad/práctica y un médico.
      * @param {Especialidad} especialidad
      * @param {Medico} medico
      * @returns {Turno[]}
      */
-    generarTurnosPara(especialidad, medico) {
-        return this._generarTurnos({
-            servicio: especialidad,
-            duracionMins: especialidad.duracionTurnoEnMins,
-            costo: especialidad.costoConsulta,
-            medico,
-        });
-    }
-
-
-     //Genera turnos para una práctica y un médico.
-    generarTurnosPara(practica, medico) {
-        return this._generarTurnos({
-            servicio: practica,
-            duracionMins: practica.duracionTurnoEnMins,
-            costo: practica.costo,
-            medico,
-        });
+    generarTurnosPara(objeto, medico) {
+        if(objeto instanceof Especialidad){
+            return this._generarTurnos({
+                servicio: objeto,
+                duracionMins: objeto.duracionTurnoEnMins,
+                costo: objeto.costoConsulta,
+                medico,
+            });
+        }else if(objeto instanceof Practica){
+            return this._generarTurnos({
+                servicio: objeto,
+                duracionMins: objeto.duracionTurnoEnMins,
+                costo: objeto.costo,
+                medico,
+            });
+        }
     }
 
      //Refresca la lista de turnos de un médico según su disponibilidad actual.
