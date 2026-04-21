@@ -1,5 +1,6 @@
 import { Turno } from '../Turno.js';
 import { EstadoTurno } from '../enums/EstadoTurno.js';
+import { DiaSemana } from '../enums/DiaSemana.js';
 
 /**
  * Agenda: genera y refresca turnos disponibles para un médico.
@@ -27,12 +28,8 @@ export class Agenda {
         });
     }
 
-    /**
-     * Genera turnos para una práctica y un médico.
-     * @param {Practica} practica
-     * @param {Medico} medico
-     * @returns {Turno[]}
-     */
+
+     //Genera turnos para una práctica y un médico.
     generarTurnosPara(practica, medico) {
         return this._generarTurnos({
             servicio: practica,
@@ -42,15 +39,7 @@ export class Agenda {
         });
     }
 
-    /**
-     * Refresca la lista de turnos de un médico según su disponibilidad actual.
-     * Reglas:
-     *  - Turnos pasados → no se tocan.
-     *  - Turnos futuros RESERVADOS → no se tocan.
-     *  - Turnos futuros DISPONIBLES → se eliminan y se regeneran.
-     * @param {Medico} medico
-     * @returns {{ eliminar: Turno[], crear: Turno[] }}
-     */
+     //Refresca la lista de turnos de un médico según su disponibilidad actual.
     refrescarTurnosSegunDisponibilidadDe(medico) {
         const ahora = new Date();
 
@@ -105,8 +94,7 @@ export class Agenda {
         for (let i = 0; i <= DIAS_ANTICIPACION; i++) {
             const fecha = new Date(hoy);
             fecha.setDate(hoy.getDate() + i);
-
-            // Nombre del día en español para comparar con DiaSemana
+            
             const nombreDia = this._nombreDiaSemanaES(fecha.getDay());
 
             // Buscar disponibilidades que apliquen a este día
@@ -127,7 +115,7 @@ export class Agenda {
                     turno.medico = medico;
                     turno.paciente = null;
                     turno.fechaHora = slotFecha;
-                    turno.sede = medico.sedes[0] ?? null; // sede principal
+                    turno.sede = medico.sedes[0] ?? null; 
                     turno.practica = servicio;
                     turno.estado = EstadoTurno.DISPONIBLE;
                     turno.costo = costo;
@@ -140,14 +128,7 @@ export class Agenda {
         return turnos;
     }
 
-    /**
-     * Genera los datetime de inicio de cada turno dentro de un bloque horario.
-     * @param {Date} fecha  - día base (hora ignorada)
-     * @param {string} horaDesde - "HH:mm"
-     * @param {string} horaHasta - "HH:mm"
-     * @param {number} duracionMins
-     * @returns {Date[]}
-     */
+     // Genera los datetime de inicio de cada turno dentro de un bloque horario.
     _generarSlots(fecha, horaDesde, horaHasta, duracionMins) {
         const slots = [];
 
@@ -168,21 +149,5 @@ export class Agenda {
         }
 
         return slots;
-    }
-
-    /**
-     * Mapea getDay() (0=domingo) al nombre en español usado por DiaSemana.
-     */
-    _nombreDiaSemanaES(getDay) {
-        const mapa = {
-            0: 'Domingo',
-            1: 'Lunes',
-            2: 'Martes',
-            3: 'Miercoles',
-            4: 'Jueves',
-            5: 'Viernes',
-            6: 'Sabado',
-        };
-        return mapa[getDay] ?? '';
     }
 }
