@@ -25,14 +25,19 @@ export class Plan {
         }
     }
 
-    obtenerCobertura(cobertura){
-        let tipoCobertura;
-        if(cobertura instanceof Especialidad){
-            tipoCobertura = this.coberturasEspecialidad.find(c => c.especialidad === cobertura);
-        }else if(cobertura instanceof Practica){
-            tipoCobertura = this.coberturasPractica.find(c => c.practica === cobertura);
-        }else throw new CoberturaInvalida(`La cobertura para ${cobertura} no pudo ser encontrada`);
+    obtenerCoberturaEspecialidad(especialidad) {
+        if(!especialidad.id){
+            throw new CoberturaInvalida(`La cobertura para ${especialidad} no pudo ser encontrada`);
+        }
+        const tipoCobertura = this.coberturasEspecialidad.find(c => c.especialidad.id === especialidad.id);
+        return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
+    }
 
+    obtenerCoberturaPractica(practica) {
+        if(!practica.id){
+            throw new CoberturaInvalida(`La cobertura para ${practica} no pudo ser encontrada`);
+        }
+        const tipoCobertura = this.coberturasPractica.find(c => c.practica.id === practica.id);
         return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
     }
 

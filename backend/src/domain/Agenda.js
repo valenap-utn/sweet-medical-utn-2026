@@ -1,7 +1,7 @@
-import { Turno } from '../Turno.js';
-import { EstadoTurno } from '../enums/EstadoTurno.js';
+import {Turno} from "./Turno.js";
 import {Especialidad} from "./coberturas/Especialidad.js";
 import {Practica} from "./coberturas/Practica.js";
+import {EstadoTurno} from "./enums/EstadoTurno.js";
 
 /**
  * Agenda: genera y refresca turnos disponibles para un médico.
@@ -15,54 +15,60 @@ import {Practica} from "./coberturas/Practica.js";
 export class Agenda {
 
     /**
-     * Genera turnos para una especialidad/práctica y un médico.
+     * Genera turnos para una especialidad y un médico.
      * @param {Especialidad} especialidad
      * @param {Medico} medico
      * @returns {Turno[]}
      */
-    generarTurnosPara(objeto, medico) {
-        if(objeto instanceof Especialidad){
-            return this._generarTurnos({
-                servicio: objeto,
-                duracionMins: objeto.duracionTurnoEnMins,
-                costo: objeto.costoConsulta,
-                medico,
-            });
-        }else if(objeto instanceof Practica){
-            return this._generarTurnos({
-                servicio: objeto,
-                duracionMins: objeto.duracionTurnoEnMins,
-                costo: objeto.costo,
-                medico,
-            });
-        }
+    generarTurnoParaEspecialidad(especialidad, medico) {
+        return this._generarTurnos({
+            servicio: especialidad,
+            duracionMins: especialidad.duracionTurnoEnMins,
+            costo: especialidad.costoConsulta,
+            medico,
+        });
     }
 
-     //Refresca la lista de turnos de un médico según su disponibilidad actual.
+    /**
+     * Genera turnos para una especialidad y un médico.
+     * @param {Practica} practica
+     * @param {Medico} medico
+     * @returns {Turno[]}
+     */
+    generarTurnoParaPractica(practica, medico) {
+        return this._generarTurnos({
+            servicio: practica,
+            duracionMins: practica.duracionTurnoEnMins,
+            costo: practica.costo,
+            medico,
+        });
+    }
+
+    //Refresca la lista de turnos de un médico según su disponibilidad actual.
     refrescarTurnosSegunDisponibilidadDe(medico) {
         const ahora = new Date();
 
         // Separamos los turnos que no se pueden tocar
-        const turnosAMantener = medico.turnosExistentes?.filter(turno => {
+        const turnosAMantener = medico.turnosExistentes.filter(turno => {
             const esPasado = new Date(turno.fechaHora) < ahora;
             const esFuturoReservado =
                 new Date(turno.fechaHora) >= ahora &&
                 turno.estado.nombre !== EstadoTurno.DISPONIBLE.nombre;
             return esPasado || esFuturoReservado;
-        }) ?? [];
+        });
 
-        const turnosAEliminar = medico.turnosExistentes?.filter(turno => {
+        const turnosAEliminar = medico.turnosExistentes.filter(turno => {
             const esFuturo = new Date(turno.fechaHora) >= ahora;
             return esFuturo && turno.estado.nombre === EstadoTurno.DISPONIBLE.nombre;
-        }) ?? [];
+        });
 
         // Regeneramos los turnos futuros según la nueva disponibilidad
         const turnosNuevos = [];
         for (const especialidad of medico.especialidades) {
-            turnosNuevos.push(...this.generarTurnosPara(especialidad, medico));
+            turnosNuevos.push(...this.generarTurnoParaEspecialidad(especialidad, medico));
         }
         for (const practica of medico.practicas) {
-            turnosNuevos.push(...this.generarTurnosPara(practica, medico));
+            turnosNuevos.push(...this.generarTurnoParaPractica(practica, medico));
         }
 
         // Filtramos los nuevos para no duplicar los que ya se mantienen
