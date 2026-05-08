@@ -1,4 +1,44 @@
-# 🏥 Sweet Medical 
+# 🏥 Sweet Medical
+
+---
+
+## ⚙️ Instalación y ejecución del proyecto
+
+### Instalar dependencias
+
+Una vez clonado el repositorio, instalar las dependencias con:
+
+```bash
+npm install
+```
+
+### Levantar el proyecto
+
+Desde la raíz del proyecto, ejecutar el siguiente comando para iniciar la aplicación en modo desarrollo:
+
+```bash
+npm run dev
+```
+
+## Ejecutar tests
+
+Parado desde la carpeta `/backend`, ejecutar:
+
+```bash
+npm test
+```
+
+### Ejecutar un test específico
+
+Desde la carpeta `/backend`:
+
+```bash
+npm test archivo.test.js
+```
+
+Donde `archivo.test.js` corresponde al archivo específico que se desea probar.
+
+---
 
 ## GitFlow del proyecto
 
