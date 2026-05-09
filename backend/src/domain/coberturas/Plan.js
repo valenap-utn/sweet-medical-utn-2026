@@ -1,8 +1,6 @@
 import {PlanInvalido} from "../../exceptions/PlanInvalido.js";
 import {NivelCobertura} from "../enums/NivelCobertura.js";
 import {CoberturaInvalida} from "../../exceptions/CoberturaInvalida.js";
-import {Especialidad} from "./Especialidad.js";
-import {Practica} from "./Practica.js";
 
 export class Plan {
     id;
@@ -10,17 +8,17 @@ export class Plan {
     coberturasEspecialidad;
     coberturasPractica;
 
-    constructor(id,nombre) {
-        this.validarParametros(id, nombre);
-        this.id = id;
+    constructor(nombre) {
+        this.validarParametros(nombre);
+        this.id = null;
         this.nombre = nombre;
         this.coberturasEspecialidad = [];
         this.coberturasPractica = [];
     }
 
-    validarParametros(id, nombre) {
-        if ([id, nombre].some(v => !v)) {
-            throw new PlanInvalido(`El plan necesita id y nombre.\n
+    validarParametros(nombre) {
+        if (typeof nombre !== "string" || nombre.trim().length < 3) {
+            throw new PlanInvalido(`El plan necesita un nombre válido.\n
                 Se recibió nombre: ${nombre}`);
         }
     }
@@ -42,7 +40,8 @@ export class Plan {
     }
 
     agregarEspecialidad(coberturaEspecialidad) {
-        if(!this.coberturasEspecialidad.includes(coberturaEspecialidad)) {
+        const existe = this.coberturasEspecialidad.some(c => c.especialidad.id === coberturaEspecialidad.especialidad.id);
+        if(!existe) {
             this.coberturasEspecialidad.push(coberturaEspecialidad);
         }else{
             console.log(`La especialidad ${coberturaEspecialidad} ya pertenece al plan ${this.nombre}`);
@@ -50,7 +49,8 @@ export class Plan {
     }
 
     agregarPractica(coberturaPractica){
-        if(!this.coberturasPractica.includes(coberturaPractica)){
+        const existe = this.coberturasPractica.some(c => c.practica.id === coberturaPractica.practica.id);
+        if(!existe){
             this.coberturasPractica.push(coberturaPractica);
         }else{
             console.log(`La practica ${coberturaPractica} ya pertenece al plan ${this.nombre}`);
