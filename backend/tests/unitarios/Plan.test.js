@@ -1,3 +1,4 @@
+import {describe, expect, test} from '@jest/globals';
 import {Plan} from "../../src/domain/coberturas/Plan.js";
 import {PlanInvalido} from "../../src/exceptions/PlanInvalido.js";
 import {CoberturaEspecialidad} from "../../src/domain/coberturas/CoberturaEspecialidad.js";
@@ -31,7 +32,7 @@ describe("Plan", () => {
 
         plan.agregarEspecialidad(coberturaEspecialidad);
 
-        const nivel = plan.obtenerCobertura(odontologia);
+        const nivel = plan.obtenerCoberturaEspecialidad(odontologia);
 
         expect(nivel).toBe(NivelCobertura.PARCIAL);
     });
@@ -39,7 +40,7 @@ describe("Plan", () => {
     test("Se debería devolver NO CUBIERTA si no existe", ()=>{
         const plan = new Plan("2","Plan Platino");
         const dermatologia = new Especialidad("2","Dermatologia",60,35000);
-        const nivel = plan.obtenerCobertura(dermatologia);
+        const nivel = plan.obtenerCoberturaEspecialidad(dermatologia);
 
         expect(nivel).toBe(NivelCobertura.NO_CUBIERTA);
     })
@@ -51,7 +52,7 @@ describe("Plan", () => {
 
         plan.agregarPractica(cobertura);
 
-        const nivel = plan.obtenerCobertura(radiografia);
+        const nivel = plan.obtenerCoberturaPractica(radiografia);
 
         expect(nivel).toBe(NivelCobertura.TOTAL);
     })

@@ -1,3 +1,4 @@
+import {describe, expect, test} from '@jest/globals';
 import {Turno} from "../../src/domain/Turno.js";
 import {Medico} from "../../src/domain/users/Medico.js";
 import {Usuario} from "../../src/domain/users/Usuario.js";
@@ -48,7 +49,7 @@ describe('Turnos', () => {
         turno.actualizarEstado(EstadoTurno.CONFIRMADO,medico,"Estoy disponible.");
         turno.actualizarEstado(EstadoTurno.CANCELADO,medico,"Mentira, no estoy disponible.");
 
-        console.log(turno.historialEstados);
+        // console.log(turno.historialEstados);
 
         expect(turno.estado).toBe(EstadoTurno.CANCELADO);
     })
