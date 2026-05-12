@@ -12,9 +12,59 @@ Una vez clonado el repositorio, instalar las dependencias con:
 npm install
 ```
 
+---
+
+## 🐳 Base de datos MongoDB
+
+El proyecto utiliza MongoDB ejecutándose mediante Docker.
+
+### Requisitos
+
+- Docker Desktop instalado y en ejecución
+
+### Levantar MongoDB
+
+Desde la raíz del proyecto ejecutar:
+
+```bash
+docker compose up -d
+```
+
+Esto iniciará una instancia local de MongoDB en el puerto `27017`.
+
+### Verificar contenedor
+
+```bash
+docker ps
+```
+
+Debería visualizarse un contenedor llamado:
+
+```txt
+sweet-medical-mongo
+```
+
+### Variables de entorno
+
+Crear un archivo `.env` dentro de `/backend` con el siguiente contenido:
+
+```env
+PORT=4000
+HOST=localhost
+MONGODB_URI=mongodb://root:secret@127.0.0.1:27017/sweet-medical?authSource=admin
+```
+
+---
+
+## 📁 Variables de entorno
+
+El archivo `.env` no debe versionarse.
+
+---
+
 ### Levantar el proyecto
 
-Desde la raíz del proyecto, ejecutar el siguiente comando para iniciar la aplicación en modo desarrollo:
+Una vez iniciada la base de datos MongoDB, ejecutar desde la raíz del proyecto:
 
 ```bash
 npm run dev
