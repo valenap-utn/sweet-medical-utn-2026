@@ -1,7 +1,6 @@
 import { NotificacionService } from "../services/NotificacionService.js";
 import { NotificacionRepository } from "../repositories/NotificacionRepository.js";
 
-// Composición manual — se puede reemplazar por un contenedor DI si el proyecto lo incorpora
 const notificacionService = new NotificacionService(new NotificacionRepository());
 
 /**
