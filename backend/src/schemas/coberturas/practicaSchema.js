@@ -27,11 +27,11 @@ const PracticaSchema = new mongoose.Schema({
         required: true,
     }
 }, {
-    // Para trazabilidad ( createdAt , updatedAt )
-    timestamps: true
+    _id: false,
+    timestamps: false
 })
 
 PracticaSchema.loadClass(Practica);
 
-export const PracticaModel = mongoose.model('Practica', PracticaSchema);
+export { PracticaSchema };
 

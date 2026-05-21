@@ -23,10 +23,10 @@ const EspecialidadSchema = new mongoose.Schema({
         required: true,
     }
 }, {
-    // Para trazabilidad ( createdAt , updatedAt )
-    timestamps: true
+    _id: false,
+    timestamps: false
 })
 
 EspecialidadSchema.loadClass(Especialidad);
 
-export const EspecialidadModel = mongoose.model('Especialidad', EspecialidadSchema);
+export { EspecialidadSchema };

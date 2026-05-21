@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import { Medico } from "../../domain/users/Medico.js";
+import {DisponibilidadHorariaSchema} from "../disponibilidadHorariaSchema.js";
+import { EspecialidadSchema } from "../coberturas/especialidadSchema.js";
+import { PracticaSchema } from "../coberturas/practicaSchema.js";
 
 const MedicoSchema = new mongoose.Schema({
 
@@ -18,22 +21,13 @@ const MedicoSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    especialidades: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Especialidad"
-    }],
-    practicas: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Practica"
-    }],
+    especialidades: [EspecialidadSchema],
+    practicas: [PracticaSchema],
     sedes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Sede"
     }],
-    disponibilidades: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "DisponibilidadHoraria"
-    }]
+    disponibilidades: [DisponibilidadHorariaSchema]
 }, {
     // Para trazabilidad ( createdAt , updatedAt )
     timestamps: true
