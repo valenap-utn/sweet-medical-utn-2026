@@ -7,13 +7,23 @@ import {
 
 const router = express.Router();
 
-// GET /api/notificaciones/no-leidas/:usuarioId
+/**
+ * @route   GET /api/notificaciones/no-leidas/:usuarioId
+ * @desc    Lista de notificaciones sin leer de un usuario
+ */
 router.get("/no-leidas/:usuarioId", obtenerNoLeidas);
 
-// GET /api/notificaciones/leidas/:usuarioId
+/**
+ * @route   GET /api/notificaciones/leidas/:usuarioId
+ * @desc    Lista de notificaciones leídas de un usuario
+ */
 router.get("/leidas/:usuarioId", obtenerLeidas);
 
-// PATCH /api/notificaciones/:id/leer
+/**
+ * @route   PATCH /api/notificaciones/:id/leer
+ * @desc    Marca una notificación como leída
+ * @body    { usuarioId: string }
+ */
 router.patch("/:id/leer", marcarComoLeida);
 
 export default router;
