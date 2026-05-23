@@ -3,10 +3,14 @@ import { TipoNotificacion } from "../domain/Notificacion.js";
 
 const notificacionSchema = new mongoose.Schema(
     {
-        usuarioDestinatarioId: {
+        destinatario: {
             type: String,
             required: true,
             index: true,
+        },
+        remitente: {
+            type: String,
+            required: true,
         },
         mensaje: {
             type: String,
@@ -20,7 +24,6 @@ const notificacionSchema = new mongoose.Schema(
         leida: {
             type: Boolean,
             default: false,
-            index: true,
         },
         fechaHoraCreacion: {
             type: Date,
@@ -34,7 +37,7 @@ const notificacionSchema = new mongoose.Schema(
     { versionKey: false }
 );
 
-// índice compuesto: consultas frecuentes por destinatario + estado de lectura
-notificacionSchema.index({ usuarioDestinatarioId: 1, leida: 1 });
+// Índice compuesto: las dos queries frecuentes son exactamente estas
+notificacionSchema.index({ destinatario: 1, leida: 1, fechaHoraCreacion: -1 });
 
 export const NotificacionModel = mongoose.model("Notificacion", notificacionSchema);
