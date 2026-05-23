@@ -4,25 +4,35 @@ export class NotificacionRepository {
 
     async guardar(notificacion) {
         const doc = new NotificacionModel({
-            _id:                   notificacion.id,
-            usuarioDestinatarioId: notificacion.usuarioDestinatarioId,
-            mensaje:               notificacion.mensaje,
-            tipo:                  notificacion.tipo,
-            leida:                 notificacion.leida,
-            fechaHoraCreacion:     notificacion.fechaHoraCreacion?.toString(),
-            fechaHoraLeida:        notificacion.fechaHoraLeida?.toString() ?? null,
+            destinatario:      notificacion.destinatario,
+            remitente:         notificacion.remitente,
+            mensaje:           notificacion.mensaje,
+            tipo:              notificacion.tipo,
+            leida:             notificacion.leida,
+            fechaHoraCreacion: new Date(notificacion.fechaHoraCreacion.toString()),
+            fechaHoraLeida:    notificacion.fechaHoraLeida
+                                   ? new Date(notificacion.fechaHoraLeida.toString())
+                                   : null,
         });
         return doc.save();
     }
 
+    /**
+     * Notificaciones no leídas de un usuario, más recientes primero.
+     */
     async obtenerNoLeidasPorUsuario(usuarioId) {
-        return NotificacionModel.find({ usuarioDestinatarioId: usuarioId, leida: false })
+        return NotificacionModel
+            .find({ destinatario: usuarioId, leida: false })
             .sort({ fechaHoraCreacion: -1 })
             .lean();
     }
 
+    /**
+     * Notificaciones leídas de un usuario, más recientemente leídas primero.
+     */
     async obtenerLeidasPorUsuario(usuarioId) {
-        return NotificacionModel.find({ usuarioDestinatarioId: usuarioId, leida: true })
+        return NotificacionModel
+            .find({ destinatario: usuarioId, leida: true })
             .sort({ fechaHoraLeida: -1 })
             .lean();
     }
