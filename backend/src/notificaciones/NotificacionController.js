@@ -1,10 +1,13 @@
 import { NotificacionService } from "../services/NotificacionService.js";
 import { NotificacionRepository } from "../repositories/NotificacionRepository.js";
 
+// Composición manual — reemplazable por un contenedor DI en iteraciones posteriores
 const notificacionService = new NotificacionService(new NotificacionRepository());
 
 /**
  * GET /api/notificaciones/no-leidas/:usuarioId
+ *
+ * Retorna todas las notificaciones sin leer del usuario, ordenadas de más reciente a más antigua.
  */
 export async function obtenerNoLeidas(req, res, next) {
     try {
@@ -18,6 +21,8 @@ export async function obtenerNoLeidas(req, res, next) {
 
 /**
  * GET /api/notificaciones/leidas/:usuarioId
+ *
+ * Retorna todas las notificaciones ya leídas del usuario, ordenadas por fechaHoraLeida desc.
  */
 export async function obtenerLeidas(req, res, next) {
     try {
@@ -31,6 +36,8 @@ export async function obtenerLeidas(req, res, next) {
 
 /**
  * PATCH /api/notificaciones/:id/leer
+ *
+ * Marca una notificación como leída. Idempotente.
  * Body: { usuarioId: string }
  */
 export async function marcarComoLeida(req, res, next) {
