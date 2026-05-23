@@ -11,17 +11,21 @@ export class NotificacionService {
     }
 
     /**
-     * Crea y persiste una notificación para un usuario.
-     * @param {string} usuarioDestinatarioId
+     * Crea y persiste una notificación.
+     * Usado internamente por otros servicios (TurnoService, etc.) al disparar eventos.
+     *
+     * @param {string} destinatarioId  - id del Usuario destinatario
+     * @param {string} remitenteId     - id del Usuario que origina el evento
      * @param {string} mensaje
-     * @param {string} tipo - ver TipoNotificacion
+     * @param {string} tipo            - ver TipoNotificacion
      * @returns {Promise<object>}
      */
-    async crearNotificacion(usuarioDestinatarioId, mensaje, tipo) {
+    async crearNotificacion(destinatarioId, remitenteId, mensaje, tipo) {
         try {
             const notificacion = new Notificacion(
                 randomUUID(),
-                usuarioDestinatarioId,
+                destinatarioId,
+                remitenteId,
                 mensaje,
                 tipo
             );
@@ -35,7 +39,7 @@ export class NotificacionService {
     }
 
     /**
-     * Devuelve las notificaciones no leídas de un usuario.
+     * Devuelve las notificaciones NO leídas de un usuario, más recientes primero.
      * @param {string} usuarioId
      * @returns {Promise<object[]>}
      */
@@ -45,7 +49,7 @@ export class NotificacionService {
     }
 
     /**
-     * Devuelve las notificaciones leídas de un usuario.
+     * Devuelve las notificaciones YA leídas de un usuario, más recientemente leídas primero.
      * @param {string} usuarioId
      * @returns {Promise<object[]>}
      */
@@ -55,9 +59,12 @@ export class NotificacionService {
     }
 
     /**
-     * Marca una notificación como leída. Solo el destinatario puede hacerlo.
+     * Marca una notificación como leída.
+     * Solo el destinatario puede hacerla — se valida antes de delegar al repo.
+     * La operación es idempotente: si ya estaba leída devuelve el documento sin tocar el repo.
+     *
      * @param {string} notificacionId
-     * @param {string} usuarioId - quien hace el request (para autorización)
+     * @param {string} usuarioId  - quien realiza la acción (para autorización)
      * @returns {Promise<object>}
      */
     async marcarComoLeida(notificacionId, usuarioId) {
@@ -65,20 +72,21 @@ export class NotificacionService {
         this.#validarUsuarioId(usuarioId);
 
         const notificacion = await this.notificacionRepository.obtenerPorId(notificacionId);
+
         if (!notificacion) {
-            throw new NotFoundError(`Notificación con id ${notificacionId} no encontrada.`);
+            throw new NotFoundError(`Notificación con id "${notificacionId}" no encontrada.`);
         }
-        if (notificacion.usuarioDestinatarioId !== usuarioId) {
+        if (notificacion.destinatario !== usuarioId) {
             throw new BadRequestError("No podés marcar como leída una notificación que no te pertenece.");
         }
         if (notificacion.leida) {
-            return notificacion; // idempotente: ya estaba leída
+            return notificacion; // ya estaba leída, no se modifica
         }
 
         return this.notificacionRepository.marcarComoLeida(notificacionId);
     }
 
-    // ─── privados ─────────────────────────────────────────────────────────────
+    // ─── private ──────────────────────────────────────────────────────────────
 
     #validarUsuarioId(usuarioId) {
         if (!usuarioId) throw new BadRequestError("El id de usuario es obligatorio.");
