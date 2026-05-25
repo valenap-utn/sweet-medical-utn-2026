@@ -1,4 +1,4 @@
-import {PacienteModel} from "../schemas/users/pacienteSchema.js";
+import {PacienteModel} from "../../schemas/users/pacienteSchema.js";
 
 
 export class PacienteRepository {

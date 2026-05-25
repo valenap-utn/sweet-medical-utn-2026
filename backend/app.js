@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import router from './src/routes/router.js'
 import {Server} from "./src/config/Server.js";
-import {PacienteRepository} from "./src/repositories/PacienteRepository.js";
+import {PacienteRepository} from "./src/repositories/users/PacienteRepository.js";
 import {TurnoRepository} from "./src/repositories/TurnoRepository.js";
 import {PacienteService} from "./src/services/PacienteService.js";
 import {PacienteController} from "./src/controllers/PacienteController.js";

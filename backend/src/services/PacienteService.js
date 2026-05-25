@@ -21,7 +21,7 @@ export class PacienteService {
         }
 
         // Calculamos el costo de la consulta/turno
-        const costo = this.calcularCostoPaciente(paciente, turno);
+        const costo = this.calcularCostoPaciente({paciente, turno});
 
         // Reservamos el turno
         turno.reservar({
@@ -60,11 +60,11 @@ export class PacienteService {
         return await this.turnoRepository.save(turno);
     }
 
-    async obtenerHistorial(pacienteId) {
+    async obtenerHistorial({pacienteId}) {
         return await this.turnoRepository.findByPacienteId(pacienteId);
     }
 
-    async solicitarCambioFecha(pacienteId, turnoId, nuevaFechaHora) {
+    async solicitarCambioFecha({pacienteId, turnoId, nuevaFechaHora}) {
         if (!nuevaFechaHora) throw new Error("Debe indicar la nueva fecha solicitada.")
 
         const turno = await this.turnoRepository.findById(turnoId);
