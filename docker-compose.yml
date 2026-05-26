@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:6
+    image: mongo:7
     container_name: sweet-medical-mongo
     ports:
       - "27017:27017"

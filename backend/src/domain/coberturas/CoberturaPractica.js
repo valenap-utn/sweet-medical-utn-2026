@@ -17,7 +17,7 @@ export class CoberturaPractica{
         }
     }
 
-    get nivel() {
+    /*get nivel() {
         return this.nivel;
-    }
+    }*/
 }
