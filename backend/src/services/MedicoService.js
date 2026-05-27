@@ -16,8 +16,7 @@ export class MedicoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("No se encontró el turno");
 
-        const medicoDelTurno = turno.medico._id;
-        if (String(medicoDelTurno) !== String(medicoId)) throw new Error("El turno no pertenece al medico");
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
 
         const unaHoraAntes = subHours(turno.fechaHoraInicio, 1);
         if (isAfter(new Date(), unaHoraAntes)) {
@@ -35,8 +34,7 @@ export class MedicoService {
     async marcarTurnoRealizado({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
-        const medicoDelTurno = turno.medico._id;
-        if (String(medicoDelTurno) !== String(medicoId)) throw new Error("El turno no pertenece al medico");
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
         if (turno.estado !== EstadoTurno.CONFIRMADO.nombre) throw new Error("El turno que quiere marcar como realizado no está confirmado");
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.REALIZADO.nombre,
@@ -57,8 +55,7 @@ export class MedicoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
 
-        const medicoDelTurno = turno.medico._id;
-        if (String(medicoDelTurno) !== String(medicoId)) throw new Error("El turno no pertenece al medico");
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
 
         const fechaParseada = parseISO(nuevaFechaHora);
         if (!isValid(fechaParseada)) throw new Error("La fecha especificada no es válida.");
@@ -206,6 +203,13 @@ export class MedicoService {
 
     servicioCoincide(s, servicio) {
         return s.nombre === servicio.nombre && s.costo === servicio.costo;
+    }
+
+    validarTurnoPerteneceAMedico(turno, medicoId) {
+        const medicoDelTurno = turno.medico._id;
+        if (String(medicoDelTurno) !== String(medicoId)) {
+            throw new Error("El turno no pertenece al paciente.")
+        }
     }
 
 }
