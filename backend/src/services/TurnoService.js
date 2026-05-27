@@ -1,5 +1,6 @@
 import {isValid, parseISO} from "date-fns";
 import {NivelCobertura} from "../domain/enums/NivelCobertura.js";
+import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 
 export class TurnoService {
     constructor(turnoRepository, pacienteRepository) {
@@ -7,9 +8,20 @@ export class TurnoService {
         this.pacienteRepository = pacienteRepository;
     }
 
+    // POST /api/turnos
+    async crearTurno(data) {
+        return await this.turnoRepository.create({
+            ...data,
+            paciente: null,
+            estado: EstadoTurno.DISPONIBLE.nombre,
+            costo: null,
+            historialEstados: [],
+        });
+    }
+
     // Busca turnos dispo. y calcula el costo según el plan del paciente
     async buscarDisponibles({pacienteId, filtros}) {
-        if(!pacienteId) throw new Error("Debe indicar pacienteId.")
+        if (!pacienteId) throw new Error("Debe indicar pacienteId.")
 
         const paciente = await this.pacienteRepository.findById(pacienteId);
         if (!paciente) throw new Error("Paciente no encontrado.");
@@ -31,7 +43,7 @@ export class TurnoService {
             turnos: resultado.turnos.map((turno) => {
                 const cobertura = this.obtenerCoberturaPaciente(paciente, turno);
 
-                return{
+                return {
                     id: turno.id,
                     medico: turno.medico,
                     sede: turno.sede,
@@ -76,8 +88,8 @@ export class TurnoService {
 
         const costoBase = servicio.costoConsulta ?? servicio.costo ?? 0;
 
-        if(cobertura === NivelCobertura.TOTAL) return 0;
-        if(cobertura === NivelCobertura.PARCIAL) return costoBase * 0.5;
+        if (cobertura === NivelCobertura.TOTAL) return 0;
+        if (cobertura === NivelCobertura.PARCIAL) return costoBase * 0.5;
         return costoBase;
     }
 }

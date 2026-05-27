@@ -6,6 +6,8 @@ export default function turnoRoutes(getController) {
     const turnoController = getController(TurnoController);
 
     // Endpoints
+    router.post("/", turnoController.crearTurno);
+
     router.get("/opciones-servicio", turnoController.obtenerOpcionesServicio);
 
     router.get("/medicos-disponibles", turnoController.obtenerMedicosDisponibles);

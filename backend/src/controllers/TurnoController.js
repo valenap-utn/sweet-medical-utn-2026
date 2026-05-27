@@ -3,6 +3,15 @@ export class TurnoController {
         this.turnoService = turnoService;
     }
 
+    crearTurno = async (req, res, next) => {
+        try {
+            const turno = await this.turnoService.crearTurno(req.body);
+            res.status(201).json(turno);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     buscarDisponibles = async (req, res, next) => {
         try {
             // Esto sería por ej.: /api/turnos/disponibles?pacienteId=1&sedeId=2&tipoServicio=PRACTICA
@@ -20,10 +29,10 @@ export class TurnoController {
     };
 
     obtenerMedicosDisponibles = async (req, res, next) => {
-        try{
+        try {
             const medicos = await this.turnoService.obtenerMedicosDisponibles(req.query);
             res.status(200).json(medicos);
-        }catch(err){
+        } catch (err) {
             next(err);
         }
     }

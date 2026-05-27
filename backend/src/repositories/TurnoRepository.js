@@ -1,9 +1,15 @@
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
+import {TurnoModel} from "../schemas/turnoSchema.js";
 
 export class TurnoRepository {
-    constructor(turnoModel) {
-        this.model = turnoModel;
+    constructor() {
+        this.model = TurnoModel;
+    }
+
+    // POST
+    async create(turno) {
+        return await this.model.create(turno);
     }
 
     // Busca el turno y trae las entidades relacionadas
@@ -129,8 +135,8 @@ export class TurnoRepository {
 
         if (sedeId) filtros.sede = sedeId;
         if (tipoServicio) filtros.tipoServicio = tipoServicio;
-        if(tipoServicio === TipoServicio.ESPECIALIDAD && especialidadId) filtros.especialidad = especialidadId;
-        if(tipoServicio === TipoServicio.PRACTICA && practicaId) filtros.practica = practicaId;
+        if (tipoServicio === TipoServicio.ESPECIALIDAD && especialidadId) filtros.especialidad = especialidadId;
+        if (tipoServicio === TipoServicio.PRACTICA && practicaId) filtros.practica = practicaId;
 
         return await this.model
             .find(filtros)

@@ -1,4 +1,4 @@
-import {AppException} from "./AppException";
+import {AppException} from "./AppException.js";
 
 export class TurnoInvalido extends AppException {
     constructor(mensaje) {
