@@ -1,51 +1,103 @@
-import {TurnoInvalido} from "../exceptions/TurnoInvalido";
-import {CambioEstadoTurno} from "./CambioEstadoTurno.js";
-import {LocalDateTime} from "@js-joda/core";
-// import {EstadoTurno} from "./enums/EstadoTurno.js";
+// src/domain/Turno.js
+import { TurnoInvalido } from "../exceptions/TurnoInvalido.js";
+import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
+import { EstadoTurno } from "./enums/EstadoTurno.js";
+import { TipoServicio } from "./enums/TipoServicio.js";
 
 export class Turno {
     id;
     medico;
-    paciente;
-    fechaHora;
+    paciente; // null si está dispo.
+
     sede;
-    practica;
-    estado;
+    tipoServicio; // ESPECIALIDAD o PRACTICA
+    especialidad; // Objeto Especialidad o null
+    practica;     // Objeto Practica o null
+
+    fechaHoraInicio;
+    fechaHoraFin;
+    estado; // DISPONIBLE, RESERVADO, CANCELADO, REALIZADO
     historialEstados;
-    costo;
 
-    constructor(id, medico, paciente, fechaHora, sede, practica, estado, costo, sinParametros) {
-        if(!sinParametros){
-            this.validarParametros(medico,paciente, fechaHora, sede, practica, estado, costo);
-            this.id = id;
-            this.medico = medico;
-            this.paciente = paciente;
-            this.fechaHora = fechaHora;
-            this.sede = sede;
-            this.practica = practica;
-            this.estado = estado; // o  debería ser tipo: EstadoTurno.RESERVADO || EstadoTurno.DISPONIBLE ???
-            this.costo = costo;
-            this.historialEstados = [];
+    fechaHoraSolicitada; // por si solicitan cambio de horario
+    costo; // costo final calculado al momento de reservar
+
+    constructor({
+                    id = null, // Se agrega para soportar la asignación delegada a Mongo
+                    medico, paciente = null, sede, tipoServicio, especialidad = null,
+                    practica = null, fechaHoraInicio, fechaHoraFin, fechaHoraSolicitada = null,
+                    estado = EstadoTurno.DISPONIBLE, costo = null, historialEstados = []
+                } = {}) {
+
+        this.validarParametros({
+            medico,
+            sede,
+            tipoServicio,
+            especialidad,
+            practica,
+            fechaHoraInicio,
+            fechaHoraFin,
+            estado
+        });
+
+        this.id = id; // Si viene de la base de datos tendrá valor; si viene de la Agenda será null
+        this.medico = medico;
+        this.paciente = paciente;
+        this.sede = sede;
+        this.tipoServicio = tipoServicio;
+        this.especialidad = especialidad;
+        this.practica = practica;
+        this.fechaHoraInicio = fechaHoraInicio;
+        this.fechaHoraFin = fechaHoraFin;
+        this.estado = estado;
+        this.fechaHoraSolicitada = fechaHoraSolicitada;
+        this.costo = costo;
+        this.historialEstados = Array.isArray(historialEstados) ? historialEstados : [];
+    }
+
+    validarParametros({medico, sede, tipoServicio, especialidad, practica, fechaHoraInicio, fechaHoraFin, estado}) {
+        if (!medico || !sede || !tipoServicio || !fechaHoraInicio || !fechaHoraFin || !estado) {
+            throw new TurnoInvalido("El turno necesita médico, sede, tipoServicio, fechaHoraInicio, fechaHoraFin y estado.");
+        }
+
+        if (tipoServicio === TipoServicio.ESPECIALIDAD && !especialidad) {
+            throw new TurnoInvalido("El turno de tipo ESPECIALIDAD necesita una especialidad.");
+        }
+
+        if (tipoServicio === TipoServicio.PRACTICA && !practica) {
+            throw new TurnoInvalido("El turno de tipo PRACTICA necesita una práctica.");
+        }
+
+        if (especialidad && practica) {
+            throw new TurnoInvalido("El turno no puede tener especialidad y práctica al mismo tiempo.");
         }
     }
 
-    static build(){
-        return new Turno({sinParametros:true});
+    reservar({paciente, costo}) {
+        if (this.estado !== EstadoTurno.DISPONIBLE) throw new TurnoInvalido("Solo se pueden reservar turnos disponibles.");
+        if (!paciente) throw new TurnoInvalido("Para reservar un turno se necesita un paciente.");
+
+        this.paciente = paciente;
+        this.costo = costo;
+
+        // Le pasamos el id propio del turno (this.id) al historial para mantener la trazabilidad en la DB
+        this.actualizarEstado({
+            nuevoEstado: EstadoTurno.RESERVADO,
+            usuario: paciente,
+            motivo: "Reserva de Turno",
+            turnoId: this.id
+        });
     }
 
-    validarParametros(medico, paciente, fechaHora, sede, practica, estado, costo) {
-        if (
-            [medico, paciente, fechaHora, sede, practica, estado, costo]
-                .some(v => !v)) {
-            throw new TurnoInvalido(`El turno necesita medico, paciente, fechaHora, sede, practica, estado, costo.\n
-                Se recibió medico: ${medico}, paciente: ${paciente}, fechaHora: ${fechaHora}, 
-                sede: ${sede}, practica: ${practica}, estado: ${estado}, costo: ${costo}`);
-        }
-    }
-
-    actualizarEstado(nuevoEstado, usuario, motivo){
+    actualizarEstado({nuevoEstado, usuario, motivo, turnoId = null}) {
         this.estado = nuevoEstado;
-        const updateEstado = new CambioEstadoTurno(LocalDateTime.now(),this.estado, this.id, usuario, motivo);
-        this.historialEstados.push(updateEstado); // trazabilidad
+        const updateEstado = new CambioEstadoTurno({
+            fechaHoraIngreso: new Date(),
+            estado: nuevoEstado,
+            turno: turnoId || this.id, // Si no se pasa explícitamente, usa el de la propia instancia
+            usuario:usuario,
+            motivo: motivo
+        });
+        this.historialEstados.push(updateEstado); // Trazabilidad completa
     }
 }
