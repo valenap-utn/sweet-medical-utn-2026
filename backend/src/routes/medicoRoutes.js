@@ -16,5 +16,9 @@ export default function medicoRoutes(getController) {
 
     router.patch('/:medicoId/turnos/:turnoId/confirmar-cambio', medicoController.confirmarModificacionFecha);
 
+    router.post('/:medicoId/disponibilidades', medicoController.agregarDisponibilidad);
+
+    router.delete('/:medicoId/disponibilidades', medicoController.quitarDisponibilidad);
+
     return router;
 }

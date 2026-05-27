@@ -95,4 +95,35 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
+    async agregarDisponibilidad({medicoId, disponibilidad}){
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error("Medico no encontrado.");
+
+        if(!this.disponibilidadValida(disponibilidad)) throw new Error("Disponibilidad no válida");
+
+        const existe = medico.disponibilidades.some(d => d.diaSemana === disponibilidad.diaSemana && d.horaDesde === disponibilidad.horaDesde && d.horaHasta === disponibilidad.horaHasta);
+        if(existe) throw new Error("Disponibilidad ya existente");
+
+        medico.disponibilidades.push(disponibilidad);
+
+        return await this.medicoRepository.save(medico);
+    }
+
+    async quitarDisponibilidad({medicoId, disponibilidad}){
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error("Medico no encontrado.");
+
+        const cantidadOriginal = medico.disponibilidades.length;
+
+        medico.disponibilidades = medico.disponibilidades.filter(d => !(d.diaSemana === disponibilidad.diaSemana && d.horaDesde === disponibilidad.horaDesde && d.horaHasta === disponibilidad.horaHasta));
+        if(cantidadOriginal === medico.disponibilidades.length) throw new Error("Disponibilidad no encontrada");
+
+        return await this.medicoRepository.save(medico);
+
+    }
+
+    //TODO: Revisar formato de horario para verificar que sea válido
+    disponibilidadValida(disponibilidad){
+        return isValid(parseISO(disponibilidad.horaDesde)) && isValid(parseISO(disponibilidad.horaHasta)) && disponibilidad.horaHasta > disponibilidad.horaDesde;
+    }
 }

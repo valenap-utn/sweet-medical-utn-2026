@@ -77,4 +77,36 @@ export class MedicoController {
             next(err);
         }
     };
+
+    agregarDisponibilidad = async (req, res, next) => {
+        try {
+            const { medicoId } = req.params;
+            const { disponibilidad } = req.body;
+
+            const medico = await this.medicoService.agregarDisponibilidad({
+                medicoId,
+                disponibilidad
+            });
+
+            res.status(200).json(medico);
+        } catch(err) {
+            next(err);
+        }
+    };
+
+    quitarDisponibilidad = async (req, res, next) => {
+        try {
+            const { medicoId } = req.params;
+            const { disponibilidad } = req.body;
+
+            const medico = await this.medicoService.quitarDisponibilidad({
+                medicoId,
+                disponibilidad
+            });
+
+            res.status(200).json(medico);
+        } catch(err) {
+            next(err);
+        }
+    };
 }

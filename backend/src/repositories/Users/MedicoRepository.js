@@ -8,4 +8,8 @@ export class MedicoRepository {
     async create(medico) {
         return await this.model.create(medico);
     }
+
+    async findById(id) {
+        return await this.model.findById(id);
+    }
 }
