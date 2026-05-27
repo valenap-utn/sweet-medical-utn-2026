@@ -10,6 +10,6 @@ export class MedicoRepository {
     }
 
     async findById(id) {
-        return await this.model.findById(id);
+        return await this.model.findById(id).populate("especialidades").populate("practicas").populate("sedes");
     }
 }

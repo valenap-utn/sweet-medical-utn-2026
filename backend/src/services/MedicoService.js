@@ -1,10 +1,13 @@
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
+import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {isAfter, isValid, parseISO, subHours} from "date-fns";
 
 export class MedicoService {
-    constructor({medicoRepository, turnoRepository}) {
+    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
+        this.especialidadRepository = especialidadRepository;
+        this.practicaRepository = practicaRepository;
     }
 
     async cancelarTurno({medicoId, turnoId, motivo}) {
@@ -95,35 +98,114 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
-    async agregarDisponibilidad({medicoId, disponibilidad}){
+    async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
+        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
+    }
+
+    async consultarDisponibilidadPractica({medicoId, practicaId}) {
+        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, especialidadId: practicaId})
+    }
+
+    async agregarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new Error("Medico no encontrado.");
 
-        if(!this.disponibilidadValida(disponibilidad)) throw new Error("Disponibilidad no válida");
+        if (!this.disponibilidadValida(disponibilidad)) throw new Error("Disponibilidad no válida");
 
-        const existe = medico.disponibilidades.some(d => d.diaSemana === disponibilidad.diaSemana && d.horaDesde === disponibilidad.horaDesde && d.horaHasta === disponibilidad.horaHasta);
-        if(existe) throw new Error("Disponibilidad ya existente");
+        if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new Error("Disponibilidad ya existente");
 
-        medico.disponibilidades.push(disponibilidad);
+        medico.definirDisponibilidad(disponibilidad);
 
         return await this.medicoRepository.save(medico);
     }
 
-    async quitarDisponibilidad({medicoId, disponibilidad}){
+    async quitarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new Error("Medico no encontrado.");
 
         const cantidadOriginal = medico.disponibilidades.length;
 
-        medico.disponibilidades = medico.disponibilidades.filter(d => !(d.diaSemana === disponibilidad.diaSemana && d.horaDesde === disponibilidad.horaDesde && d.horaHasta === disponibilidad.horaHasta));
-        if(cantidadOriginal === medico.disponibilidades.length) throw new Error("Disponibilidad no encontrada");
+        medico.disponibilidades = medico.disponibilidades.filter(d => !(this.disponibilidadCoincide(d, disponibilidad)));
+        if (cantidadOriginal === medico.disponibilidades.length) throw new Error("Disponibilidad no encontrada");
 
         return await this.medicoRepository.save(medico);
 
     }
 
-    //TODO: Revisar formato de horario para verificar que sea válido
-    disponibilidadValida(disponibilidad){
-        return isValid(parseISO(disponibilidad.horaDesde)) && isValid(parseISO(disponibilidad.horaHasta)) && disponibilidad.horaHasta > disponibilidad.horaDesde;
+    async agregarEspecialidad({medicoId, especialidadId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error("Medico no encontrado");
+
+        const especialidad = await this.especialidadRepository.findById(especialidadId);
+        if (!especialidad) throw new Error("Especialidad no existe, créela antes de agregar");
+
+        if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new Error("El medico ya tiene esta especialidad");
+
+        medico.agregarEspecialidad(especialidad);
+
+        return await this.medicoRepository.save(medico);
+
     }
+
+    async quitarEspecialidad({medicoId, especialidadId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error("Medico no encontrado.");
+
+        const especialidad = await this.especialidadRepository.findById(especialidadId);
+        if (!especialidad) throw new Error("Especialidad no existe, créela antes de agregar");
+
+        const cantidadOriginal = medico.especialidades.length;
+
+        medico.especialidades = medico.especialidades.filter(e => !(this.servicioCoincide(e, especialidad)));
+        if (cantidadOriginal === medico.especialidades.length) throw new Error("Especialidad no encontrada");
+
+        return await this.medicoRepository.save(medico);
+
+    }
+
+    async agregarPractica({medicoId, practicaId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error("Medico no encontrado");
+
+        const practica = await this.practicaRepository.findById(practicaId);
+        if (!practica) throw new Error("Práctica no existe, créela antes de agregar");
+
+        if (medico.practicas.some(p => this.servicioCoincide(p, practica))) throw new Error("El medico ya tiene esta práctica");
+
+        medico.agregarPractica(practica);
+
+        return await this.medicoRepository.save(medico);
+    }
+
+    async quitarPractica({medicoId, practicaId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error("Medico no encontrado.");
+
+        const practica = await this.practicaRepository.findById(practicaId);
+        if (!practica) throw new Error("Práctica no existe, créela antes de agregar");
+
+        const cantidadOriginal = medico.practicas.length;
+
+        medico.practicas = medico.practicas.filter(p => !(this.servicioCoincide(p, practica)));
+        if (cantidadOriginal === medico.practicas.length) throw new Error("Práctica no encontrada");
+
+        return await this.medicoRepository.save(medico);
+    }
+
+
+    // -------------------------------------------- FUNCIONES AUXILIARES -----------------------------------------------------------------
+
+    disponibilidadValida(disponibilidad) {
+        const formatoHora = /^([01]\d|2[0-3]):([0-5]\d)$/; // Verifica que el formato ingresado de horario sea de forma "HH:mm" Ejemplo: "08:00"
+        return formatoHora.test(disponibilidad.horaDesde) && formatoHora.test(disponibilidad.horaHasta) && disponibilidad.horaHasta > disponibilidad.horaDesde;
+    }
+
+    disponibilidadCoincide(d, disponibilidad) {
+        return d.diaSemana === disponibilidad.diaSemana && d.horaDesde === disponibilidad.horaDesde && d.horaHasta === disponibilidad.horaHasta;
+    }
+
+    servicioCoincide(s, servicio) {
+        return s.nombre === servicio.nombre && s.costo === servicio.costo;
+    }
+
 }
