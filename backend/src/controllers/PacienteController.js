@@ -38,7 +38,7 @@ export class PacienteController {
         try {
             const {pacienteId, turnoId} = req.params;
             const {nuevaFechaHora} = req.body;
-            const turno = this.pacienteService.solicitarCambioFecha({pacienteId, turnoId, nuevaFechaHora});
+            const turno = await this.pacienteService.solicitarCambioFecha({pacienteId, turnoId, nuevaFechaHora});
             res.status(200).json(turno);
         } catch (e) {
             next(e);
