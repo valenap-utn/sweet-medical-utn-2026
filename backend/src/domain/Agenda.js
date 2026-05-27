@@ -6,10 +6,10 @@ import { addDays, addMinutes, isBefore, isAfter } from "date-fns";
 export class Agenda {
     constructor(medico) {
         if (!medico) {
-            throw new Error("La agenda debe estar asociada a un Médico (Relación 1 a 1).");
+            throw new Error("La agenda debe estar asociada a un Médico");
         }
         this.medico = medico;
-        this.turnos = []; // Relación 1 a * con Turno (Estado interno protegido)
+        this.turnos = [];
     }
 
     //Refresca la agenda basándose en cambios de disponibilidad
@@ -22,12 +22,12 @@ export class Agenda {
             const estaReservadoOConfirmado = turno.estado !== EstadoTurno.DISPONIBLE;
 
             if (esPasado || estaReservadoOConfirmado) {
-                return true; // REGLA 1 y 2: Se mantienen intactos
+                return true;
             }
 
-            const sigueSiendoValido = this._verificarSiCoincideConDisponibilidad(turno);
+            const sigueSiendoValido = this.verificarSiCoincideConDisponibilidad(turno);
 
-            return sigueSiendoValido; // Si ya no coincide, devuelve false y se "limpia" (elimina)
+            return sigueSiendoValido; // Si ya no coincide, devuelve false y se elimina
         });
     }
 
@@ -48,7 +48,7 @@ export class Agenda {
                 const bloques = this.generarBloques(fechaActual, disp.horaDesde, disp.horaHasta, duracionMins);
 
                 for (const bloque of bloques) {
-                    const nuevoTurno = this._crearInstanciaTurno(bloque, servicio);
+                    const nuevoTurno = this.crearInstanciaTurno(bloque, servicio);
 
                     if (!this.existeSolapamiento(nuevoTurno)) {
                         this.turnos.push(nuevoTurno);
@@ -94,6 +94,58 @@ export class Agenda {
             const finB = turnoExistente.fechaHoraFin.getTime();
 
             return inicioA < finB && finA > inicioB;
+        });
+    }
+    
+    // Buscar si el médico atiende ese día, y verificar que el horario del turno esté
+    // dentro de la franja horaria de la nueva disponibilidad.
+    verificarSiCoincideConDisponibilidad(turno) {
+        const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+        const nombreDiaTurno = diasSemana[turno.fechaHoraInicio.getDay()];
+
+        const disponibilidadesEseDia = this.medico.disponibilidades?.filter(
+            disp => disp.diaSemana.toString() === nombreDiaTurno
+        ) || [];
+
+        if (disponibilidadesEseDia.length === 0) return false;
+
+        for (const disp of disponibilidadesEseDia) {
+            const [hDesde, mDesde] = disp.horaDesde.split(':').map(Number);
+            const [hHasta, mHasta] = disp.horaHasta.split(':').map(Number);
+
+            const inicioDisponibilidad = new Date(turno.fechaHoraInicio);
+            inicioDisponibilidad.setHours(hDesde, mDesde, 0, 0);
+
+            const finDisponibilidad = new Date(turno.fechaHoraInicio);
+            finDisponibilidad.setHours(hHasta, mHasta, 0, 0);
+
+            const empiezaDentro = turno.fechaHoraInicio.getTime() >= inicioDisponibilidad.getTime();
+            const terminaDentro = turno.fechaHoraFin.getTime() <= finDisponibilidad.getTime();
+
+            if (empiezaDentro && terminaDentro) {
+                return true; // Encontramos una franja horaria que cubre este turno
+            }
+        }
+
+        return false; // El turno no encajó en ninguna franja horaria válida para ese día
+    }
+
+    crearInstanciaTurno(bloque, servicio) {
+        const esPractica = servicio.codigo !== undefined;
+        const tipoServicio = esPractica ? TipoServicio.PRACTICA : TipoServicio.ESPECIALIDAD;
+        const costo = esPractica ? servicio.costo : servicio.costoConsulta;
+
+        return new Turno({
+            medico: this.medico,
+            paciente: null,
+            sede: this.medico.sedes?.[0] || null, // Asume la primera sede por defecto
+            tipoServicio: tipoServicio,
+            especialidad: !esPractica ? servicio : null,
+            practica: esPractica ? servicio : null,
+            fechaHoraInicio: bloque.inicio,
+            fechaHoraFin: bloque.fin,
+            estado: EstadoTurno.DISPONIBLE,
+            costo: costo
         });
     }
 }
