@@ -24,7 +24,7 @@ export class MedicoService {
             throw new Error("El turno solo puede cancelarse con al menos 1 hora de anticipación.");
         }
         turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.CANCELADO,
+            nuevoEstado: EstadoTurno.CANCELADO.nombre,
             usuario: medicoId,
             motivo: motivo,
             turnoId: turno._id,
@@ -37,9 +37,9 @@ export class MedicoService {
         if (!turno) throw new Error("Turno no encontrado.");
         const medicoDelTurno = turno.medico._id;
         if (String(medicoDelTurno) !== String(medicoId)) throw new Error("El turno no pertenece al medico");
-        if (turno.estado !== EstadoTurno.CONFIRMADO) throw new Error("El turno que quiere marcar como realizado no está confirmado");
+        if (turno.estado !== EstadoTurno.CONFIRMADO.nombre) throw new Error("El turno que quiere marcar como realizado no está confirmado");
         turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.REALIZADO,
+            nuevoEstado: EstadoTurno.REALIZADO.nombre,
             usuario: medicoId,
             motivo: "Se realizó el turno",
             turnoId: turno._id,
@@ -68,7 +68,7 @@ export class MedicoService {
 
         // Registramos el cambio en el historial manteniendo el estado de espera (RESERVADO)
         turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.RESERVADO,
+            nuevoEstado: EstadoTurno.RESERVADO.nombre,
             usuario: medicoId,
             motivo: "El médico propone una nueva fecha para el turno (requiere confirmación del paciente).",
             turnoId: turnoId
@@ -90,7 +90,7 @@ export class MedicoService {
 
         // El turno se consolida pasando a CONFIRMADO
         turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.CONFIRMADO,
+            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
             usuario: medicoId,
             motivo: "Modificación de fecha confirmada y consolidada en agenda.",
             turnoId: turnoId
@@ -103,7 +103,7 @@ export class MedicoService {
     }
 
     async consultarDisponibilidadPractica({medicoId, practicaId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, especialidadId: practicaId})
+        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
     }
 
     async agregarDisponibilidad({medicoId, disponibilidad}) {
