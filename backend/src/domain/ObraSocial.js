@@ -2,10 +2,12 @@
 export class ObraSocial {
     id;
     nombre;
-    planes = [];
+    planes;
 
-    constructor(nombre) {
+    constructor(id,nombre) {
+        this.id = id;
         this.nombre = nombre;
+        this.planes = [];
     }
 
     agregarPlan(nuevoPlan){

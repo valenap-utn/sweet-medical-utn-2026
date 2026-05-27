@@ -1,21 +1,26 @@
 import {PlanInvalido} from "../../exceptions/PlanInvalido.js";
 import {NivelCobertura} from "../enums/NivelCobertura.js";
 import {CoberturaInvalida} from "../../exceptions/CoberturaInvalida.js";
+import {Especialidad} from "./Especialidad.js";
+import {Practica} from "./Practica.js";
 
 export class Plan {
     id;
     nombre;
-    coberturasEspecialidad = [];
-    coberturasPractica = [];
+    coberturasEspecialidad;
+    coberturasPractica;
 
-    constructor(nombre) {
-        this.validarParametros(nombre);
+    constructor(id,nombre) {
+        this.validarParametros(id, nombre);
+        this.id = id;
         this.nombre = nombre;
+        this.coberturasEspecialidad = [];
+        this.coberturasPractica = [];
     }
 
-    validarParametros(nombre) {
-        if ([nombre].some(v => !v)) {
-            throw new PlanInvalido(`El plan necesita un nombre.\n
+    validarParametros(id, nombre) {
+        if ([id, nombre].some(v => !v)) {
+            throw new PlanInvalido(`El plan necesita id y nombre.\n
                 Se recibió nombre: ${nombre}`);
         }
     }
