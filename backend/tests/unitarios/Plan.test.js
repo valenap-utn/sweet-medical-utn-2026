@@ -1,10 +1,10 @@
-import {Plan} from "../src/domain/coberturas/Plan.js";
-import {PlanInvalido} from "../src/exceptions/PlanInvalido.js";
-import {CoberturaEspecialidad} from "../src/domain/coberturas/CoberturaEspecialidad.js";
-import {Especialidad} from "../src/domain/coberturas/Especialidad.js";
-import {NivelCobertura} from "../src/domain/enums/NivelCobertura.js";
-import {Practica} from "../src/domain/coberturas/Practica.js";
-import {CoberturaPractica} from "../src/domain/coberturas/CoberturaPractica.js";
+import {Plan} from "../../src/domain/coberturas/Plan.js";
+import {PlanInvalido} from "../../src/exceptions/PlanInvalido.js";
+import {CoberturaEspecialidad} from "../../src/domain/coberturas/CoberturaEspecialidad.js";
+import {Especialidad} from "../../src/domain/coberturas/Especialidad.js";
+import {NivelCobertura} from "../../src/domain/enums/NivelCobertura.js";
+import {Practica} from "../../src/domain/coberturas/Practica.js";
+import {CoberturaPractica} from "../../src/domain/coberturas/CoberturaPractica.js";
 
 
 describe("Plan", () => {
