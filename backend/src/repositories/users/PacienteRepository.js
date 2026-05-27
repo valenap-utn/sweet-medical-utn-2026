@@ -12,7 +12,10 @@ export class PacienteRepository {
     }
 
     async findById(id) {
-        return await this.model.findById(id).populate("plan").populate("obraSocial");
+        return await this.model
+            .findById(id)
+            .populate("plan")
+            .populate("obraSocial");
     }
 
     async findAll() {

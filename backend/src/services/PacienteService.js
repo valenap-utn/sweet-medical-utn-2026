@@ -1,5 +1,6 @@
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 import {isAfter, isValid, parseISO, subHours} from "date-fns";
+import {NivelCobertura} from "../domain/enums/NivelCobertura.js";
 
 export class PacienteService {
     constructor({pacienteRepository, turnoRepository}) {
@@ -102,10 +103,26 @@ export class PacienteService {
         }
     }
 
-    //TODO: chequear implementación para esta función de calculo de costos !!!
-    calcularCostoPaciente({paciente, turno}) {
+    calcularCostoPaciente({ paciente, turno }) {
         const servicio = turno.especialidad ?? turno.practica;
         if (!servicio) throw new Error("El turno no tiene especialidad ni práctica asociada.");
-        return servicio.costoConsulta ?? servicio.costo ?? 0;
+
+        const costoBase = servicio.costoConsulta ?? servicio.costo ?? 0;
+
+        if (!paciente.plan) return costoBase;
+
+        let cobertura;
+        if (turno.especialidad) {
+            cobertura = paciente.plan.obtenerCoberturaEspecialidad(turno.especialidad);
+        } else {
+            cobertura = paciente.plan.obtenerCoberturaPractica(turno.practica);
+        }
+
+        const coberturaNombre = cobertura?.nombre ?? cobertura;
+
+        if (coberturaNombre === NivelCobertura.TOTAL.nombre) return 0;
+        if (coberturaNombre === NivelCobertura.PARCIAL.nombre) return costoBase * 0.5;
+
+        return costoBase;
     }
 }
