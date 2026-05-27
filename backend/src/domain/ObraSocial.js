@@ -5,6 +5,7 @@ export class ObraSocial {
     planes = [];
 
     constructor(nombre) {
+        this.id = id;
         this.nombre = nombre;
     }
 
