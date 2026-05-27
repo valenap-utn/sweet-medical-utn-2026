@@ -23,4 +23,5 @@ const CoberturaEspecialidadSchema = new mongoose.Schema({
 CoberturaEspecialidadSchema.loadClass(CoberturaEspecialidad);
 
 export const CoberturaEspecialidadModel = mongoose.model("CoberturaEspecialidad", CoberturaEspecialidadSchema);
+export { CoberturaEspecialidadSchema };
 
