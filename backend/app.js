@@ -8,6 +8,8 @@ import {PacienteService} from "./src/services/PacienteService.js";
 import {PacienteController} from "./src/controllers/PacienteController.js";
 import {TurnoService} from "./src/services/TurnoService.js";
 import {TurnoController} from "./src/controllers/TurnoController.js";
+import swaggerUi from "swagger-ui-express";
+import {swaggerSpec} from "./src/docs/swagger.js";
 
 // Acá se arman dependencias, controllers, rutas y middlewares
 
@@ -36,6 +38,10 @@ const turnoController = new TurnoController(turnoService);
 // Registro de controllers dispo. para las rutas
 server.setController(PacienteController, pacienteController);
 server.setController(TurnoController, turnoController);
+
+// SWAGGER
+app.use("/api-docs", swaggerUi.serve);
+app.get("/api-docs", swaggerUi.setup(swaggerSpec));
 
 // Registro de rutas principales
 server.addRoute(router);
