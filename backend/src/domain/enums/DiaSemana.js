@@ -1,3 +1,4 @@
+import {getDay} from "date-fns";
 
 export class DiaSemana {
     constructor(nombre) {
@@ -7,18 +8,18 @@ export class DiaSemana {
     toString() {
         return this.nombre.toUpperCase();
     }
-}
 
-_nombreDiaSemanaES(getDay) {
-    const mapa = {
-         0: 'Domingo',
-         1: 'Lunes',
-         2: 'Martes',
-         3: 'Miercoles',
-         4: 'Jueves',
-         5: 'Viernes',
-         6: 'Sabado',
-     };
-     return mapa[getDay] ?? '';
+    _nombreDiaSemanaES(fecha) {
+        const numeroDia = getDay(fecha);
+        const mapa = {
+            0: new DiaSemana('Domingo'),
+            1: new DiaSemana('Lunes'),
+            2: new DiaSemana('Martes'),
+            3: new DiaSemana('Miercoles'),
+            4: new DiaSemana('Jueves'),
+            5: new DiaSemana('Viernes'),
+            6: new DiaSemana('Sabado'),
+        };
+        return mapa[numeroDia];
+    }
 }
-
