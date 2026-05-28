@@ -15,10 +15,10 @@ export class Practica {
         this.costo = costo;
     }
 
-    validarParametros(codigo,nombre, duracionTurnoEnMins, costo){
-        if([codigo,nombre, duracionTurnoEnMins, costo].some(v=>!v)){
-            throw new PracticaInvalida(`La practica necesita codigo, nombre, duracion en minutos del turno, costo.\n
-                Se recibió codigo: ${codigo}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, 
+    validarParametros(id, codigo, nombre, duracionTurnoEnMins, costo){
+        if(!id || !codigo || !nombre || !duracionTurnoEnMins || !costo){
+            throw new PracticaInvalida(`La practica necesita ID, codigo, nombre, duracion en minutos del turno, costo.\n
+                Se recibió ID: ${id}, codigo: ${codigo}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, 
                 costo: ${costo}`);
         }
     }
