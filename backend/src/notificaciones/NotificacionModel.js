@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { TipoNotificacion } from "../domain/Notificacion.js";
 
+// No estoy muy segura de que haya que tener un Schema para las Notif.
 const notificacionSchema = new mongoose.Schema(
     {
         destinatario: {

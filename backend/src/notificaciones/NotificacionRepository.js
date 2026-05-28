@@ -17,9 +17,7 @@ export class NotificacionRepository {
         return doc.save();
     }
 
-    /**
-     * Notificaciones no leídas de un usuario, más recientes primero.
-     */
+    // Notificaciones no leídas de un usuario, más recientes primero.
     async obtenerNoLeidasPorUsuario(usuarioId) {
         return NotificacionModel
             .find({ destinatario: usuarioId, leida: false })
@@ -27,9 +25,7 @@ export class NotificacionRepository {
             .lean();
     }
 
-    /**
-     * Notificaciones leídas de un usuario, más recientemente leídas primero.
-     */
+    // Notificaciones leídas de un usuario, más recientemente leídas primero.
     async obtenerLeidasPorUsuario(usuarioId) {
         return NotificacionModel
             .find({ destinatario: usuarioId, leida: true })

@@ -1,26 +1,16 @@
-import { Notificacion } from "../domain/Notificacion.js";
-import { NotificacionInvalida } from "../exceptions/NotificacionInvalida.js";
-import { NotFoundError, BadRequestError } from "../error/AppError.js";
-import { randomUUID } from "crypto";
+import {Notificacion} from "../domain/Notificacion.js";
+import {NotificacionInvalida} from "../exceptions/NotificacionInvalida.js";
+import {BadRequestError, NotFoundError} from "../error/AppError.js";
+import {randomUUID} from "crypto";
 
 export class NotificacionService {
-
-    /** @param {import("../repositories/NotificacionRepository.js").NotificacionRepository} notificacionRepository */
     constructor(notificacionRepository) {
         this.notificacionRepository = notificacionRepository;
     }
 
-    /**
-     * Crea y persiste una notificación.
-     * Usado internamente por otros servicios (TurnoService, etc.) al disparar eventos.
-     *
-     * @param {string} destinatarioId  - id del Usuario destinatario
-     * @param {string} remitenteId     - id del Usuario que origina el evento
-     * @param {string} mensaje
-     * @param {string} tipo            - ver TipoNotificacion
-     * @returns {Promise<object>}
-     */
-    async crearNotificacion(destinatarioId, remitenteId, mensaje, tipo) {
+    // Crea y persiste una notificación.
+    // Usado internamente por otros servicios (TurnoService, etc.) al disparar eventos.
+    async crearNotificacion({destinatarioId, remitenteId, mensaje, tipo}) {
         try {
             const notificacion = new Notificacion(
                 randomUUID(),
@@ -38,36 +28,22 @@ export class NotificacionService {
         }
     }
 
-    /**
-     * Devuelve las notificaciones NO leídas de un usuario, más recientes primero.
-     * @param {string} usuarioId
-     * @returns {Promise<object[]>}
-     */
-    async obtenerNoLeidas(usuarioId) {
+    // Devuelve las notificaciones NO leídas de un usuario, más recientes primero.
+    async obtenerNoLeidas({usuarioId}) {
         this.#validarUsuarioId(usuarioId);
         return this.notificacionRepository.obtenerNoLeidasPorUsuario(usuarioId);
     }
 
-    /**
-     * Devuelve las notificaciones YA leídas de un usuario, más recientemente leídas primero.
-     * @param {string} usuarioId
-     * @returns {Promise<object[]>}
-     */
-    async obtenerLeidas(usuarioId) {
+    // Devuelve las notificaciones YA leídas de un usuario, más recientemente leídas primero.
+    async obtenerLeidas({usuarioId}) {
         this.#validarUsuarioId(usuarioId);
         return this.notificacionRepository.obtenerLeidasPorUsuario(usuarioId);
     }
 
-    /**
-     * Marca una notificación como leída.
-     * Solo el destinatario puede hacerla — se valida antes de delegar al repo.
-     * La operación es idempotente: si ya estaba leída devuelve el documento sin tocar el repo.
-     *
-     * @param {string} notificacionId
-     * @param {string} usuarioId  - quien realiza la acción (para autorización)
-     * @returns {Promise<object>}
-     */
-    async marcarComoLeida(notificacionId, usuarioId) {
+    // Marca una notificación como leída
+    // Solo el destinatario puede hacerla — se valida antes de delegar al repo.
+    // La operación es idempotente: si ya estaba leída devuelve el documento sin tocar el repo.
+    async marcarComoLeida({notificacionId, usuarioId}) {
         if (!notificacionId) throw new BadRequestError("El id de la notificación es obligatorio.");
         this.#validarUsuarioId(usuarioId);
 
@@ -88,7 +64,7 @@ export class NotificacionService {
 
     // ─── private ──────────────────────────────────────────────────────────────
 
-    #validarUsuarioId(usuarioId) {
+    #validarUsuarioId({usuarioId}) {
         if (!usuarioId) throw new BadRequestError("El id de usuario es obligatorio.");
     }
 }
