@@ -1,6 +1,6 @@
 import express from "express";
 import healthRoutes from "./healthcheckRoute.js";
-// import planRoutes from "./planRoutes.js";
+import medicoRoutes from "./medicoRoutes.js";
 import pacienteRoutes from "./pacienteRoutes.js";
 import turnoRoutes from "./turnoRoutes.js";
 
@@ -10,6 +10,9 @@ export default function createRouter(getController) {
 
     router.use("/healthcheck", healthRoutes);
     // router.use("/plan", planRoutes);
+
+    const medicoRouter = medicoRoutes(getController);
+    router.use("/medicos", medicoRouter);
 
     const pacientesRouter = pacienteRoutes(getController);
     router.use("/pacientes", pacientesRouter);
