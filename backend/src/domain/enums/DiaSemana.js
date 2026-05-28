@@ -1,4 +1,3 @@
-
 export class DiaSemana {
     constructor(nombre) {
         this.nombre = nombre;
