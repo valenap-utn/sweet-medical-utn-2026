@@ -7,12 +7,9 @@ export class AgendaService {
         this.turnoRepository = turnoRepository;
     }
 
-    async modificarDisponibilidad({ medicoId, nuevasDisponibilidades }) {
+    async regenerarAgenda({ medicoId }) {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new Error("Médico no encontrado");
-
-        medico.disponibilidades = nuevasDisponibilidades;
-        await this.medicoRepository.save(medico);
 
         const fechaDesde = new Date();
         const fechaHasta = addDays(fechaDesde, 30);
@@ -22,6 +19,7 @@ export class AgendaService {
         const agenda = new Agenda(medico);
         agenda.turnos = [...turnosFuturos];
 
+        // Se limpia la agenda en base a la disponibilidad ACTUAL del médico
         agenda.refrescarTurnos();
 
         const idsTurnosValidos = agenda.turnos.map(t => t._id?.toString()).filter(id => id);
@@ -43,7 +41,7 @@ export class AgendaService {
         }
 
         return {
-            mensaje: "Disponibilidad actualizada y agenda regenerada exitosamente.",
+            mensaje: "Agenda regenerada exitosamente.",
             turnosEliminados: turnosAEliminar.length,
             turnosGenerados: nuevosTurnos.length
         };
