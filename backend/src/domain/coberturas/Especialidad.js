@@ -20,7 +20,22 @@ export class Especialidad {
         }
     }
 
-    establecerNuevoCosto(nuevoCosto){
-        this.costoConsulta = nuevoCosto;
+    establecerNuevoNombre(nuevoNombre){
+        if(nuevoNombre !== undefined) {
+            this.nombre = nuevoNombre;
+        }
     }
+
+    establecerNuevaDuracion(nuevaDuracion){
+        if(nuevaDuracion !== undefined) {
+            this.duracionTurnoEnMins = nuevaDuracion;
+        }
+    }
+
+    establecerNuevoCosto(nuevoCosto){
+        if(nuevoCosto !== undefined) {
+            this.costoConsulta = nuevoCosto;
+        }
+    }
+
 }

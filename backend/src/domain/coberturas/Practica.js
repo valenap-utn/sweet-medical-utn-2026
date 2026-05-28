@@ -22,4 +22,22 @@ export class Practica {
                 costo: ${costo}`);
         }
     }
+
+    establecerNuevoNombre(nuevoNombre){
+        if(nuevoNombre !== undefined) {
+            this.nombre = nuevoNombre;
+        }
+    }
+
+    establecerNuevaDuracion(nuevaDuracion){
+        if(nuevaDuracion !== undefined) {
+            this.duracionTurnoEnMins = nuevaDuracion;
+        }
+    }
+
+    establecerNuevoCosto(nuevoCosto){
+        if(nuevoCosto !== undefined) {
+            this.costo = nuevoCosto;
+        }
+    }
 }

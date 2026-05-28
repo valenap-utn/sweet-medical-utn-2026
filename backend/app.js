@@ -10,6 +10,8 @@ import {TurnoService} from "./src/services/TurnoService.js";
 import {TurnoController} from "./src/controllers/TurnoController.js";
 import swaggerUi from "swagger-ui-express";
 import {swaggerSpec} from "./src/docs/swagger.js";
+import {ServiciosMedicoService} from "./src/services/ServiciosMedicoService.js";
+import {ServiciosMedicoController} from "./src/controllers/ServiciosMedicoController.js";
 
 // Acá se arman dependencias, controllers, rutas y middlewares
 
@@ -30,14 +32,17 @@ const turnoRepository = new TurnoRepository();
 // Services
 const pacienteService = new PacienteService({pacienteRepository, turnoRepository});
 const turnoService = new TurnoService(turnoRepository,pacienteRepository);
+const serviciosMedicoService = new ServiciosMedicoService({especialidadRepository, practicaRepository});
 
 // Controllers
 const pacienteController = new PacienteController(pacienteService);
 const turnoController = new TurnoController(turnoService);
+const serviciosMedicoController = new ServiciosMedicoController(serviciosMedicoService);
 
 // Registro de controllers dispo. para las rutas
 server.setController(PacienteController, pacienteController);
 server.setController(TurnoController, turnoController);
+server.setController(ServiciosMedicoController, serviciosMedicoController);
 
 // SWAGGER
 app.use("/api-docs", swaggerUi.serve);

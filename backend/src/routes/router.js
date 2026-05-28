@@ -1,6 +1,7 @@
 import express from "express";
 import healthRoutes from "./healthcheckRoute.js";
 import medicoRoutes from "./medicoRoutes.js";
+import serviciosMedicoRoutes from "./serviciosMedicoRoutes.js";
 import pacienteRoutes from "./pacienteRoutes.js";
 import turnoRoutes from "./turnoRoutes.js";
 
@@ -19,6 +20,9 @@ export default function createRouter(getController) {
 
     const turnosRouter = turnoRoutes(getController);
     router.use("/turnos", turnosRouter);
+
+    const serviciosMedicoRouter = serviciosMedicoRoutes(getController);
+    router.use("/servicios-medicos", serviciosMedicoRouter);
 
     return router;
 }
