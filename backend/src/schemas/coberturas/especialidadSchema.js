@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import {Especialidad} from "../../domain/coberturas/Especialidad.js";
 
-
 const EspecialidadSchema = new mongoose.Schema({
     nombre:{
         type: String,
@@ -23,10 +22,10 @@ const EspecialidadSchema = new mongoose.Schema({
         required: true,
     }
 }, {
-
     timestamps: true
 })
 
 EspecialidadSchema.loadClass(Especialidad);
 
 export const EspecialidadModel = mongoose.model("Especialidad", EspecialidadSchema);
+//export { EspecialidadSchema };

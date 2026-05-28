@@ -21,4 +21,5 @@ const CoberturaPracticaSchema = new mongoose.Schema({
 
 CoberturaPracticaSchema.loadClass(CoberturaPractica);
 
-export { CoberturaPracticaSchema };
+export const CoberturaPracticaModel = mongoose.model("CoberturaPractica", CoberturaPracticaSchema);
+// export { CoberturaPracticaSchema };
