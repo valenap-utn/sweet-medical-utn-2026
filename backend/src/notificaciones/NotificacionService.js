@@ -19,7 +19,7 @@ export class NotificacionService {
                 mensaje,
                 tipo
             );
-            return await this.notificacionRepository.guardar(notificacion);
+            return await this.notificacionRepository.guardar({notificacion});
         } catch (e) {
             if (e instanceof NotificacionInvalida) {
                 throw new BadRequestError(e.message);
@@ -31,13 +31,13 @@ export class NotificacionService {
     // Devuelve las notificaciones NO leídas de un usuario, más recientes primero.
     async obtenerNoLeidas({usuarioId}) {
         this.#validarUsuarioId(usuarioId);
-        return this.notificacionRepository.obtenerNoLeidasPorUsuario(usuarioId);
+        return this.notificacionRepository.obtenerNoLeidasPorUsuario({usuarioId});
     }
 
     // Devuelve las notificaciones YA leídas de un usuario, más recientemente leídas primero.
     async obtenerLeidas({usuarioId}) {
         this.#validarUsuarioId(usuarioId);
-        return this.notificacionRepository.obtenerLeidasPorUsuario(usuarioId);
+        return this.notificacionRepository.obtenerLeidasPorUsuario({usuarioId});
     }
 
     // Marca una notificación como leída
@@ -47,7 +47,7 @@ export class NotificacionService {
         if (!notificacionId) throw new BadRequestError("El id de la notificación es obligatorio.");
         this.#validarUsuarioId(usuarioId);
 
-        const notificacion = await this.notificacionRepository.obtenerPorId(notificacionId);
+        const notificacion = await this.notificacionRepository.obtenerPorId({notificacionId});
 
         if (!notificacion) {
             throw new NotFoundError(`Notificación con id "${notificacionId}" no encontrada.`);
@@ -59,7 +59,7 @@ export class NotificacionService {
             return notificacion; // ya estaba leída, no se modifica
         }
 
-        return this.notificacionRepository.marcarComoLeida(notificacionId);
+        return this.notificacionRepository.marcarComoLeida({notificacionId});
     }
 
     // ─── private ──────────────────────────────────────────────────────────────

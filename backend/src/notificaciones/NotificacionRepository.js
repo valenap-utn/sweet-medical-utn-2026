@@ -2,7 +2,7 @@ import { NotificacionModel } from "../models/NotificacionModel.js";
 
 export class NotificacionRepository {
 
-    async guardar(notificacion) {
+    async guardar({notificacion}) {
         const doc = new NotificacionModel({
             destinatario:      notificacion.destinatario,
             remitente:         notificacion.remitente,
@@ -18,7 +18,7 @@ export class NotificacionRepository {
     }
 
     // Notificaciones no leídas de un usuario, más recientes primero.
-    async obtenerNoLeidasPorUsuario(usuarioId) {
+    async obtenerNoLeidasPorUsuario({usuarioId}) {
         return NotificacionModel
             .find({ destinatario: usuarioId, leida: false })
             .sort({ fechaHoraCreacion: -1 })
@@ -26,18 +26,18 @@ export class NotificacionRepository {
     }
 
     // Notificaciones leídas de un usuario, más recientemente leídas primero.
-    async obtenerLeidasPorUsuario(usuarioId) {
+    async obtenerLeidasPorUsuario({usuarioId}) {
         return NotificacionModel
             .find({ destinatario: usuarioId, leida: true })
             .sort({ fechaHoraLeida: -1 })
             .lean();
     }
 
-    async obtenerPorId(id) {
+    async obtenerPorId({id}) {
         return NotificacionModel.findById(id).lean();
     }
 
-    async marcarComoLeida(id) {
+    async marcarComoLeida({id}) {
         return NotificacionModel.findByIdAndUpdate(
             id,
             { leida: true, fechaHoraLeida: new Date() },

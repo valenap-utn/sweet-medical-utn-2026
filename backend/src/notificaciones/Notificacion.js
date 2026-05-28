@@ -1,5 +1,4 @@
 import {NotificacionInvalida} from "../exceptions/NotificacionInvalida.js";
-import {LocalDateTime} from "@js-joda/core";
 
 // Tipos de notificación según el ciclo de vida de un turno (Sweet Medical).
 export const TipoNotificacion = Object.freeze({
@@ -22,13 +21,13 @@ export class Notificacion {
     leida;
 
     constructor({id, destinatario, remitente, mensaje, tipo}) {
-        this.validarParametros(id, destinatario, remitente, mensaje, tipo);
+        this.validarParametros({id, destinatario, remitente, mensaje, tipo});
         this.id = id;
         this.destinatario = destinatario;
         this.remitente = remitente;
         this.mensaje = mensaje;
         this.tipo = tipo;
-        this.fechaHoraCreacion = LocalDateTime.now();
+        this.fechaHoraCreacion = new Date();
         this.leida = false;
         this.fechaHoraLeida = null;
     }
@@ -47,7 +46,7 @@ export class Notificacion {
 
     marcarComoLeida() {
         if (this.leida) return; // idempotente
-        this.fechaHoraLeida = LocalDateTime.now();
+        this.fechaHoraLeida = new Date();
         this.leida = true;
     }
 }
