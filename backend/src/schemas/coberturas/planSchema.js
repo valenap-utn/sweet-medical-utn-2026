@@ -31,7 +31,3 @@ const PlanSchema = new mongoose.Schema({
 PlanSchema.loadClass(Plan);
 
 export const PlanModel = mongoose.model('Plan', PlanSchema);
-
-
-
-

@@ -1,11 +1,10 @@
-import { PlanRepository } from "../repositories/PlanRepository.js";
 import { ObraSocialModel } from "../schemas/obraSocialSchema.js";
 import { EspecialidadModel } from "../schemas/coberturas/especialidadSchema.js";
 import { PracticaModel } from "../schemas/coberturas/practicaSchema.js";
 
 export class PlanService {
-    constructor() {
-        this.planRepository = new PlanRepository();
+    constructor({planRepository}) {
+        this.planRepository = planRepository;
     }
 
     async crearPlan(nombre, obraSocialId) {
