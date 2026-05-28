@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { Turno } from "../domain/Turno.js";
-import { EstadoTurno } from "../domain/enums/EstadoTurno.js";
+import {EstadoTurno} from "../../domain/enums/EstadoTurno.js";
+import {Turno} from "../../domain/Turno.js";
 
 const CambioEstadoTurnoSchema = new mongoose.Schema({
     fechaHoraIngreso: {

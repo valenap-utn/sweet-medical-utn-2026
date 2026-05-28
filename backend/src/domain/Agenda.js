@@ -5,9 +5,9 @@ import {addDays, addMinutes, isAfter, isBefore} from "date-fns";
 
 export class Agenda {
     constructor(medico) {
-        if (!medico) {
-            throw new Error("La agenda debe estar asociada a un Médico");
-        }
+        // if (!medico) {
+        //     throw new Error("La agenda debe estar asociada a un Médico");
+        // }
         this.medico = medico;
         this.turnos = [];
     }

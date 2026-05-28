@@ -1,4 +1,4 @@
-import {UsuarioInvalido} from "../../exceptions/UsuarioInvalido";
+import {UsuarioInvalido} from "../../exceptions/UsuarioInvalido.js";
 import {validarPassword} from "../../utils/auxFunctions.js";
 
 export class Usuario {

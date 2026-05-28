@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Notificacion } from "../domain/Notificacion.js";
+import {Notificacion} from "../../domain/Notificacion.js";
 
 const NotificacionSchema = new mongoose.Schema({
     destinatario: {

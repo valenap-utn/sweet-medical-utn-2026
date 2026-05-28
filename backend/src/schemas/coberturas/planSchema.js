@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import {Plan} from "../../domain/coberturas/Plan.js";
 import {CoberturaEspecialidadSchema} from "./coberturaEspecialidadSchema.js";
-import {CoberturaPracticaSchema} from "./coberturaPracticaSchema.js";
 
 const PlanSchema = new mongoose.Schema({
     nombre: {
