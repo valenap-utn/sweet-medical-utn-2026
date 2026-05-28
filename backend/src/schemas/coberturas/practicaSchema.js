@@ -33,5 +33,5 @@ const PracticaSchema = new mongoose.Schema({
 PracticaSchema.loadClass(Practica);
 
 export const PracticaModel = mongoose.model("Practica", PracticaSchema);
-export { PracticaSchema };
+//export { PracticaSchema };
 

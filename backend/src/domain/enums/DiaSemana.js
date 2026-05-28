@@ -7,4 +7,3 @@ export class DiaSemana {
         return this.nombre.toUpperCase();
     }
 }
-

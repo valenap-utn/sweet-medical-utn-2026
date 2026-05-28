@@ -1,9 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import router from './src/routes/router.js'
-import {notFoundHandler} from "./src/middlewares/notFoundHandler.js";
-import {errorLogger} from "./src/middlewares/errorLogger.js";
-import {errorHandler} from "./src/middlewares/errorHandler.js";
+import {Server} from "./src/config/Server.js";
+import {PacienteRepository} from "./src/repositories/users/PacienteRepository.js";
+import {TurnoRepository} from "./src/repositories/TurnoRepository.js";
+import {PacienteService} from "./src/services/PacienteService.js";
+import {PacienteController} from "./src/controllers/PacienteController.js";
+import {TurnoService} from "./src/services/TurnoService.js";
+import {TurnoController} from "./src/controllers/TurnoController.js";
+import swaggerUi from "swagger-ui-express";
+import {swaggerSpec} from "./src/docs/swagger.js";
+
+// Acá se arman dependencias, controllers, rutas y middlewares
 
 // App config
 const app = express();
@@ -12,14 +20,33 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// API Endpoints
-app.use("/api", router);
+// Wrapper de Express
+const server = new Server(app);
 
-// + Middlewares
-app.use(notFoundHandler) // captura rutas inexistentes
+// Repositories
+const pacienteRepository = new PacienteRepository();
+const turnoRepository = new TurnoRepository();
 
-// Error handlers
-app. use(errorLogger)  // Loggea errores
-app.use(errorHandler) // responde al cliente
+// Services
+const pacienteService = new PacienteService({pacienteRepository, turnoRepository});
+const turnoService = new TurnoService(turnoRepository,pacienteRepository);
+
+// Controllers
+const pacienteController = new PacienteController(pacienteService);
+const turnoController = new TurnoController(turnoService);
+
+// Registro de controllers dispo. para las rutas
+server.setController(PacienteController, pacienteController);
+server.setController(TurnoController, turnoController);
+
+// SWAGGER
+app.use("/api-docs", swaggerUi.serve);
+app.get("/api-docs", swaggerUi.setup(swaggerSpec));
+
+// Registro de rutas principales
+server.addRoute(router);
+
+// Configura rutas y middlewares globales
+server.configureRoutes();
 
 export default app;
