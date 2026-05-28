@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import {Plan} from "../../domain/coberturas/Plan.js";
-import {CoberturaEspecialidadModel} from "./coberturaEspecialidadSchema.js";
-import {CoberturaPracticaModel} from "./coberturaPracticaSchema.js";
+import {CoberturaEspecialidadSchema} from "./coberturaEspecialidadSchema.js";
+import {CoberturaPracticaSchema} from "./coberturaPracticaSchema.js";
 
 const PlanSchema = new mongoose.Schema({
     nombre: {
@@ -16,11 +16,11 @@ const PlanSchema = new mongoose.Schema({
         }
     },
     coberturasEspecialidad: {
-        type: [CoberturaEspecialidadModel],
+        type: [CoberturaEspecialidadSchema],
         default: []
     },
     coberturasPractica: {
-        type: [CoberturaPracticaModel],
+        type: [CoberturaPracticaSchema],
         default: []
     }
 }, {
@@ -31,5 +31,3 @@ const PlanSchema = new mongoose.Schema({
 PlanSchema.loadClass(Plan);
 
 export const PlanModel = mongoose.model('Plan', PlanSchema);
-
-

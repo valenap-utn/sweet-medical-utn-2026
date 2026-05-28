@@ -29,10 +29,7 @@ export class FactoryNotificacion {
         }
     }
 
-    /**
-     * Recordatorio del día previo: se envían DOS notificaciones (paciente y médico).
-     * @returns {Notificacion[]}
-     */
+    // Recordatorio del día previo: se envían DOS notificaciones (paciente y médico).
     crearRecordatorios(turno) {
         const servicio = turno.practica?.nombre ?? 'consulta';
         const fechaFormateada = this._formatearFecha(turno.fechaHora);
