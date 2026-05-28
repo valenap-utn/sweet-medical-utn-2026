@@ -1,11 +1,9 @@
-// src/domain/Turno.js
-import { TurnoInvalido } from "../exceptions/TurnoInvalido.js";
-import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
-import { EstadoTurno } from "./enums/EstadoTurno.js";
-import { TipoServicio } from "./enums/TipoServicio.js";
+import {TurnoInvalido} from "../exceptions/TurnoInvalido.js";
+import {CambioEstadoTurno} from "./CambioEstadoTurno.js";
+import {EstadoTurno} from "./enums/EstadoTurno.js";
+import {TipoServicio} from "./enums/TipoServicio.js";
 
 export class Turno {
-    id;
     medico;
     paciente; // null si está dispo.
 
@@ -73,20 +71,18 @@ export class Turno {
         }
     }
 
-    reservar({paciente, costo}) {
+    reservar({paciente, costo, turnoId = null}) {
         if (this.estado !== EstadoTurno.DISPONIBLE) throw new TurnoInvalido("Solo se pueden reservar turnos disponibles.");
-        if (!paciente) throw new TurnoInvalido("Para reservar un turno se necesita un paciente.");
+        if (!paciente) throw new TurnoInvalido("Para reservar un turno se necesita un paciente.")
 
         this.paciente = paciente;
         this.costo = costo;
-
-        // Le pasamos el id propio del turno (this.id) al historial para mantener la trazabilidad en la DB
         this.actualizarEstado({
             nuevoEstado: EstadoTurno.RESERVADO,
             usuario: paciente,
             motivo: "Reserva de Turno",
-            turnoId: this.id
-        });
+            turnoId,
+        })
     }
 
     actualizarEstado({nuevoEstado, usuario, motivo, turnoId = null}) {

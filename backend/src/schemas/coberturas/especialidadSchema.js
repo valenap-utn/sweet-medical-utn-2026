@@ -23,10 +23,10 @@ const EspecialidadSchema = new mongoose.Schema({
         required: true,
     }
 }, {
-    _id: false,
-    timestamps: false
+
+    timestamps: true
 })
 
 EspecialidadSchema.loadClass(Especialidad);
 
-export { EspecialidadSchema };
+export const EspecialidadModel = mongoose.model("Especialidad", EspecialidadSchema);
