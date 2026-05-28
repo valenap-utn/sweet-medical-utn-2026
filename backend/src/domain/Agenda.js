@@ -1,149 +1,158 @@
 import {Turno} from "./Turno.js";
+import {Especialidad} from "./coberturas/Especialidad.js";
+import {Practica} from "./coberturas/Practica.js";
 import {EstadoTurno} from "./enums/EstadoTurno.js";
-import {TipoServicio} from "./enums/TipoServicio.js";
-import {addDays, addMinutes, isAfter, isBefore} from "date-fns";
 
+/**
+ * Agenda: genera y refresca turnos disponibles para un médico.
+ *
+ * Reglas de generación:
+ *  - Se generan turnos desde HOY hasta 30 días hacia adelante.
+ *  - Se respeta la disponibilidad horaria (DiaSemana, horaDesde, horaHasta).
+ *  - La duración de cada slot se toma de la especialidad/práctica.
+ *  - Los turnos generados quedan en estado DISPONIBLE.
+ */
 export class Agenda {
-    constructor(medico) {
-        if (!medico) {
-            throw new Error("La agenda debe estar asociada a un Médico");
-        }
-        this.medico = medico;
-        this.turnos = [];
-    }
 
-    //Refresca la agenda basándose en cambios de disponibilidad
-    //Elimina turnos futuros DISPONIBLES que ya no coincidan con la nueva disponibilidad.
-    refrescarTurnos() {
-        const ahora = new Date();
-
-        this.turnos = this.turnos.filter(turno => {
-            const esPasado = isBefore(turno.fechaHoraInicio, ahora);
-            const estaReservadoOConfirmado = turno.estado !== EstadoTurno.DISPONIBLE;
-
-            if (esPasado || estaReservadoOConfirmado) {
-                return true;
-            }
-
-            return this.verificarSiCoincideConDisponibilidad(turno); // Si ya no coincide, devuelve false y se elimina
+    /**
+     * Genera turnos para una especialidad y un médico.
+     * @param {Especialidad} especialidad
+     * @param {Medico} medico
+     * @returns {Turno[]}
+     */
+    generarTurnoParaEspecialidad(especialidad, medico) {
+        return this._generarTurnos({
+            servicio: especialidad,
+            duracionMins: especialidad.duracionTurnoEnMins,
+            costo: especialidad.costoConsulta,
+            medico,
         });
     }
 
-    //Crea bloques nuevos donde haya espacio vacio
-    generarTurnos(fechaDesde, fechaHasta, servicio) {
-        let fechaActual = new Date(fechaDesde);
-        const finRango = new Date(fechaHasta);
-        const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-
-        while (!isAfter(fechaActual, finRango)) {
-            const nombreDia = diasSemana[fechaActual.getDay()];
-            const disponibilidadesHoy = this.medico.disponibilidades?.filter(
-                disp => disp.diaSemana.toString() === nombreDia
-            ) || [];
-
-            for (const disp of disponibilidadesHoy) {
-                const duracionMins = servicio.duracionTurnoEnMins;
-                const bloques = this.generarBloques(fechaActual, disp.horaDesde, disp.horaHasta, duracionMins);
-
-                for (const bloque of bloques) {
-                    const nuevoTurno = this.crearInstanciaTurno(bloque, servicio);
-
-                    if (!this.existeSolapamiento(nuevoTurno)) {
-                        this.turnos.push(nuevoTurno);
-                    }
-                }
-            }
-            fechaActual = addDays(fechaActual, 1);
-        }
+    /**
+     * Genera turnos para una especialidad y un médico.
+     * @param {Practica} practica
+     * @param {Medico} medico
+     * @returns {Turno[]}
+     */
+    generarTurnoParaPractica(practica, medico) {
+        return this._generarTurnos({
+            servicio: practica,
+            duracionMins: practica.duracionTurnoEnMins,
+            costo: practica.costo,
+            medico,
+        });
     }
 
-    generarBloques(fechaAGenerar, horaDesde, horaHasta, duracionMins) {
-        const bloques = [];
+    //Refresca la lista de turnos de un médico según su disponibilidad actual.
+    refrescarTurnosSegunDisponibilidadDe(medico) {
+        const ahora = new Date();
+
+        // Separamos los turnos que no se pueden tocar
+        const turnosAMantener = medico.turnosExistentes.filter(turno => {
+            const esPasado = new Date(turno.fechaHora) < ahora;
+            const esFuturoReservado =
+                new Date(turno.fechaHora) >= ahora &&
+                turno.estado.nombre !== EstadoTurno.DISPONIBLE.nombre;
+            return esPasado || esFuturoReservado;
+        });
+
+        const turnosAEliminar = medico.turnosExistentes.filter(turno => {
+            const esFuturo = new Date(turno.fechaHora) >= ahora;
+            return esFuturo && turno.estado.nombre === EstadoTurno.DISPONIBLE.nombre;
+        });
+
+        // Regeneramos los turnos futuros según la nueva disponibilidad
+        const turnosNuevos = [];
+        for (const especialidad of medico.especialidades) {
+            turnosNuevos.push(...this.generarTurnoParaEspecialidad(especialidad, medico));
+        }
+        for (const practica of medico.practicas) {
+            turnosNuevos.push(...this.generarTurnoParaPractica(practica, medico));
+        }
+
+        // Filtramos los nuevos para no duplicar los que ya se mantienen
+        const fechasMantenidas = new Set(
+            turnosAMantener.map(t => `${t.fechaHora}-${t.practica?.id ?? 'esp'}`)
+        );
+        const turnosACrear = turnosNuevos.filter(
+            t => !fechasMantenidas.has(`${t.fechaHora}-${t.practica?.id ?? 'esp'}`)
+        );
+
+        return { eliminar: turnosAEliminar, crear: turnosACrear };
+    }
+
+    // ─── privados ────────────────────────────────────────────────────────────
+
+    /**
+     * Núcleo de la generación de turnos.
+     * Itera 30 días hacia adelante y, por cada día que coincide con alguna
+     * DisponibilidadHoraria del médico, crea slots del tamaño indicado.
+     */
+    _generarTurnos({ servicio, duracionMins, costo, medico }) {
+        const turnos = [];
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        const DIAS_ANTICIPACION = 30;
+
+        for (let i = 0; i <= DIAS_ANTICIPACION; i++) {
+            const fecha = new Date(hoy);
+            fecha.setDate(hoy.getDate() + i);
+            
+            const nombreDia = this._nombreDiaSemanaES(fecha.getDay());
+
+            // Buscar disponibilidades que apliquen a este día
+            const disponibilidadesDelDia = medico.disponibilidades.filter(
+                d => d.diaSemana.toString().toUpperCase() === nombreDia.toUpperCase()
+            );
+
+            for (const disponibilidad of disponibilidadesDelDia) {
+                const slots = this._generarSlots(
+                    fecha,
+                    disponibilidad.horaDesde,
+                    disponibilidad.horaHasta,
+                    duracionMins
+                );
+
+                for (const slotFecha of slots) {
+                    const turno = Turno.build();
+                    turno.medico = medico;
+                    turno.paciente = null;
+                    turno.fechaHora = slotFecha;
+                    turno.sede = medico.sedes[0] ?? null; 
+                    turno.practica = servicio;
+                    turno.estado = EstadoTurno.DISPONIBLE;
+                    turno.costo = costo;
+                    turno.historialEstados = [];
+                    turnos.push(turno);
+                }
+            }
+        }
+
+        return turnos;
+    }
+
+     // Genera los datetime de inicio de cada turno dentro de un bloque horario.
+    _generarSlots(fecha, horaDesde, horaHasta, duracionMins) {
+        const slots = [];
+
         const [hDesde, mDesde] = horaDesde.split(':').map(Number);
         const [hHasta, mHasta] = horaHasta.split(':').map(Number);
 
-        let inicioBloque = new Date(fechaAGenerar);
-        inicioBloque.setHours(hDesde, mDesde, 0, 0);
+        let actual = new Date(fecha);
+        actual.setHours(hDesde, mDesde, 0, 0);
 
-        const finDisponibilidad = new Date(fechaAGenerar);
-        finDisponibilidad.setHours(hHasta, mHasta, 0, 0);
+        const fin = new Date(fecha);
+        fin.setHours(hHasta, mHasta, 0, 0);
 
-        while (isBefore(inicioBloque, finDisponibilidad)) {
-            const finBloque = addMinutes(inicioBloque, duracionMins);
-
-            if (isAfter(finBloque, finDisponibilidad)) break;
-
-            bloques.push({
-                inicio: inicioBloque,
-                fin: finBloque
-            });
-
-            inicioBloque = finBloque;
+        while (actual < fin) {
+            const siguiente = new Date(actual.getTime() + duracionMins * 60_000);
+            if (siguiente > fin) break;
+            slots.push(new Date(actual));
+            actual = siguiente;
         }
 
-        return bloques;
-    }
-
-    existeSolapamiento(nuevoTurno) {
-        return this.turnos.some(turnoExistente => {
-            const inicioA = nuevoTurno.fechaHoraInicio.getTime();
-            const finA = nuevoTurno.fechaHoraFin.getTime();
-            const inicioB = turnoExistente.fechaHoraInicio.getTime();
-            const finB = turnoExistente.fechaHoraFin.getTime();
-
-            return inicioA < finB && finA > inicioB;
-        });
-    }
-
-    // Buscar si el médico atiende ese día, y verificar que el horario del turno esté
-    // dentro de la franja horaria de la nueva disponibilidad.
-    verificarSiCoincideConDisponibilidad(turno) {
-        const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-        const nombreDiaTurno = diasSemana[turno.fechaHoraInicio.getDay()];
-
-        const disponibilidadesEseDia = this.medico.disponibilidades?.filter(
-            disp => disp.diaSemana.toString() === nombreDiaTurno
-        ) || [];
-
-        if (disponibilidadesEseDia.length === 0) return false;
-
-        for (const disp of disponibilidadesEseDia) {
-            const [hDesde, mDesde] = disp.horaDesde.split(':').map(Number);
-            const [hHasta, mHasta] = disp.horaHasta.split(':').map(Number);
-
-            const inicioDisponibilidad = new Date(turno.fechaHoraInicio);
-            inicioDisponibilidad.setHours(hDesde, mDesde, 0, 0);
-
-            const finDisponibilidad = new Date(turno.fechaHoraInicio);
-            finDisponibilidad.setHours(hHasta, mHasta, 0, 0);
-
-            const empiezaDentro = turno.fechaHoraInicio.getTime() >= inicioDisponibilidad.getTime();
-            const terminaDentro = turno.fechaHoraFin.getTime() <= finDisponibilidad.getTime();
-
-            if (empiezaDentro && terminaDentro) {
-                return true; // Encontramos una franja horaria que cubre este turno
-            }
-        }
-
-        return false; // El turno no encajó en ninguna franja horaria válida para ese día
-    }
-
-    crearInstanciaTurno(bloque, servicio) {
-        const esPractica = servicio.codigo !== undefined;
-        const tipoServicio = esPractica ? TipoServicio.PRACTICA : TipoServicio.ESPECIALIDAD;
-        const costo = esPractica ? servicio.costo : servicio.costoConsulta;
-
-        return new Turno({
-            medico: this.medico,
-            paciente: null,
-            sede: this.medico.sedes?.[0] || null, // Asume la primera sede por defecto
-            tipoServicio: tipoServicio,
-            especialidad: !esPractica ? servicio : null,
-            practica: esPractica ? servicio : null,
-            fechaHoraInicio: bloque.inicio,
-            fechaHoraFin: bloque.fin,
-            estado: EstadoTurno.DISPONIBLE,
-            costo: costo
-        });
+        return slots;
     }
 }
