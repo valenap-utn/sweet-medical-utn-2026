@@ -7,37 +7,33 @@ export class Practica {
     duracionTurnoEnMins;
     costo;
 
-    constructor(codigo,nombre, duracionTurnoEnMins, costo) {
-        this.validarParametros(codigo,nombre, duracionTurnoEnMins, costo);
+    constructor(id, codigo, nombre, duracionTurnoEnMins, costo) {
+        this.validarParametros(id, codigo, nombre, duracionTurnoEnMins, costo);
+        this.id = id;
         this.codigo = codigo;
         this.nombre = nombre;
         this.duracionTurnoEnMins = duracionTurnoEnMins;
         this.costo = costo;
     }
 
-    validarParametros(codigo,nombre, duracionTurnoEnMins, costo){
-        if([codigo,nombre, duracionTurnoEnMins, costo].some(v=>!v)){
-            throw new PracticaInvalida(`La practica necesita codigo, nombre, duracion en minutos del turno, costo.\n
-                Se recibió codigo: ${codigo}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, 
-                costo: ${costo}`);
+    validarParametros(id, codigo, nombre, duracionTurnoEnMins, costo) {
+        if ([id, codigo, nombre, duracionTurnoEnMins, costo].some(v => !v)) {
+            throw new PracticaInvalida(
+                `La practica necesita id, codigo, nombre, duracion en minutos del turno, costo.\n` +
+                `Se recibió id: ${id}, codigo: ${codigo}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costo}`
+            );
         }
     }
 
-    establecerNuevoNombre(nuevoNombre){
-        if(nuevoNombre !== undefined) {
-            this.nombre = nuevoNombre;
-        }
+    establecerNuevoNombre(nuevoNombre) {
+        if (nuevoNombre !== undefined) this.nombre = nuevoNombre;
     }
 
-    establecerNuevaDuracion(nuevaDuracion){
-        if(nuevaDuracion !== undefined) {
-            this.duracionTurnoEnMins = nuevaDuracion;
-        }
+    establecerNuevaDuracion(nuevaDuracion) {
+        if (nuevaDuracion !== undefined) this.duracionTurnoEnMins = nuevaDuracion;
     }
 
-    establecerNuevoCosto(nuevoCosto){
-        if(nuevoCosto !== undefined) {
-            this.costo = nuevoCosto;
-        }
+    establecerNuevoCosto(nuevoCosto) {
+        if (nuevoCosto !== undefined) this.costo = nuevoCosto;
     }
 }
