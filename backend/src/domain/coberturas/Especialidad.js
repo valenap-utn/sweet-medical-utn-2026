@@ -13,10 +13,10 @@ export class Especialidad {
         this.costoConsulta = costoConsulta;
     }
 
-    validarParametros(id, nombre, duracionTurnoEnMins, costoConsulta) {
-        if (!id || !nombre || !duracionTurnoEnMins || !costoConsulta) {
-            throw new EspecialidadInvalida(`La especialidad necesita ID, nombre, duracion en minutos del turno, costo de la consulta.\n
-                Se recibió ID: ${id}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costoConsulta}`);
+    validarParametros(nombre, duracionTurnoEnMins, costoConsulta) {
+        if ([nombre, duracionTurnoEnMins, costoConsulta].some(v => !v)) {
+            throw new EspecialidadInvalida(`La especialidad necesita nombre, duracion en minutos del turno, costo de la consulta.\n
+                Se recibió nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costoConsulta}`);
         }
     }
 

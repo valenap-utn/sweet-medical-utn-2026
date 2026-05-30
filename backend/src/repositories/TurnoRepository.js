@@ -1,6 +1,6 @@
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
-import {TurnoModel} from "../schemas/turnoSchema.js";
+import {TurnoModel} from "../schemas/users/turnoSchema.js";
 
 export class TurnoRepository {
     constructor() {

@@ -27,11 +27,11 @@ const PracticaSchema = new mongoose.Schema({
         required: true,
     }
 }, {
+
     timestamps: true
 })
 
 PracticaSchema.loadClass(Practica);
 
 export const PracticaModel = mongoose.model("Practica", PracticaSchema);
-//export { PracticaSchema };
 

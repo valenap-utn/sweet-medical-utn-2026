@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { EstadoTurno } from "../domain/enums/EstadoTurno.js";
-import { CambioEstadoTurno } from "../domain/CambioEstadoTurno.js";
+import {EstadoTurno} from "../../domain/enums/EstadoTurno.js";
+import {CambioEstadoTurno} from "../../domain/CambioEstadoTurno.js";
 
 const CambioEstadoTurnoSchema = new mongoose.Schema({
 
