@@ -1,9 +1,15 @@
 import express from "express";
-// import {obtenerEspecialidades, obtenerPracticas} from "../controllers/PlanController.js";
+import {PlanController} from "../controllers/PlanController.js";
 
-const router = express.Router();
+export default function planRoutes(getController) {
+    const router = express.Router();
+    const planController = getController(PlanController);
 
-// router.get('/especialidades', obtenerEspecialidades);
-// router.get('/practicas', obtenerPracticas);
+    // GET /api/planes
+    router.get("/", planController.obtenerTodos);
 
-export default router;
+    // GET /api/planes/:id
+    router.get("/:id", planController.obtenerPorId);
+
+    return router;
+}
