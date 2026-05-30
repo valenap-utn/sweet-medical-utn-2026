@@ -8,16 +8,27 @@ export class Plan {
     coberturasEspecialidad = [];
     coberturasPractica = [];
 
-    constructor(nombre) {
-        this.validarParametros(nombre);
+    constructor(id, nombre) {
+        this.validarParametros(id, nombre);
+        this.id = id;
         this.nombre = nombre;
     }
 
-    validarParametros(nombre) {
-        if ([nombre].some(v => !v)) {
-            throw new PlanInvalido(`El plan necesita un nombre.\n
-                Se recibió nombre: ${nombre}`);
+    validarParametros(id, nombre) {
+        if ([id, nombre].some(v => !v)) {
+            throw new PlanInvalido(
+                `El plan necesita id y nombre.\n                Se recibió id: ${id}, nombre: ${nombre}`
+            );
         }
+    }
+
+    // Método unificado: detecta si el servicio es Especialidad o Practica por duck-typing.
+    obtenerCobertura(servicio) {
+        // Practica tiene campo "codigo"; Especialidad no.
+        if (servicio.codigo !== undefined) {
+            return this.obtenerCoberturaPractica(servicio);
+        }
+        return this.obtenerCoberturaEspecialidad(servicio);
     }
 
     obtenerCoberturaEspecialidad(especialidad) {
@@ -28,7 +39,7 @@ export class Plan {
         const tipoCobertura = this.coberturasEspecialidad.find(c => {
             const coberturaEspecialidadId = c.especialidad.id ?? c.especialidad._id ?? c.especialidad;
             return String(coberturaEspecialidadId) === String(especialidadId);
-        })
+        });
         return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
     }
 
@@ -39,7 +50,7 @@ export class Plan {
         }
         const tipoCobertura = this.coberturasPractica.find(c => {
             const coberturaPracticaId = c.practica.id ?? c.practica._id ?? c.practica;
-            return String(coberturaPracticaId) === String(practicaId)
+            return String(coberturaPracticaId) === String(practicaId);
         });
         return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
     }
