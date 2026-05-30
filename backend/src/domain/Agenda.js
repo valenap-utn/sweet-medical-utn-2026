@@ -1,7 +1,7 @@
-import {Turno} from "./Turno.js";
-import {EstadoTurno} from "./enums/EstadoTurno.js";
-import {TipoServicio} from "./enums/TipoServicio.js";
-import {addDays, addMinutes, isAfter, isBefore} from "date-fns";
+import { Turno } from "./Turno.js";
+import { EstadoTurno } from "./enums/EstadoTurno.js";
+import { TipoServicio } from "./enums/TipoServicio.js";
+import { addDays, addMinutes, isBefore, isAfter } from "date-fns";
 
 export class Agenda {
     constructor(medico) {
@@ -25,7 +25,9 @@ export class Agenda {
                 return true;
             }
 
-            return this.verificarSiCoincideConDisponibilidad(turno); // Si ya no coincide, devuelve false y se elimina
+            const sigueSiendoValido = this.verificarSiCoincideConDisponibilidad(turno);
+
+            return sigueSiendoValido; // Si ya no coincide, devuelve false y se elimina
         });
     }
 
@@ -94,7 +96,7 @@ export class Agenda {
             return inicioA < finB && finA > inicioB;
         });
     }
-
+    
     // Buscar si el médico atiende ese día, y verificar que el horario del turno esté
     // dentro de la franja horaria de la nueva disponibilidad.
     verificarSiCoincideConDisponibilidad(turno) {

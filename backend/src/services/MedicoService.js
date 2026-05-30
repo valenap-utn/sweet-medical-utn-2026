@@ -8,6 +8,7 @@ export class MedicoService {
         this.turnoRepository = turnoRepository;
         this.especialidadRepository = especialidadRepository;
         this.practicaRepository = practicaRepository;
+        this.agendaService = agendaService;
     }
 
     async cancelarTurno({medicoId, turnoId, motivo}) {
@@ -30,6 +31,8 @@ export class MedicoService {
         })
         return await this.turnoRepository.save(turno);
     }
+
+
 
     async marcarTurnoRealizado({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
@@ -112,8 +115,11 @@ export class MedicoService {
         if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new Error("Disponibilidad ya existente");
 
         medico.definirDisponibilidad(disponibilidad);
+        await this.medicoRepository.save(medico);
 
-        return await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+
+        return { mensaje: "Disponibilidad agregada y agenda regenerada." };
     }
 
     async quitarDisponibilidad({medicoId, disponibilidad}) {
@@ -125,7 +131,11 @@ export class MedicoService {
         medico.disponibilidades = medico.disponibilidades.filter(d => !(this.disponibilidadCoincide(d, disponibilidad)));
         if (cantidadOriginal === medico.disponibilidades.length) throw new Error("Disponibilidad no encontrada");
 
-        return await this.medicoRepository.save(medico);
+        await this.medicoRepository.save(medico);
+
+        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+
+        return { mensaje: "Disponibilidad eliminada y agenda regenerada." };
 
     }
 

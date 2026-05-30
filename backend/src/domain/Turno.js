@@ -9,8 +9,8 @@ export class Turno {
 
     sede;
     tipoServicio; // ESPECIALIDAD o PRACTICA
-    especialidad;
-    practica;
+    especialidad; // Objeto Especialidad o null
+    practica;     // Objeto Practica o null
 
     fechaHoraInicio;
     fechaHoraFin;
@@ -18,14 +18,15 @@ export class Turno {
     historialEstados;
 
     fechaHoraSolicitada; // por si solicitan cambio de horario
-
     costo; // costo final calculado al momento de reservar
 
     constructor({
+                    id = null, // Se agrega para soportar la asignación delegada a Mongo
                     medico, paciente = null, sede, tipoServicio, especialidad = null,
                     practica = null, fechaHoraInicio, fechaHoraFin, fechaHoraSolicitada = null,
                     estado = EstadoTurno.DISPONIBLE, costo = null, historialEstados = []
-                }) {
+                } = {}) {
+
         this.validarParametros({
             medico,
             sede,
@@ -36,6 +37,8 @@ export class Turno {
             fechaHoraFin,
             estado
         });
+
+        this.id = id; // Si viene de la base de datos tendrá valor; si viene de la Agenda será null
         this.medico = medico;
         this.paciente = paciente;
         this.sede = sede;
@@ -45,14 +48,12 @@ export class Turno {
         this.fechaHoraInicio = fechaHoraInicio;
         this.fechaHoraFin = fechaHoraFin;
         this.estado = estado;
-
         this.fechaHoraSolicitada = fechaHoraSolicitada;
-
         this.costo = costo;
-        this.historialEstados = historialEstados;
+        this.historialEstados = Array.isArray(historialEstados) ? historialEstados : [];
     }
 
-    validarParametros({medico, sede, tipoServicio, especialidad, practica, fechaHoraInicio, fechaHoraFin, estado,}) {
+    validarParametros({medico, sede, tipoServicio, especialidad, practica, fechaHoraInicio, fechaHoraFin, estado}) {
         if (!medico || !sede || !tipoServicio || !fechaHoraInicio || !fechaHoraFin || !estado) {
             throw new TurnoInvalido("El turno necesita médico, sede, tipoServicio, fechaHoraInicio, fechaHoraFin y estado.");
         }
@@ -89,10 +90,10 @@ export class Turno {
         const updateEstado = new CambioEstadoTurno({
             fechaHoraIngreso: new Date(),
             estado: nuevoEstado,
-            turno: turnoId,
-            usuario,
-            motivo
+            turno: turnoId || this.id, // Si no se pasa explícitamente, usa el de la propia instancia
+            usuario:usuario,
+            motivo: motivo
         });
-        this.historialEstados.push(updateEstado); // trazabilidad
+        this.historialEstados.push(updateEstado); // Trazabilidad completa
     }
 }
