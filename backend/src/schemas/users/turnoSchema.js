@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { CambioEstadoTurnoSchema } from "./cambioEstadoTurnoSchema.js";
+import {CambioEstadoTurnoSchema} from "./cambioEstadoTurnoSchema.js";
 import {Turno} from "../../domain/Turno.js";
 import {EstadoTurno} from "../../domain/enums/EstadoTurno.js";
+import {TipoServicio} from "../../domain/enums/TipoServicio.js";
 
 
 const TurnoSchema = new mongoose.Schema({
-
     medico: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Medico",
@@ -19,6 +19,11 @@ const TurnoSchema = new mongoose.Schema({
     sede: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Sede",
+        required: true
+    },
+    tipoServicio:{
+        type: String,
+        enum: Object.values(TipoServicio),
         required: true
     },
     especialidad: {
@@ -46,9 +51,17 @@ const TurnoSchema = new mongoose.Schema({
         type: [CambioEstadoTurnoSchema],
         default: [],
     },
-    fechaHora: {
+    fechaHoraInicio: {
         type: Date,
         required: true
+    },
+    fechaHoraFin: {
+        type: Date,
+        required: true
+    },
+    fechaHoraSolicitada: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true,
