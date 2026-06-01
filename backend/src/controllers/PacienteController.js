@@ -24,6 +24,16 @@ export class PacienteController {
         }
     };
 
+    confirmarCambioFechaPropuestoPorMedico = async (req, res, next) => {
+        try {
+            const {pacienteId, turnoId} = req.params;
+            const turno = await this.pacienteService.confirmarCambioFechaPropuestoPorMedico({pacienteId, turnoId});
+            res.status(200).json(turno);
+        } catch (err) {
+            next(err);
+        }
+    }
+
     obtenerHistorial = async (req, res, next) => {
         try {
             const {pacienteId} = req.params;

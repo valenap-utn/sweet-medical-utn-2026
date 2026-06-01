@@ -14,7 +14,7 @@ export default function medicoRoutes(getController) {
 
     router.patch('/:medicoId/turnos/:turnoId/proponer-cambio', medicoController.proponerCambioFecha);
 
-    router.patch('/:medicoId/turnos/:turnoId/confirmar-cambio', medicoController.confirmarCambioFechaSolicitadoPorPaciente);
+    router.patch('/:medicoId/turnos/:turnoId/confirmacion', medicoController.confirmarCambioFechaSolicitadoPorPaciente);
 
     router.get('/:medicoId/especialidades/:especialidadId/turnos', medicoController.consultarDisponibilidadEspecialidad);
 
