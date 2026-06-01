@@ -11,6 +11,12 @@ export class MedicoService {
         this.agendaService = agendaService;
     }
 
+    /* ===== ESTADOS del TURNO ====================================================================================== */
+
+    // EstadoTurno.CONFIRMADO.nombre
+    // TODO: confirmarTurno()
+
+    // EstadoTurno.CANCELADO.nombre
     async cancelarTurno({medicoId, turnoId, motivo}) {
         if (!motivo) throw new Error("Debe indicar un motivo para la cancelación");
 
@@ -32,8 +38,7 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
-
-
+    // EstadoTurno.REALIZADO.nombre
     async marcarTurnoRealizado({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
@@ -48,9 +53,12 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
+    // Historial de Estados de Turnos por Paciente
     async obtenerHistorial({pacienteId}) {
         return await this.turnoRepository.findByPacienteId(pacienteId);
     }
+
+    /* ===== SOLICITUD de CAMBIO de FECHA =========================================================================== */
 
     async proponerCambioFecha({medicoId, turnoId, nuevaFechaHora}) {
         if (!nuevaFechaHora) throw new Error("Debe indicar la nueva fecha y hora propuesta.");
@@ -98,12 +106,23 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
+
+    /* ===== DISPONIBILIDADES ======================================================================================= */
+
     async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
+        return await this.turnoRepository.buscarDisponibles({
+            medicoId: medicoId,
+            tipoServicio: TipoServicio.ESPECIALIDAD,
+            especialidadId: especialidadId
+        })
     }
 
     async consultarDisponibilidadPractica({medicoId, practicaId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
+        return await this.turnoRepository.buscarDisponibles({
+            medicoId: medicoId,
+            tipoServicio: TipoServicio.PRACTICA,
+            practicaId: practicaId
+        })
     }
 
     async agregarDisponibilidad({medicoId, disponibilidad}) {
@@ -117,9 +136,9 @@ export class MedicoService {
         medico.definirDisponibilidad(disponibilidad);
         await this.medicoRepository.save(medico);
 
-        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+        await this.agendaService.regenerarAgenda({medicoId}); // <--- NUEVO
 
-        return { mensaje: "Disponibilidad agregada y agenda regenerada." };
+        return {mensaje: "Disponibilidad agregada y agenda regenerada."};
     }
 
     async quitarDisponibilidad({medicoId, disponibilidad}) {
@@ -133,11 +152,13 @@ export class MedicoService {
 
         await this.medicoRepository.save(medico);
 
-        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+        await this.agendaService.regenerarAgenda({medicoId}); // <--- NUEVO
 
-        return { mensaje: "Disponibilidad eliminada y agenda regenerada." };
+        return {mensaje: "Disponibilidad eliminada y agenda regenerada."};
 
     }
+
+    /* ===== ESPECIALIDAD y PRACTICA ====================================================================== ========= */
 
     async agregarEspecialidad({medicoId, especialidadId}) {
         const medico = await this.medicoRepository.findById(medicoId);
