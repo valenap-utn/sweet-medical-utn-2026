@@ -14,7 +14,25 @@ export class MedicoService {
     /* ===== ESTADOS del TURNO ====================================================================================== */
 
     // EstadoTurno.CONFIRMADO.nombre
-    // TODO: confirmarTurno()
+    async confirmarTurno({medicoId, turnoId}) {
+        const turno = await this.turnoRepository.findById(turnoId);
+        if(!turno) throw new Error(`El turno con id ${turnoId} no pudo ser encontrado`);
+
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
+
+        if(turno.estado !== EstadoTurno.DISPONIBLE.nombre) {
+            throw new Error(`Solo se pueden confirmar turnos reservados. El estado de este turno es: ${turno.estado}`);
+        }
+
+        turno.actualizarEstado({
+            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
+            usuario: medicoId,
+            motivo: "El médico confirmó el turno.",
+            turnoId: turno._id,
+        });
+
+        return await this.turnoRepository.save(turno);
+    }
 
     // EstadoTurno.CANCELADO.nombre
     async cancelarTurno({medicoId, turnoId, motivo}) {
@@ -239,7 +257,7 @@ export class MedicoService {
     validarTurnoPerteneceAMedico(turno, medicoId) {
         const medicoDelTurno = turno.medico._id;
         if (String(medicoDelTurno) !== String(medicoId)) {
-            throw new Error("El turno no pertenece al paciente.")
+            throw new Error(`El turno no pertenece al médico con ID ${medicoId}, pertenece a ${turno.medico._id}.`);
         }
     }
 
