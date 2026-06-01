@@ -142,4 +142,38 @@ export class TurnoRepository {
             .find(filtros)
             .distinct("medico"); //retorna valores unicos (sin duplicados)
     }
+
+    // Agenda futura del médico
+    async findFuturosByMedico(medicoId, fechaDesde) {
+        return await this.model
+            .find({medico: medicoId, fechaHoraInicio: {$gte: fechaDesde}})
+            .sort({fechaHoraInicio: 1});
+    }
+
+    // Para eliminar todos los turnos futuros del médico
+    async deleteMany(ids) {
+        return await this.model.deleteMany({
+            _id: {$in: ids},
+            estado: EstadoTurno.DISPONIBLE.nombre,
+            fechaHoraInicio: {$gte: new Date()}
+        });
+    }
+
+    async insertMany(turnos) {
+        return await this.model.insertMany(
+            turnos.map(turno => ({
+                medico: turno.medico?._id ?? turno.medico,
+                paciente: turno.paciente?._id ?? turno.paciente ?? null,
+                sede: turno.sede?._id ?? turno.sede,
+                tipoServicio: turno.tipoServicio,
+                especialidad: turno.especialidad?._id ?? turno.especialidad ?? null,
+                practica: turno.practica?._id ?? turno.practica ?? null,
+                fechaHoraInicio: turno.fechaHoraInicio,
+                fechaHoraFin: turno.fechaHoraFin,
+                estado: turno.estado?.nombre ?? turno.estado,
+                costo: turno.costo ?? null,
+                historialEstados: turno.historialEstados ?? []
+            }))
+        );
+    }
 }
