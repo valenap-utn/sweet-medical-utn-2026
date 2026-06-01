@@ -106,6 +106,8 @@ export class MedicoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
 
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
+
         if (!turno.fechaHoraSolicitada) throw new Error("No existe ninguna propuesta de cambio de fecha pendiente para este turno");
 
         // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
