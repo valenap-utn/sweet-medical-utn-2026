@@ -20,7 +20,7 @@ export class MedicoService {
 
         this.validarTurnoPerteneceAMedico(turno, medicoId);
 
-        if(turno.estado !== EstadoTurno.DISPONIBLE.nombre) {
+        if(turno.estado !== EstadoTurno.RESERVADO.nombre) {
             throw new Error(`Solo se pueden confirmar turnos reservados. El estado de este turno es: ${turno.estado}`);
         }
 
