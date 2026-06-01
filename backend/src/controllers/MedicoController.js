@@ -64,11 +64,11 @@ export class MedicoController {
         }
     };
 
-    confirmarModificacionFecha = async (req, res, next) => {
+    confirmarCambioFechaSolicitadoPorPaciente = async (req, res, next) => {
         try {
             const {medicoId, turnoId} = req.params;
 
-            const turno = await this.medicoService.confirmarModificacionFecha({
+            const turno = await this.medicoService.confirmarCambioFechaSolicitadoPorPaciente({
                 medicoId,
                 turnoId
             });

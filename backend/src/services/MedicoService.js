@@ -102,7 +102,7 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
-    async confirmarModificacionFecha({medicoId, turnoId}) {
+    async confirmarCambioFechaSolicitadoPorPaciente({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
 
