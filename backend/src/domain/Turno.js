@@ -24,7 +24,7 @@ export class Turno {
                     id = null, // Se agrega para soportar la asignación delegada a Mongo
                     medico, paciente = null, sede, tipoServicio, especialidad = null,
                     practica = null, fechaHoraInicio, fechaHoraFin, fechaHoraSolicitada = null,
-                    estado = EstadoTurno.DISPONIBLE, costo = null, historialEstados = []
+                    estado = EstadoTurno.DISPONIBLE.nombre, costo = null, historialEstados = []
                 } = {}) {
 
         this.validarParametros({
@@ -72,17 +72,17 @@ export class Turno {
     }
 
     reservar({paciente, costo, turnoId = null}) {
-        if (this.estado !== EstadoTurno.DISPONIBLE) throw new TurnoInvalido("Solo se pueden reservar turnos disponibles.");
+        if (this.estado !== EstadoTurno.DISPONIBLE.nombre) throw new TurnoInvalido("Solo se pueden reservar turnos disponibles.");
         if (!paciente) throw new TurnoInvalido("Para reservar un turno se necesita un paciente.")
 
         this.paciente = paciente;
         this.costo = costo;
         this.actualizarEstado({
-            nuevoEstado: EstadoTurno.RESERVADO,
+            nuevoEstado: EstadoTurno.RESERVADO.nombre,
             usuario: paciente,
             motivo: "Reserva de Turno",
             turnoId,
-        })
+        });
     }
 
     actualizarEstado({nuevoEstado, usuario, motivo, turnoId = null}) {
@@ -91,7 +91,7 @@ export class Turno {
             fechaHoraIngreso: new Date(),
             estado: nuevoEstado,
             turno: turnoId || this.id, // Si no se pasa explícitamente, usa el de la propia instancia
-            usuario:usuario,
+            usuario: usuario,
             motivo: motivo
         });
         this.historialEstados.push(updateEstado); // Trazabilidad completa
