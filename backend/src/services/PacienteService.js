@@ -117,7 +117,7 @@ export class PacienteService {
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.RESERVADO.nombre, // pendiente de confirmación por parte del médico
             usuario: pacienteId,
-            motivo: "Solicitud de cambio de fecha",
+            motivo: "Solicitud de cambio de fecha pendiente de confirmación médica.",
             turnoId: turno._id,
         });
 
