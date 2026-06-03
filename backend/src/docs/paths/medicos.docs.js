@@ -182,7 +182,7 @@
 
 /**
  * @swagger
- * /medicos/{medicoId}/turnos/{turnoId}/confirmar-cambio:
+ * /medicos/{medicoId}/turnos/{turnoId}/confirmacion:
  *   patch:
  *     tags:
  *       - Médicos

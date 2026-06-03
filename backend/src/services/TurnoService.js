@@ -68,7 +68,7 @@ export class TurnoService {
     // Devuelve opciones de servicios (para desplegables del front)
     async obtenerOpcionesServicio({tipoServicio, sedeId}) {
         if (!tipoServicio) throw new Error("Debe indicar tipoServicio.");
-        return await this.turnoRepository.obtenerOpcionesServicio(tipoServicio, sedeId);
+        return await this.turnoRepository.obtenerOpcionesServicio({tipoServicio, sedeId});
     }
 
     // ---------- FUNCIONES AUXILIARES ----------

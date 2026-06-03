@@ -14,5 +14,7 @@ export default function pacienteRoutes(getController) {
 
     router.patch('/:pacienteId/turnos/:turnoId/solicitar-cambio', pacienteController.solicitarCambioFecha);
 
+    router.patch('/pacienteId/turnos/turnoId/confirmacion', pacienteController.confirmarCambioFechaPropuestoPorMedico)
+
     return router;
 }

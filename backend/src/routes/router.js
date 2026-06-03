@@ -4,6 +4,8 @@ import medicoRoutes from "./medicoRoutes.js";
 import serviciosMedicoRoutes from "./serviciosMedicoRoutes.js";
 import pacienteRoutes from "./pacienteRoutes.js";
 import turnoRoutes from "./turnoRoutes.js";
+import planRoutes from "./planRoutes.js";
+import notificacionRoutes from "./notificacionRoutes.js";
 
 // Acá agrupamos las rutas principales !
 export default function createRouter(getController) {
@@ -23,6 +25,12 @@ export default function createRouter(getController) {
 
     const serviciosMedicoRouter = serviciosMedicoRoutes(getController);
     router.use("/servicios-medicos", serviciosMedicoRouter);
+
+    const planesRouter = planRoutes(getController);
+    router.use("/planes", planesRouter);
+
+    const notificacionRouter = notificacionRoutes(getController);
+    router.use("/notificaciones", notificacionRouter);
 
     return router;
 }

@@ -1,7 +1,7 @@
-import { Turno } from "./Turno.js";
-import { EstadoTurno } from "./enums/EstadoTurno.js";
-import { TipoServicio } from "./enums/TipoServicio.js";
-import { addDays, addMinutes, isBefore, isAfter } from "date-fns";
+import {Turno} from "./Turno.js";
+import {EstadoTurno} from "./enums/EstadoTurno.js";
+import {TipoServicio} from "./enums/TipoServicio.js";
+import {addDays, addMinutes, isAfter, isBefore} from "date-fns";
 
 export class Agenda {
     constructor(medico) {
@@ -19,15 +19,13 @@ export class Agenda {
 
         this.turnos = this.turnos.filter(turno => {
             const esPasado = isBefore(turno.fechaHoraInicio, ahora);
-            const estaReservadoOConfirmado = turno.estado !== EstadoTurno.DISPONIBLE;
+            const noEstaDisponible = turno.estado !== EstadoTurno.DISPONIBLE.nombre;
 
-            if (esPasado || estaReservadoOConfirmado) {
+            if (esPasado || noEstaDisponible) {
                 return true;
             }
 
-            const sigueSiendoValido = this.verificarSiCoincideConDisponibilidad(turno);
-
-            return sigueSiendoValido; // Si ya no coincide, devuelve false y se elimina
+            return this.verificarSiCoincideConDisponibilidad(turno); // Si ya no coincide, devuelve false y se elimina
         });
     }
 
@@ -96,7 +94,7 @@ export class Agenda {
             return inicioA < finB && finA > inicioB;
         });
     }
-    
+
     // Buscar si el médico atiende ese día, y verificar que el horario del turno esté
     // dentro de la franja horaria de la nueva disponibilidad.
     verificarSiCoincideConDisponibilidad(turno) {
@@ -144,7 +142,7 @@ export class Agenda {
             practica: esPractica ? servicio : null,
             fechaHoraInicio: bloque.inicio,
             fechaHoraFin: bloque.fin,
-            estado: EstadoTurno.DISPONIBLE,
+            estado: EstadoTurno.DISPONIBLE.nombre,
             costo: costo
         });
     }

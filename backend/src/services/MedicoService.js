@@ -11,6 +11,30 @@ export class MedicoService {
         this.agendaService = agendaService;
     }
 
+    /* ===== ESTADOS del TURNO ====================================================================================== */
+
+    // EstadoTurno.CONFIRMADO.nombre
+    async confirmarTurno({medicoId, turnoId}) {
+        const turno = await this.turnoRepository.findById(turnoId);
+        if(!turno) throw new Error(`El turno con id ${turnoId} no pudo ser encontrado`);
+
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
+
+        if(turno.estado !== EstadoTurno.RESERVADO.nombre) {
+            throw new Error(`Solo se pueden confirmar turnos reservados. El estado de este turno es: ${turno.estado}`);
+        }
+
+        turno.actualizarEstado({
+            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
+            usuario: medicoId,
+            motivo: "El médico confirmó el turno.",
+            turnoId: turno._id,
+        });
+
+        return await this.turnoRepository.save(turno);
+    }
+
+    // EstadoTurno.CANCELADO.nombre
     async cancelarTurno({medicoId, turnoId, motivo}) {
         if (!motivo) throw new Error("Debe indicar un motivo para la cancelación");
 
@@ -32,8 +56,7 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
-
-
+    // EstadoTurno.REALIZADO.nombre
     async marcarTurnoRealizado({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
@@ -48,9 +71,12 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
+    // Historial de Estados de Turnos por Paciente
     async obtenerHistorial({pacienteId}) {
         return await this.turnoRepository.findByPacienteId(pacienteId);
     }
+
+    /* ===== SOLICITUD de CAMBIO de FECHA =========================================================================== */
 
     async proponerCambioFecha({medicoId, turnoId, nuevaFechaHora}) {
         if (!nuevaFechaHora) throw new Error("Debe indicar la nueva fecha y hora propuesta.");
@@ -76,9 +102,11 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
-    async confirmarModificacionFecha({medicoId, turnoId}) {
+    async confirmarCambioFechaSolicitadoPorPaciente({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error("Turno no encontrado.");
+
+        this.validarTurnoPerteneceAMedico(turno, medicoId);
 
         if (!turno.fechaHoraSolicitada) throw new Error("No existe ninguna propuesta de cambio de fecha pendiente para este turno");
 
@@ -98,12 +126,23 @@ export class MedicoService {
         return await this.turnoRepository.save(turno);
     }
 
+
+    /* ===== DISPONIBILIDADES ======================================================================================= */
+
     async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
+        return await this.turnoRepository.buscarDisponibles({
+            medicoId: medicoId,
+            tipoServicio: TipoServicio.ESPECIALIDAD,
+            especialidadId: especialidadId
+        })
     }
 
     async consultarDisponibilidadPractica({medicoId, practicaId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
+        return await this.turnoRepository.buscarDisponibles({
+            medicoId: medicoId,
+            tipoServicio: TipoServicio.PRACTICA,
+            practicaId: practicaId
+        })
     }
 
     async agregarDisponibilidad({medicoId, disponibilidad}) {
@@ -117,9 +156,9 @@ export class MedicoService {
         medico.definirDisponibilidad(disponibilidad);
         await this.medicoRepository.save(medico);
 
-        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+        await this.agendaService.regenerarAgenda({medicoId}); // <--- NUEVO
 
-        return { mensaje: "Disponibilidad agregada y agenda regenerada." };
+        return {mensaje: "Disponibilidad agregada y agenda regenerada."};
     }
 
     async quitarDisponibilidad({medicoId, disponibilidad}) {
@@ -133,11 +172,13 @@ export class MedicoService {
 
         await this.medicoRepository.save(medico);
 
-        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+        await this.agendaService.regenerarAgenda({medicoId}); // <--- NUEVO
 
-        return { mensaje: "Disponibilidad eliminada y agenda regenerada." };
+        return {mensaje: "Disponibilidad eliminada y agenda regenerada."};
 
     }
+
+    /* ===== ESPECIALIDAD y PRACTICA ====================================================================== ========= */
 
     async agregarEspecialidad({medicoId, especialidadId}) {
         const medico = await this.medicoRepository.findById(medicoId);
@@ -218,7 +259,7 @@ export class MedicoService {
     validarTurnoPerteneceAMedico(turno, medicoId) {
         const medicoDelTurno = turno.medico._id;
         if (String(medicoDelTurno) !== String(medicoId)) {
-            throw new Error("El turno no pertenece al paciente.")
+            throw new Error(`El turno no pertenece al médico con ID ${medicoId}, pertenece a ${turno.medico._id}.`);
         }
     }
 

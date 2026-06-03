@@ -24,7 +24,9 @@ export class Server {
     // Devuelve un controller a las rutas
     getController(controllerClass) {
         const controller = this.#controllers[controllerClass.name];
-        if(!controller) throw new Error(`Controller missing: ${controllerClass.name}`);
+        if (!controller) {
+            throw new Error(`Controller missing: ${controllerClass.name}`);
+        }
         return controller;
     }
 
@@ -34,7 +36,7 @@ export class Server {
     }
 
     // Configura rutas y middlewares globales
-    configureRoutes(){
+    configureRoutes() {
         this.#routes.forEach(route => {
             this.app.use("/api", route(this.getController.bind(this)));
         });

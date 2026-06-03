@@ -6,36 +6,32 @@ export class Especialidad {
     duracionTurnoEnMins;
     costoConsulta;
 
-    constructor(nombre, duracionTurnoEnMins, costoConsulta) {
-        this.validarParametros(nombre, duracionTurnoEnMins, costoConsulta);
+    constructor(id, nombre, duracionTurnoEnMins, costoConsulta) {
+        this.validarParametros(id, nombre, duracionTurnoEnMins, costoConsulta);
+        this.id = id;
         this.nombre = nombre;
         this.duracionTurnoEnMins = duracionTurnoEnMins;
         this.costoConsulta = costoConsulta;
     }
 
-    validarParametros(nombre, duracionTurnoEnMins, costoConsulta) {
-        if ([nombre, duracionTurnoEnMins, costoConsulta].some(v => !v)) {
-            throw new EspecialidadInvalida(`La especialidad necesita nombre, duracion en minutos del turno, costo de la consulta.\n
-                Se recibió nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costoConsulta}`);
+    validarParametros(id, nombre, duracionTurnoEnMins, costoConsulta) {
+        if ([id, nombre, duracionTurnoEnMins, costoConsulta].some(v => !v)) {
+            throw new EspecialidadInvalida(
+                `La especialidad necesita id, nombre, duracion en minutos del turno, costo de la consulta.\n` +
+                `Se recibió id: ${id}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costoConsulta}`
+            );
         }
     }
 
-    establecerNuevoNombre(nuevoNombre){
-        if(nuevoNombre !== undefined) {
-            this.nombre = nuevoNombre;
-        }
+    establecerNuevoNombre(nuevoNombre) {
+        if (nuevoNombre !== undefined) this.nombre = nuevoNombre;
     }
 
-    establecerNuevaDuracion(nuevaDuracion){
-        if(nuevaDuracion !== undefined) {
-            this.duracionTurnoEnMins = nuevaDuracion;
-        }
+    establecerNuevaDuracion(nuevaDuracion) {
+        if (nuevaDuracion !== undefined) this.duracionTurnoEnMins = nuevaDuracion;
     }
 
-    establecerNuevoCosto(nuevoCosto){
-        if(nuevoCosto !== undefined) {
-            this.costoConsulta = nuevoCosto;
-        }
+    establecerNuevoCosto(nuevoCosto) {
+        if (nuevoCosto !== undefined) this.costoConsulta = nuevoCosto;
     }
-
 }
