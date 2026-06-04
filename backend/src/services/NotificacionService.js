@@ -12,13 +12,13 @@ export class NotificacionService {
     // Usado internamente por otros servicios (TurnoService, etc.) al disparar eventos.
     async crearNotificacion({destinatarioId, remitenteId, mensaje, tipo}) {
         try {
-            const notificacion = new Notificacion(
-                randomUUID(),
-                destinatarioId,
-                remitenteId,
+            const notificacion = new Notificacion({
+                id: randomUUID(),
+                destinatario: destinatarioId,
+                remitente: remitenteId,
                 mensaje,
                 tipo
-            );
+            });
             return await this.notificacionRepository.guardar({notificacion});
         } catch (e) {
             if (e instanceof NotificacionInvalida) {
@@ -64,7 +64,7 @@ export class NotificacionService {
 
     // ─── private ──────────────────────────────────────────────────────────────
 
-    #validarUsuarioId({usuarioId}) {
+    #validarUsuarioId(usuarioId) {
         if (!usuarioId) throw new BadRequestError("El id de usuario es obligatorio.");
     }
 }
