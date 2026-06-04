@@ -8,11 +8,22 @@ const REMITENTE    = "usuario-paciente-1";
 const MENSAJE      = "Nueva reserva: Juan Pérez solicitó un turno de Cardiología para el 01/06/2026.";
 const TIPO         = TipoNotificacion.TURNO_RESERVADO;
 
+function build(overrides = {}) {
+    return new Notificacion({
+        id:           ID,
+        destinatario: DESTINATARIO,
+        remitente:    REMITENTE,
+        mensaje:      MENSAJE,
+        tipo:         TIPO,
+        ...overrides,
+    });
+}
+
 // ─── suite ───────────────────────────────────────────────────────────────────
 describe("Notificacion (dominio)", () => {
 
     test("se crea correctamente con parámetros válidos", () => {
-        const n = new Notificacion(ID, DESTINATARIO, REMITENTE, MENSAJE, TIPO);
+        const n = build();
 
         expect(n.id).toBe(ID);
         expect(n.destinatario).toBe(DESTINATARIO);
@@ -25,28 +36,27 @@ describe("Notificacion (dominio)", () => {
     });
 
     test.each([
-        [null, DESTINATARIO, REMITENTE, MENSAJE, TIPO, "id nulo"],
-        [ID,   null,         REMITENTE, MENSAJE, TIPO, "destinatario nulo"],
-        [ID,   DESTINATARIO, null,      MENSAJE, TIPO, "remitente nulo"],
-        [ID,   DESTINATARIO, REMITENTE, "",      TIPO, "mensaje vacío"],
-        [ID,   DESTINATARIO, REMITENTE, MENSAJE, null, "tipo nulo"],
-    ])("lanza NotificacionInvalida cuando %s (%s)", (id, dest, rem, msg, tipo) => {
-        expect(() => new Notificacion(id, dest, rem, msg, tipo)).toThrow(NotificacionInvalida);
+        [{ id: null },           "id nulo"],
+        [{ destinatario: null }, "destinatario nulo"],
+        [{ remitente: null },    "remitente nulo"],
+        [{ mensaje: "" },        "mensaje vacío"],
+        [{ tipo: null },         "tipo nulo"],
+    ])("lanza NotificacionInvalida cuando %s", (override) => {
+        expect(() => build(override)).toThrow(NotificacionInvalida);
     });
 
     test("lanza NotificacionInvalida con tipo desconocido", () => {
-        expect(() => new Notificacion(ID, DESTINATARIO, REMITENTE, MENSAJE, "TIPO_INVENTADO"))
-            .toThrow(NotificacionInvalida);
+        expect(() => build({ tipo: "TIPO_INVENTADO" })).toThrow(NotificacionInvalida);
     });
 
     test("todos los valores del enum TipoNotificacion son válidos", () => {
         for (const tipo of Object.values(TipoNotificacion)) {
-            expect(() => new Notificacion(ID, DESTINATARIO, REMITENTE, MENSAJE, tipo)).not.toThrow();
+            expect(() => build({ tipo })).not.toThrow();
         }
     });
 
     test("marcarComoLeida actualiza leida y fechaHoraLeida", () => {
-        const n = new Notificacion(ID, DESTINATARIO, REMITENTE, MENSAJE, TIPO);
+        const n = build();
 
         n.marcarComoLeida();
 
@@ -55,7 +65,7 @@ describe("Notificacion (dominio)", () => {
     });
 
     test("marcarComoLeida es idempotente: no sobreescribe fechaHoraLeida en segunda llamada", () => {
-        const n = new Notificacion(ID, DESTINATARIO, REMITENTE, MENSAJE, TIPO);
+        const n = build();
 
         n.marcarComoLeida();
         const primeraFecha = n.fechaHoraLeida;
