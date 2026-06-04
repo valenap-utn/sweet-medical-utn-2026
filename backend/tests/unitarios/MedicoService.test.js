@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, jest, test } from "@jest/globals";
-import { MedicoService } from "../../src/services/MedicoService.js";
-import { EstadoTurno } from "../../src/domain/enums/EstadoTurno.js";
-import { TipoServicio } from "../../src/domain/enums/TipoServicio.js";
+import {beforeEach, describe, expect, jest, test} from "@jest/globals";
+import {MedicoService} from "../../src/services/MedicoService.js";
+import {EstadoTurno} from "../../src/domain/enums/EstadoTurno.js";
+import {TipoServicio} from "../../src/domain/enums/TipoServicio.js";
+import {DiaSemana} from "../../src/domain/enums/DiaSemana.js";
 
 describe("MedicoService tests", () => {
     let medicoRepository;
@@ -24,12 +25,35 @@ describe("MedicoService tests", () => {
 
     const buildTurno = (overrides = {}) => ({
         _id: "turno-1",
-        medico: { _id: "medico-1" },
+        medico: {_id: "medico-1"},
         paciente: "paciente-1",
         estado: EstadoTurno.CONFIRMADO.nombre,
         fechaHoraInicio: new Date(Date.now() + 3 * 60 * 60 * 1000),
         fechaHoraSolicitada: null,
         actualizarEstado: jest.fn(),
+        ...overrides,
+    });
+
+    const buildDisponibilidad = (overrides = {}) => ({
+        diaSemana: new DiaSemana('Lunes'),
+        horaDesde: '08:00',
+        horaHasta: '12:00',
+        ...overrides,
+    });
+
+    const buildEspecialidad = (overrides = {}) => ({
+        _id: "esp-1",
+        nombre: "Cardiología",
+        duracionTurnoEnMins: 30,
+        costoConsulta: 10000,
+        ...overrides,
+    });
+
+    const buildPractica = (overrides = {}) => ({
+        _id: "prac-1",
+        nombre: "Radiografía",
+        duracionTurnoEnMins: 20,
+        costo: 5000,
         ...overrides,
     });
 
@@ -128,7 +152,7 @@ describe("MedicoService tests", () => {
         const medico = buildMedico();
 
         const turno = buildTurno({
-            medico: { _id: "otro-medico" },
+            medico: {_id: "otro-medico"},
         });
 
         turnoRepository.findById.mockResolvedValue(turno);
@@ -210,7 +234,7 @@ describe("MedicoService tests", () => {
         const medico = buildMedico();
 
         const turno = buildTurno({
-            medico: { _id: "otro-medico" },
+            medico: {_id: "otro-medico"},
         });
 
         turnoRepository.findById.mockResolvedValue(turno);
@@ -244,6 +268,26 @@ describe("MedicoService tests", () => {
         );
     });
 
+    // ========================================== Obtener historial de paciente ======================================================
+
+    test("Obtiene historial de turnos", async () => {
+        const turnos = [
+            {_id: "turno-1"},
+            {_id: "turno-2"},
+        ];
+
+        turnoRepository.findByPacienteId.mockResolvedValue(turnos);
+
+        const resultado = await medicoService.obtenerHistorial({
+            pacienteId: "paciente-1",
+        });
+
+        expect(turnoRepository.findByPacienteId)
+            .toHaveBeenCalledWith("paciente-1");
+
+        expect(resultado).toEqual(turnos);
+    });
+
     // ========================================== Proponer cambio de fecha ======================================================
 
     test("Propone cambio de fecha", async () => {
@@ -272,7 +316,7 @@ describe("MedicoService tests", () => {
         expect(resultado).toBe(turno);
     });
 
-    test("No propone cambio sin fecha", async () => {
+    test("No propone cambio de fecha sin una fecha", async () => {
         const medico = buildMedico();
         const turno = buildTurno();
 
@@ -302,6 +346,26 @@ describe("MedicoService tests", () => {
             })
         ).rejects.toThrow(
             "Turno turno-1 no encontrado."
+        );
+    });
+
+    test("No propone el cambio de fecha de un turno que no pertenece al médico", async () => {
+        const medico = buildMedico();
+
+        const turno = buildTurno({
+            medico: {_id: "otro-medico"},
+        });
+
+        turnoRepository.findById.mockResolvedValue(turno);
+
+        await expect(
+            medicoService.proponerCambioFecha({
+                medicoId: medico._id,
+                turnoId: turno._id,
+                nuevaFechaHora: "2027-05-10T10:00:00",
+            })
+        ).rejects.toThrow(
+            `El turno ${turno._id} no pertenece al médico ${medico._id}.`
         );
     });
 
@@ -353,6 +417,21 @@ describe("MedicoService tests", () => {
         expect(resultado).toBe(turno);
     });
 
+    test("No confirma modificación de fecha de un turno inexistente", async () => {
+        const medico = buildMedico();
+
+        turnoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.marcarTurnoRealizado({
+                medicoId: medico._id,
+                turnoId: "turno-1",
+            })
+        ).rejects.toThrow(
+            "Turno turno-1 no encontrado."
+        );
+    });
+
     test("No confirma modificación si no existe fecha solicitada", async () => {
         const medico = buildMedico();
         const turno = buildTurno();
@@ -367,26 +446,6 @@ describe("MedicoService tests", () => {
         ).rejects.toThrow(
             `No existe ninguna propuesta de cambio de fecha pendiente para el turno ${turno._id}`
         );
-    });
-
-    // ========================================== Obtener historial de paciente ======================================================
-
-    test("Obtiene historial de turnos", async () => {
-        const turnos = [
-            { _id: "turno-1" },
-            { _id: "turno-2" },
-        ];
-
-        turnoRepository.findByPacienteId.mockResolvedValue(turnos);
-
-        const resultado = await medicoService.obtenerHistorial({
-            pacienteId: "paciente-1",
-        });
-
-        expect(turnoRepository.findByPacienteId)
-            .toHaveBeenCalledWith("paciente-1");
-
-        expect(resultado).toEqual(turnos);
     });
 
 // ----------------------------------------------- DISPONIBILIDAD HORARIA --------------------------------------------------------------
@@ -423,6 +482,150 @@ describe("MedicoService tests", () => {
         });
     });
 
+    test("Agrega una disponibilidad horaria", async () => {
+        const medico = buildMedico();
+        const disponibilidad = buildDisponibilidad();
+
+        medicoRepository.findById.mockResolvedValue(medico);
+
+        const resultado = await medicoService.agregarDisponibilidad({
+            medicoId: medico._id,
+            disponibilidad,
+        });
+
+        expect(medico.definirDisponibilidad)
+            .toHaveBeenCalledWith(disponibilidad);
+
+        expect(medicoRepository.save)
+            .toHaveBeenCalledWith(medico);
+
+        expect(medicoService.agendaService.regenerarAgenda)
+            .toHaveBeenCalledWith({
+                medicoId: medico._id,
+            });
+
+        expect(resultado).toEqual({
+            mensaje: "Disponibilidad agregada y agenda regenerada.",
+        });
+    });
+
+    test("No agrega la disponibilidad si el médico no existe", async () => {
+        const disponibilidad = buildDisponibilidad();
+
+        medicoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.agregarDisponibilidad({
+                medicoId: "medico-inexistente",
+                disponibilidad,
+            })
+        ).rejects.toThrow(
+            "Medico medico-inexistente no encontrado."
+        );
+    });
+
+    test("No agrega una disponibilidad inválida", async () => {
+        const medico = buildMedico();
+
+        const disponibilidad = buildDisponibilidad({
+            horaDesde: "15:00",
+            horaHasta: "10:00",
+        });
+
+        medicoRepository.findById.mockResolvedValue(medico);
+
+        await expect(
+            medicoService.agregarDisponibilidad({
+                medicoId: medico._id,
+                disponibilidad,
+            })
+        ).rejects.toThrow(
+            "Disponibilidad no válida"
+        );
+    });
+
+    test("No agrega una disponibilidad ya existente", async () => {
+        const disponibilidad = buildDisponibilidad();
+
+        const medico = buildMedico({
+            disponibilidades: [disponibilidad],
+        });
+
+        medicoRepository.findById.mockResolvedValue(medico);
+
+        await expect(
+            medicoService.agregarDisponibilidad({
+                medicoId: medico._id,
+                disponibilidad,
+            })
+        ).rejects.toThrow(
+            "Disponibilidad ya existente"
+        );
+    });
+
+    test("Quita una disponibilidad existente", async () => {
+        const disponibilidad = buildDisponibilidad();
+
+        const medico = buildMedico({
+            disponibilidades: [disponibilidad],
+        });
+
+        medicoRepository.findById.mockResolvedValue(medico);
+
+        const resultado = await medicoService.quitarDisponibilidad({
+            medicoId: medico._id,
+            disponibilidad,
+        });
+
+        expect(medico.disponibilidades).toEqual([]);
+
+        expect(medicoRepository.save)
+            .toHaveBeenCalledWith(medico);
+
+        expect(medicoService.agendaService.regenerarAgenda)
+            .toHaveBeenCalledWith({
+                medicoId: medico._id,
+            });
+
+        expect(resultado).toEqual({
+            mensaje: "Disponibilidad eliminada y agenda regenerada.",
+        });
+    });
+
+    test("No quita la disponibilidad si el médico no existe", async () => {
+        const disponibilidad = buildDisponibilidad();
+
+        medicoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.quitarDisponibilidad({
+                medicoId: "medico-inexistente",
+                disponibilidad,
+            })
+        ).rejects.toThrow(
+            "Medico medico-inexistente no encontrado."
+        );
+    });
+
+    test("No quita una disponibilidad inexistente", async () => {
+        const medico = buildMedico({
+            disponibilidades: [],
+        });
+
+        const disponibilidad = buildDisponibilidad();
+
+        medicoRepository.findById.mockResolvedValue(medico);
+
+        await expect(
+            medicoService.quitarDisponibilidad({
+                medicoId: medico._id,
+                disponibilidad,
+            })
+        ).rejects.toThrow(
+            "Disponibilidad no encontrada"
+        );
+    });
+
 // ------------------------------------------------- ESPECIALIDADES --------------------------------------------------------------
 
     // ========================================== Agregar especialidad ======================================================
@@ -430,10 +633,7 @@ describe("MedicoService tests", () => {
     test("Agrega una especialidad", async () => {
         const medico = buildMedico();
 
-        const especialidad = {
-            nombre: "Cardiología",
-            costo: 1000,
-        };
+        const especialidad = buildEspecialidad();
 
         medicoRepository.findById.mockResolvedValue(medico);
         especialidadRepository.findById.mockResolvedValue(especialidad);
@@ -451,11 +651,21 @@ describe("MedicoService tests", () => {
             .toHaveBeenCalledWith(medico);
     });
 
+    test("No agrega una especialidad si el médico no existe", async () => {
+        medicoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.agregarEspecialidad({
+                medicoId: "medico-inexistente",
+                especialidadId: "esp-1",
+            })
+        ).rejects.toThrow(
+            "Medico medico-inexistente no encontrado."
+        );
+    });
+
     test("No agrega una especialidad duplicada", async () => {
-        const especialidad = {
-            nombre: "Cardiología",
-            costo: 1000,
-        };
+        const especialidad = buildEspecialidad();
 
         const medico = buildMedico({
             especialidades: [especialidad],
@@ -477,10 +687,7 @@ describe("MedicoService tests", () => {
     // ========================================== Quitar especialidad ======================================================
 
     test("Quita una especialidad", async () => {
-        const especialidad = {
-            nombre: "Cardiología",
-            costo: 1000,
-        };
+        const especialidad = buildEspecialidad();
 
         const medico = buildMedico({
             especialidades: [especialidad],
@@ -488,35 +695,87 @@ describe("MedicoService tests", () => {
 
         medicoRepository.findById.mockResolvedValue(medico);
         especialidadRepository.findById.mockResolvedValue(especialidad);
+
         medicoRepository.save.mockResolvedValue(medico);
 
-        await medicoService.quitarEspecialidad({
+        const resultado = await medicoService.quitarEspecialidad({
             medicoId: medico._id,
             especialidadId: "esp-1",
         });
 
         expect(medico.especialidades).toEqual([]);
+
+        expect(medicoRepository.save)
+            .toHaveBeenCalledWith(medico);
+
+        expect(resultado).toBe(medico);
+    });
+
+    test("No quita una especialidad si el médico no existe", async () => {
+        medicoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.quitarEspecialidad({
+                medicoId: "medico-inexistente",
+                especialidadId: "esp-1",
+            })
+        ).rejects.toThrow(
+            "Medico medico-inexistente no encontrado."
+        );
+    });
+
+    test("No quita una especialidad inexistente", async () => {
+        const medico = buildMedico();
+
+        medicoRepository.findById.mockResolvedValue(medico);
+        especialidadRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.quitarEspecialidad({
+                medicoId: medico._id,
+                especialidadId: "esp-inexistente",
+            })
+        ).rejects.toThrow(
+            "Especialidad esp-inexistente no existe"
+        );
+    });
+
+    test("No quita una especialidad que el médico no posee", async () => {
+        const especialidad = buildEspecialidad();
+
+        const medico = buildMedico({
+            especialidades: [],
+        });
+
+        medicoRepository.findById.mockResolvedValue(medico);
+        especialidadRepository.findById.mockResolvedValue(especialidad);
+
+        await expect(
+            medicoService.quitarEspecialidad({
+                medicoId: medico._id,
+                especialidadId: "esp-1",
+            })
+        ).rejects.toThrow(
+            `El medico ${medico._id} no tiene la especialidad esp-1`
+        );
     });
 
 // -------------------------------------------------- PRACTICAS --------------------------------------------------------------
 
     // ========================================== Agregar práctica ======================================================
-    
+
     test("Agrega una práctica", async () => {
         const medico = buildMedico();
-
-        const practica = {
-            nombre: "Radiografía",
-            costo: 500,
-        };
+        const practica = buildPractica();
 
         medicoRepository.findById.mockResolvedValue(medico);
         practicaRepository.findById.mockResolvedValue(practica);
+
         medicoRepository.save.mockResolvedValue(medico);
 
-        await medicoService.agregarPractica({
+        const resultado = await medicoService.agregarPractica({
             medicoId: medico._id,
-            practicaId: "prac-1",
+            practicaId: practica._id,
         });
 
         expect(medico.agregarPractica)
@@ -524,13 +783,41 @@ describe("MedicoService tests", () => {
 
         expect(medicoRepository.save)
             .toHaveBeenCalledWith(medico);
+
+        expect(resultado).toBe(medico);
     });
 
-    test("No agrega una práctica duplicada", async () => {
-        const practica = {
-            nombre: "Radiografía",
-            costo: 500,
-        };
+    test("No agrega una práctica si el médico no existe", async () => {
+        medicoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.agregarPractica({
+                medicoId: "medico-inexistente",
+                practicaId: "prac-1",
+            })
+        ).rejects.toThrow(
+            "Medico medico-inexistente no encontrado."
+        );
+    });
+
+    test("No agrega una práctica inexistente", async () => {
+        const medico = buildMedico();
+
+        medicoRepository.findById.mockResolvedValue(medico);
+        practicaRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.agregarPractica({
+                medicoId: medico._id,
+                practicaId: "prac-inexistente",
+            })
+        ).rejects.toThrow(
+            "Práctica prac-inexistente no existe, créela antes de agregar"
+        );
+    });
+
+    test("No agrega una práctica que el médico ya posee", async () => {
+        const practica = buildPractica();
 
         const medico = buildMedico({
             practicas: [practica],
@@ -542,20 +829,17 @@ describe("MedicoService tests", () => {
         await expect(
             medicoService.agregarPractica({
                 medicoId: medico._id,
-                practicaId: "prac-1",
+                practicaId: practica._id,
             })
         ).rejects.toThrow(
-            `El medico ${medico._id} ya tiene la práctica prac-1`
+            `El medico ${medico._id} ya tiene la práctica ${practica._id}`
         );
     });
 
     // ========================================== Quitar práctica ======================================================
 
     test("Quita una práctica", async () => {
-        const practica = {
-            nombre: "Radiografía",
-            costo: 500,
-        };
+        const practica = buildPractica();
 
         const medico = buildMedico({
             practicas: [practica],
@@ -565,11 +849,64 @@ describe("MedicoService tests", () => {
         practicaRepository.findById.mockResolvedValue(practica);
         medicoRepository.save.mockResolvedValue(medico);
 
-        await medicoService.quitarPractica({
+        const resultado = await medicoService.quitarPractica({
             medicoId: medico._id,
-            practicaId: "prac-1",
+            practicaId: practica._id,
         });
 
         expect(medico.practicas).toEqual([]);
+        expect(medicoRepository.save).toHaveBeenCalledWith(medico);
+        expect(resultado).toBe(medico);
+    });
+
+    test("No quita una práctica si el médico no existe", async () => {
+        const practica = buildPractica();
+
+        medicoRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.quitarPractica({
+                medicoId: "medico-inexistente",
+                practicaId: practica._id,
+            })
+        ).rejects.toThrow(
+            "Medico medico-inexistente no encontrado."
+        );
+    });
+
+    test("No quita una práctica si la práctica no existe", async () => {
+        const medico = buildMedico();
+
+        medicoRepository.findById.mockResolvedValue(medico);
+        practicaRepository.findById.mockResolvedValue(null);
+
+        await expect(
+            medicoService.quitarPractica({
+                medicoId: medico._id,
+                practicaId: "practica-inexistente",
+            })
+        ).rejects.toThrow(
+            "Práctica practica-inexistente no existe"
+        );
+    });
+
+    test("No quita una práctica que el médico no tiene", async () => {
+        const practica = buildPractica();
+
+        const medico = buildMedico({
+            practicas: [],
+        });
+
+        medicoRepository.findById.mockResolvedValue(medico);
+        practicaRepository.findById.mockResolvedValue(practica);
+
+        await expect(
+            medicoService.quitarPractica({
+                medicoId: medico._id,
+                practicaId: practica._id,
+            })
+        ).rejects.toThrow(
+            `El medico ${medico._id} no tiene la práctica ${practica._id}`
+        );
     });
 });

@@ -52,6 +52,8 @@ describe("ServiciosMedicoService tests", () => {
         });
     });
 
+// ------------------------- ESPECIALIDAD ----------------------
+
     test("Crea una especialidad", async () => {
         const especialidad = buildEspecialidad();
 
@@ -131,7 +133,7 @@ describe("ServiciosMedicoService tests", () => {
                 especialidadId: "especialidad-inexistente",
             })
         ).rejects.toThrow(
-            "La especialidad especialidad.inexistente no existe"
+            "La especialidad especialidad-inexistente no existe"
         );
     });
 
@@ -188,6 +190,8 @@ describe("ServiciosMedicoService tests", () => {
         );
     });
 
+// -------------------------- PRACTICAS --------------------------
+
     test("Crea una práctica", async () => {
         const practica = buildPractica();
 
@@ -235,7 +239,7 @@ describe("ServiciosMedicoService tests", () => {
         );
     });
 
-    test("borra una práctica", async () => {
+    test("Borra una práctica", async () => {
         const practica = buildPractica();
 
         practicaRepository.findById

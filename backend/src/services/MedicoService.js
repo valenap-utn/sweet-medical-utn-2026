@@ -3,7 +3,7 @@ import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {isAfter, isValid, parseISO, subHours} from "date-fns";
 
 export class MedicoService {
-    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository}) {
+    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
         this.especialidadRepository = especialidadRepository;
