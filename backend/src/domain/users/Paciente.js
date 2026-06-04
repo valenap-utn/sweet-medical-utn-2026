@@ -18,8 +18,6 @@ export class Paciente {
         this.plan = plan;
     }
 
-    static build
-
     validarParametros(usuario,dni, nombre,obraSocial,plan) {
         if ([usuario,dni, nombre,obraSocial,plan].some(v => !v)) {
             throw new UsuarioInvalido(`El paciente necesita usuario, dni, nombre, obra social y plan.\n
