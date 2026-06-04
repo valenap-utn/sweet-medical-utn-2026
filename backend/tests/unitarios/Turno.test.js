@@ -20,7 +20,7 @@ describe("Turno", () => {
             fechaHoraFin: new Date("2026-06-01T10:30:00"),
         });
 
-        expect(turno.estado).toBe(EstadoTurno.DISPONIBLE);
+        expect(turno.estado).toBe(EstadoTurno.DISPONIBLE.nombre);
         expect(turno.paciente).toBeNull();
         expect(turno.costo).toBeNull();
         expect(turno.historialEstados).toEqual([]);
@@ -68,7 +68,7 @@ describe("Turno", () => {
             turnoId: "turno-1",
         });
 
-        expect(turno.estado).toBe(EstadoTurno.RESERVADO);
+        expect(turno.estado).toBe(EstadoTurno.RESERVADO.nombre);
         expect(turno.paciente).toBe(paciente);
         expect(turno.costo).toBe(5000);
         expect(turno.historialEstados).toHaveLength(1);
@@ -84,7 +84,7 @@ describe("Turno", () => {
             practica,
             fechaHoraInicio: new Date("2026-06-01T10:00:00"),
             fechaHoraFin: new Date("2026-06-01T10:30:00"),
-            estado: EstadoTurno.RESERVADO,
+            estado: EstadoTurno.RESERVADO.nombre,
             costo: 5000,
         });
 
