@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import {describe, expect, jest, test} from "@jest/globals";
 import { NotificacionService } from "../../src/services/NotificacionService.js";
 import { TipoNotificacion } from "../../src/domain/Notificacion.js";
 import { NotFoundError, BadRequestError } from "../../src/error/AppError.js";

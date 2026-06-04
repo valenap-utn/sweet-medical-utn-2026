@@ -29,6 +29,7 @@ describe('PacienteService tests', () => {
         ...overrides,
     });
 
+    // Antes de cada prueba se ejecuta esto
     beforeEach(() => {
         // Mocks de repositories utilizados por el servicio
         pacienteRepository = {findById: jest.fn(),};
