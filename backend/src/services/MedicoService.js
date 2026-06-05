@@ -1,6 +1,7 @@
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {isAfter, isValid, parseISO, subHours} from "date-fns";
+import {BadRequestError, ConflictError, ForbiddenError, NotFoundError} from "../error/AppError.js";
 
 export class MedicoService {
     constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService}) {
@@ -12,7 +13,7 @@ export class MedicoService {
     }
 
     async cancelarTurno({medicoId, turnoId, motivo}) {
-        if (!motivo) throw new Error("Debe indicar un motivo para la cancelación");
+        if (!motivo) throw new BadRequestError("Debe indicar un motivo para cancelar el turno");
 
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
@@ -21,7 +22,7 @@ export class MedicoService {
 
         const unaHoraAntes = subHours(turno.fechaHoraInicio, 1);
         if (isAfter(new Date(), unaHoraAntes)) {
-            throw new Error("El turno solo puede cancelarse con al menos 1 hora de anticipación.");
+            throw new ConflictError("El turno solo puede cancelarse con al menos 1 hora de anticipación.");
         }
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.CANCELADO.nombre,
@@ -38,7 +39,7 @@ export class MedicoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
         this.validarTurnoPerteneceAMedico(turno, medicoId);
-        if (turno.estado !== EstadoTurno.CONFIRMADO.nombre) throw new Error(`El turno ${turnoId} no está confirmado`);
+        if (turno.estado !== EstadoTurno.CONFIRMADO.nombre) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.REALIZADO.nombre,
             usuario: medicoId,
@@ -53,7 +54,7 @@ export class MedicoService {
     }
 
     async proponerCambioFecha({medicoId, turnoId, nuevaFechaHora}) {
-        if (!nuevaFechaHora) throw new Error("Debe indicar la nueva fecha y hora propuesta.");
+        if (!nuevaFechaHora) throw new BadRequestError(`Debe indicar la nueva fecha y hora propuesta.`);
 
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
@@ -61,7 +62,7 @@ export class MedicoService {
         this.validarTurnoPerteneceAMedico(turno, medicoId);
 
         const fechaParseada = parseISO(nuevaFechaHora);
-        if (!isValid(fechaParseada)) throw new Error(`La fecha ${fechaParseada} no es válida.`);
+        if (!isValid(fechaParseada)) throw new BadRequestError(`La fecha ${nuevaFechaHora} no es válida.`);
 
         // Se asigna la fecha propuesta al campo temporal sin sobreescribir la original todavía
         turno.fechaHoraSolicitada = fechaParseada;
@@ -78,9 +79,9 @@ export class MedicoService {
 
     async confirmarCambioFechaSolicitadoPorPaciente({medicoId, turnoId}) {
         const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
+        if (!turno) throw new NotFoundError(`No se encontró el turno con id: ${turnoId} .`);
 
-        if (!turno.fechaHoraSolicitada) throw new Error(`No existe ninguna propuesta de cambio de fecha pendiente para el turno ${turnoId}`);
+        if (!turno.fechaHoraSolicitada) throw new ConflictError(`El turno con id: ${turnoId} no tiene una propuesta de cambio de fecha pendiente.`);
 
         // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
         turno.fechaHoraInicio = turno.fechaHoraSolicitada;
@@ -108,11 +109,11 @@ export class MedicoService {
 
     async agregarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
-        if (!this.disponibilidadValida(disponibilidad)) throw new Error("Disponibilidad no válida");
+        if (!this.disponibilidadValida(disponibilidad)) throw new BadRequestError(`Disponibilidad ${disponibilidad._id} no válida`);
 
-        if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new Error("Disponibilidad ya existente");
+        if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new ConflictError(`El médico ya tiene registrada la disponibilidad ${disponibilidad._id}`);
 
         medico.definirDisponibilidad(disponibilidad);
         await this.medicoRepository.save(medico);
@@ -124,7 +125,7 @@ export class MedicoService {
 
     async quitarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const cantidadOriginal = medico.disponibilidades.length;
 
@@ -141,10 +142,10 @@ export class MedicoService {
 
     async agregarEspecialidad({medicoId, especialidadId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new Error(`Especialidad ${especialidadId} no existe, créela antes de agregar`);
+        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
 
         if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new Error(`El medico ${medicoId} ya tiene la especialidad ${especialidadId}`);
 
@@ -156,10 +157,10 @@ export class MedicoService {
 
     async quitarEspecialidad({medicoId, especialidadId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new Error(`Especialidad ${especialidadId} no existe`);
+        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
 
         const cantidadOriginal = medico.especialidades.length;
 
@@ -172,10 +173,10 @@ export class MedicoService {
 
     async agregarPractica({medicoId, practicaId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new Error(`Práctica ${practicaId} no existe, créela antes de agregar`);
+        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
 
         if (medico.practicas.some(p => this.servicioCoincide(p, practica))) throw new Error(`El medico ${medicoId} ya tiene la práctica ${practicaId}`);
 
@@ -186,10 +187,10 @@ export class MedicoService {
 
     async quitarPractica({medicoId, practicaId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new Error(`Práctica ${practicaId} no existe`);
+        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
 
         const cantidadOriginal = medico.practicas.length;
 
@@ -218,7 +219,7 @@ export class MedicoService {
     validarTurnoPerteneceAMedico(turno, medicoId) {
         const medicoDelTurno = turno.medico._id;
         if (String(medicoDelTurno) !== String(medicoId)) {
-            throw new Error(`El turno ${turno._id} no pertenece al médico ${medicoId}.`)
+            throw new ForbiddenError(`El turno ${turno._id} no pertenece al médico ${medicoId}.`)
         }
     }
 

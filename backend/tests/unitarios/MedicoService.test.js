@@ -128,7 +128,7 @@ describe("MedicoService tests", () => {
                 motivo: "",
             })
         ).rejects.toThrow(
-            "Debe indicar un motivo para la cancelación"
+            "Debe indicar un motivo para cancelar el turno"
         );
     });
 
@@ -264,7 +264,7 @@ describe("MedicoService tests", () => {
                 turnoId: turno._id,
             })
         ).rejects.toThrow(
-            `El turno ${turno._id} no está confirmado`
+            `El turno con id: turno-1 no puede marcarse como \"Realizado\" porque su estado actual es Reservado`
         );
     });
 
@@ -444,7 +444,7 @@ describe("MedicoService tests", () => {
                 turnoId: turno._id,
             })
         ).rejects.toThrow(
-            `No existe ninguna propuesta de cambio de fecha pendiente para el turno ${turno._id}`
+            `El turno con id: turno-1 no tiene una propuesta de cambio de fecha pendiente.`
         );
     });
 
@@ -520,7 +520,7 @@ describe("MedicoService tests", () => {
                 disponibilidad,
             })
         ).rejects.toThrow(
-            "Medico medico-inexistente no encontrado."
+            "No se encontró el médico con id: medico-inexistente ."
         );
     });
 
@@ -540,7 +540,7 @@ describe("MedicoService tests", () => {
                 disponibilidad,
             })
         ).rejects.toThrow(
-            "Disponibilidad no válida"
+            "Disponibilidad undefined no válida"
         );
     });
 
@@ -559,7 +559,7 @@ describe("MedicoService tests", () => {
                 disponibilidad,
             })
         ).rejects.toThrow(
-            "Disponibilidad ya existente"
+            "El médico ya tiene registrada la disponibilidad undefined"
         );
     });
 
@@ -603,7 +603,7 @@ describe("MedicoService tests", () => {
                 disponibilidad,
             })
         ).rejects.toThrow(
-            "Medico medico-inexistente no encontrado."
+            "No se encontró el médico con id: medico-inexistente ."
         );
     });
 
@@ -660,7 +660,7 @@ describe("MedicoService tests", () => {
                 especialidadId: "esp-1",
             })
         ).rejects.toThrow(
-            "Medico medico-inexistente no encontrado."
+            "No se encontró el médico con id: medico-inexistente ."
         );
     });
 
@@ -720,7 +720,7 @@ describe("MedicoService tests", () => {
                 especialidadId: "esp-1",
             })
         ).rejects.toThrow(
-            "Medico medico-inexistente no encontrado."
+            "No se encontró el médico con id: medico-inexistente ."
         );
     });
 
@@ -736,7 +736,7 @@ describe("MedicoService tests", () => {
                 especialidadId: "esp-inexistente",
             })
         ).rejects.toThrow(
-            "Especialidad esp-inexistente no existe"
+            "No se encontró la especialidad con id: esp-inexistente ."
         );
     });
 
@@ -796,7 +796,7 @@ describe("MedicoService tests", () => {
                 practicaId: "prac-1",
             })
         ).rejects.toThrow(
-            "Medico medico-inexistente no encontrado."
+            "No se encontró el médico con id: medico-inexistente ."
         );
     });
 
@@ -812,7 +812,7 @@ describe("MedicoService tests", () => {
                 practicaId: "prac-inexistente",
             })
         ).rejects.toThrow(
-            "Práctica prac-inexistente no existe, créela antes de agregar"
+            "No se encontró la práctica con id: prac-inexistente ."
         );
     });
 
@@ -870,7 +870,7 @@ describe("MedicoService tests", () => {
                 practicaId: practica._id,
             })
         ).rejects.toThrow(
-            "Medico medico-inexistente no encontrado."
+            "No se encontró el médico con id: medico-inexistente ."
         );
     });
 
@@ -886,7 +886,7 @@ describe("MedicoService tests", () => {
                 practicaId: "practica-inexistente",
             })
         ).rejects.toThrow(
-            "Práctica practica-inexistente no existe"
+            "No se encontró la práctica con id: practica-inexistente ."
         );
     });
 
