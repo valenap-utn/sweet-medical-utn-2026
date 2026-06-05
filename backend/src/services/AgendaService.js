@@ -1,5 +1,7 @@
 import {Agenda} from '../domain/Agenda.js';
 import {addDays} from 'date-fns';
+import {BadRequestError, NotFoundError} from "../error/AppError.js";
+import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 
 export class AgendaService {
     constructor({medicoRepository, turnoRepository}) {
@@ -9,7 +11,7 @@ export class AgendaService {
 
     async regenerarAgenda({medicoId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`El médico con id: ${medicoId} no fue encontrado`);
+        if (!medico) throw new NotFoundError(`No se encontró un médico con id: ${medicoId}`);
 
         const fechaDesde = new Date();
         const fechaHasta = addDays(fechaDesde, 30);
@@ -23,7 +25,10 @@ export class AgendaService {
         agenda.refrescarTurnos();
 
         const idsTurnosValidos = agenda.turnos.map(t => t._id?.toString()).filter(id => id);
-        const turnosAEliminar = turnosFuturos.filter(t => !idsTurnosValidos.includes(t._id?.toString()));
+        const turnosAEliminar = turnosFuturos.filter(t =>
+            t.estado === EstadoTurno.DISPONIBLE.nombre && // para que no modifique aquellos futuros ya reservados
+            !idsTurnosValidos.includes(t._id?.toString())
+        );
 
         if (turnosAEliminar.length > 0) {
             const idsAEliminar = turnosAEliminar.map(t => t._id);
@@ -49,7 +54,7 @@ export class AgendaService {
 
     async generarTurnosParaMedico({medicoId, fechaDesde, fechaHasta}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`El médico con id: ${medicoId} no fue encontrado`);
+        if (!medico) throw new NotFoundError(`No se encontró un médico con id: ${medicoId}`);
 
         const turnosExistentes = await this.turnoRepository.findFuturosByMedico(medicoId, fechaDesde);
 
@@ -75,10 +80,10 @@ export class AgendaService {
     // TODO: chequear que esta implementación sea correcta
     async modificarDisponibilidad({medicoId, nuevasDisponibilidades}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`El médico con id: ${medicoId} no fue encontrado`);
+        if (!medico) throw new NotFoundError(`No se encontró un médico con id: ${medicoId}`);
 
         // Actualizamos disponibilidades
-        if (!Array.isArray(nuevasDisponibilidades)) throw new Error(`Las disponibilidades deben enviarse como array, se recibió: ${nuevasDisponibilidades} `);
+        if (!Array.isArray(nuevasDisponibilidades)) throw new BadRequestError(`Las disponibilidades deben enviarse como array, se recibió: ${typeof nuevasDisponibilidades} `);
 
         medico.disponibilidades = nuevasDisponibilidades;
         await this.medicoRepository.save(medico); //"reescribimos" al medico que ya teníamos con sus nuevas disponibilidades
