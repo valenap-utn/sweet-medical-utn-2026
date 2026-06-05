@@ -31,7 +31,7 @@ describe("AgendaService - Pruebas de Servicio", () => {
             _id: "medico-123",
             sedes: [{ _id: "sede-1" }],
             especialidades: [
-                { nombre: "Pediatría", duracionTurnoEnMins: 30, costoConsulta: 4000 }
+                { nombre: "Pediatría", duracionTurnoEnMins: 30, costo: 4000 }
             ],
             practicas: [],
             disponibilidades: [

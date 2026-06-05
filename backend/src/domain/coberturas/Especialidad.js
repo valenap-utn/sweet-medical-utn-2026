@@ -4,21 +4,21 @@ export class Especialidad {
     id;
     nombre;
     duracionTurnoEnMins;
-    costoConsulta;
+    costo;
 
-    constructor(id, nombre, duracionTurnoEnMins, costoConsulta) {
-        this.validarParametros(id, nombre, duracionTurnoEnMins, costoConsulta);
+    constructor(id, nombre, duracionTurnoEnMins, costo) {
+        this.validarParametros(id, nombre, duracionTurnoEnMins, costo);
         this.id = id;
         this.nombre = nombre;
         this.duracionTurnoEnMins = duracionTurnoEnMins;
-        this.costoConsulta = costoConsulta;
+        this.costo = costo;
     }
 
-    validarParametros(id, nombre, duracionTurnoEnMins, costoConsulta) {
-        if ([id, nombre, duracionTurnoEnMins, costoConsulta].some(v => !v)) {
+    validarParametros(id, nombre, duracionTurnoEnMins, costo) {
+        if ([id, nombre, duracionTurnoEnMins, costo].some(v => !v)) {
             throw new EspecialidadInvalida(
                 `La especialidad necesita id, nombre, duracion en minutos del turno, costo de la consulta.\n` +
-                `Se recibió id: ${id}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costoConsulta}`
+                `Se recibió id: ${id}, nombre: ${nombre}, duracion: ${duracionTurnoEnMins}, costo: ${costo}`
             );
         }
     }
@@ -32,6 +32,6 @@ export class Especialidad {
     }
 
     establecerNuevoCosto(nuevoCosto) {
-        if (nuevoCosto !== undefined) this.costoConsulta = nuevoCosto;
+        if (nuevoCosto !== undefined) this.costo = nuevoCosto;
     }
 }

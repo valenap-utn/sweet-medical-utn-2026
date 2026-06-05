@@ -131,7 +131,7 @@ export class Agenda {
     crearInstanciaTurno(bloque, servicio) {
         const esPractica = servicio.codigo !== undefined;
         const tipoServicio = esPractica ? TipoServicio.PRACTICA : TipoServicio.ESPECIALIDAD;
-        const costo = esPractica ? servicio.costo : servicio.costoConsulta;
+        const costo = servicio.costo;
 
         return new Turno({
             medico: this.medico,

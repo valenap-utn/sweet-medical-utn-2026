@@ -45,7 +45,7 @@ describe("MedicoService tests", () => {
         _id: "esp-1",
         nombre: "Cardiología",
         duracionTurnoEnMins: 30,
-        costoConsulta: 10000,
+        costo: 10000,
         ...overrides,
     });
 

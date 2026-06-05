@@ -139,7 +139,7 @@ export class PacienteService {
         const servicio = turno.especialidad ?? turno.practica;
         if (!servicio) throw new ConflictError(`El turno ${turno._id} no tiene especialidad ni práctica asociada.`);
 
-        const costoBase = servicio.costoConsulta ?? servicio.costo ?? 0;
+        const costoBase = servicio.costo ?? 0;
 
         if (!paciente.plan) return costoBase;
 

@@ -86,7 +86,7 @@ export class TurnoService {
         const servicio = turno.especialidad ?? turno.practica;
         if (!servicio) return 0;
 
-        const costoBase = servicio.costoConsulta ?? servicio.costo ?? 0;
+        const costoBase = servicio.costo ?? 0;
 
         if (cobertura === NivelCobertura.TOTAL) return 0;
         if (cobertura === NivelCobertura.PARCIAL) return costoBase * 0.5;

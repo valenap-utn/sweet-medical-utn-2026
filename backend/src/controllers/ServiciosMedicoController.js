@@ -10,14 +10,14 @@ export class ServiciosMedicoController {
             const {
                 nombre,
                 duracionTurnoEnMins,
-                costoConsulta
+                costo
             } = req.body;
 
             const especialidad =
                 await this.serviciosMedicoService.crearEspecialidad({
                     nombre,
                     duracionTurnoEnMins,
-                    costoConsulta
+                    costo
                 });
 
             res.status(201).json({
@@ -58,7 +58,7 @@ export class ServiciosMedicoController {
             const {
                 nombre,
                 duracionTurnoEnMins,
-                costoConsulta
+                costo
             } = req.body;
 
             const especialidad =
@@ -67,7 +67,7 @@ export class ServiciosMedicoController {
                     {
                         nombre,
                         duracionTurnoEnMins,
-                        costoConsulta
+                        costo
                     }
                 );
 
