@@ -79,7 +79,7 @@ describe('PacienteService tests', () => {
                 pacienteId: "paciente-inexistente",
                 turnoId: turno._id,
             })
-        ).rejects.toThrow("Paciente no encontrado.")
+        ).rejects.toThrow("No se encontró al paciente con id: paciente-inexistente.")
     });
 
     test("NO reserva un turno si el TURNO NO EXISTE", async () => {
@@ -93,7 +93,7 @@ describe('PacienteService tests', () => {
                 pacienteId: paciente._id,
                 turnoId: "turno-inexistente",
             })
-        ).rejects.toThrow(("Turno no encontrado."));
+        ).rejects.toThrow(("No se encontró el turno con id: turno-inexistente."));
     });
 
     test("NO reserva un turno SI NO ESTÁ DISPONIBLE", async () => {
@@ -107,7 +107,7 @@ describe('PacienteService tests', () => {
                 pacienteId: paciente._id,
                 turnoId: turno._id,
             })
-        ).rejects.toThrow("El turno no está disponible.");
+        ).rejects.toThrow("El turno con id: turno-1 no puede reservarse porque su estado actual es Reservado.");
     });
 
     test("obtiene historial de turnos del paciente", async () => {
@@ -167,7 +167,7 @@ describe('PacienteService tests', () => {
                 turnoId: "turno-1",
                 motivo: "No puedo asistir",
             })
-        ).rejects.toThrow("El turno no pertenece al paciente.");
+        ).rejects.toThrow("El turno con id: paciente-1 no pertenece al paciente paciente-1.");
     });
 
     test("solicita cambio de fecha de un turno", async () => {
