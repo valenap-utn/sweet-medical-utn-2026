@@ -1,15 +1,15 @@
-import { Agenda } from '../domain/Agenda.js';
-import { addDays } from 'date-fns';
+import {Agenda} from '../domain/Agenda.js';
+import {addDays} from 'date-fns';
 
 export class AgendaService {
-    constructor({ medicoRepository, turnoRepository }) {
+    constructor({medicoRepository, turnoRepository}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
     }
 
-    async regenerarAgenda({ medicoId }) {
+    async regenerarAgenda({medicoId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error("Médico no encontrado");
+        if (!medico) throw new Error(`El médico con id: ${medicoId} no fue encontrado`);
 
         const fechaDesde = new Date();
         const fechaHasta = addDays(fechaDesde, 30);
@@ -47,9 +47,9 @@ export class AgendaService {
         };
     }
 
-    async generarTurnosParaMedico({ medicoId, fechaDesde, fechaHasta }) {
+    async generarTurnosParaMedico({medicoId, fechaDesde, fechaHasta}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error("Médico no encontrado");
+        if (!medico) throw new Error(`El médico con id: ${medicoId} no fue encontrado`);
 
         const turnosExistentes = await this.turnoRepository.findFuturosByMedico(medicoId, fechaDesde);
 
@@ -70,5 +70,20 @@ export class AgendaService {
             mensaje: "Turnos generados exitosamente.",
             turnosGenerados: nuevosTurnos.length
         };
+    }
+
+    // TODO: chequear que esta implementación sea correcta
+    async modificarDisponibilidad({medicoId, nuevasDisponibilidades}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new Error(`El médico con id: ${medicoId} no fue encontrado`);
+
+        // Actualizamos disponibilidades
+        if (!Array.isArray(nuevasDisponibilidades)) throw new Error(`Las disponibilidades deben enviarse como array, se recibió: ${nuevasDisponibilidades} `);
+
+        medico.disponibilidades = nuevasDisponibilidades;
+        await this.medicoRepository.save(medico); //"reescribimos" al medico que ya teníamos con sus nuevas disponibilidades
+
+        // Regeneramos agenda futura
+        return await this.regenerarAgenda({medicoId});
     }
 }

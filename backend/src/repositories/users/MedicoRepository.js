@@ -19,4 +19,9 @@ export class MedicoRepository {
             .populate("practicas")
             .populate("sedes");
     }
+
+    // Agrego este métod0 para poder actualizar al médico
+    async save(medico) {
+        return await medico.save();
+    }
 }
