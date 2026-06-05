@@ -1,6 +1,7 @@
 import {isValid, parseISO} from "date-fns";
 import {NivelCobertura} from "../domain/enums/NivelCobertura.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
+import {BadRequestError, NotFoundError} from "../error/AppError.js";
 
 export class TurnoService {
     constructor(turnoRepository, pacienteRepository) {
@@ -21,16 +22,16 @@ export class TurnoService {
 
     // Busca turnos dispo. y calcula el costo según el plan del paciente
     async buscarDisponibles({pacienteId, filtros}) {
-        if (!pacienteId) throw new Error("Debe indicar pacienteId.")
+        if (!pacienteId) throw new BadRequestError("Debe indicar pacienteId.")
 
         const paciente = await this.pacienteRepository.findById(pacienteId);
-        if (!paciente) throw new Error("Paciente no encontrado.");
+        if (!paciente) throw new NotFoundError(`No se encontró el paciente con id ${pacienteId}.`);
 
         const fechaDesde = filtros.fechaDesde ? parseISO(filtros.fechaDesde) : undefined;
         const fechaHasta = filtros.fechaHasta ? parseISO(filtros.fechaHasta) : undefined;
 
-        if (fechaDesde && !isValid(fechaDesde)) throw new Error("fechaDesde no es válida.");
-        if (fechaHasta && !isValid(fechaHasta)) throw new Error("fechaHasta no es válida.");
+        if (fechaDesde && !isValid(fechaDesde)) throw new BadRequestError(`La fechaDesde no es válida: ${filtros.fechaDesde}.`);
+        if (fechaHasta && !isValid(fechaHasta)) throw new BadRequestError(`La fechaHasta no es válida: ${filtros.fechaHasta}.`);
 
         const resultado = await this.turnoRepository.buscarDisponibles({
             ...filtros,
@@ -67,7 +68,7 @@ export class TurnoService {
 
     // Devuelve opciones de servicios (para desplegables del front)
     async obtenerOpcionesServicio({tipoServicio, sedeId}) {
-        if (!tipoServicio) throw new Error("Debe indicar tipoServicio.");
+        if (!tipoServicio) throw new BadRequestError("Debe indicar tipoServicio.");
         return await this.turnoRepository.obtenerOpcionesServicio({tipoServicio, sedeId});
     }
 
