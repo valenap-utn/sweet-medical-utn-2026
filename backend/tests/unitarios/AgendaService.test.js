@@ -50,7 +50,7 @@ describe("AgendaService - Pruebas de Servicio", () => {
 
             await expect(
                 service.regenerarAgenda({ medicoId: "inexistente" })
-            ).rejects.toThrow("Médico no encontrado");
+            ).rejects.toThrow("No se encontró un médico con id: inexistente");
         });
 
         test("debe procesar, eliminar obsoletos e insertar nuevos turnos exitosamente", async () => {
