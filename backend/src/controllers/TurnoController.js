@@ -12,16 +12,9 @@ export class TurnoController {
         }
     }
 
-    buscarDisponibles = async (req, res, next) => {
+    buscarTurnosDisponibles = async (req, res, next) => {
         try {
-            // Esto sería por ej.: /api/turnos/disponibles?pacienteId=1&sedeId=2&tipoServicio=PRACTICA
-            const {pacienteId, ...filtros} = req.query
-
-            const resultado = await this.turnoService.buscarDisponibles({
-                pacienteId,
-                filtros
-            });
-
+            const resultado = await this.turnoService.buscarTurnosDisponibles(req.query);
             res.status(200).json(resultado);
         } catch (err) {
             next(err);

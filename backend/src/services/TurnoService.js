@@ -20,12 +20,8 @@ export class TurnoService {
         });
     }
 
-    // Busca turnos dispo. y calcula el costo según el plan del paciente
-    async buscarDisponibles({pacienteId, filtros}) {
-        if (!pacienteId) throw new BadRequestError("Debe indicar pacienteId.")
-
-        const paciente = await this.pacienteRepository.findById(pacienteId);
-        if (!paciente) throw new NotFoundError(`No se encontró el paciente con id ${pacienteId}.`);
+    // Busca turnos disponibles según filtros
+    async buscarTurnosDisponibles(filtros) {
 
         const fechaDesde = filtros.fechaDesde ? parseISO(filtros.fechaDesde) : undefined;
         const fechaHasta = filtros.fechaHasta ? parseISO(filtros.fechaHasta) : undefined;
@@ -33,31 +29,43 @@ export class TurnoService {
         if (fechaDesde && !isValid(fechaDesde)) throw new BadRequestError(`La fechaDesde no es válida: ${filtros.fechaDesde}.`);
         if (fechaHasta && !isValid(fechaHasta)) throw new BadRequestError(`La fechaHasta no es válida: ${filtros.fechaHasta}.`);
 
-        const resultado = await this.turnoRepository.buscarDisponibles({
+        return await this.turnoRepository.buscarTurnosDisponibles({
             ...filtros,
             fechaDesde,
             fechaHasta,
         });
+    }
+
+    async obtenerCotizacionTurno({turnoId, pacienteId}) {
+        // Buscamos el turno
+        if (!turnoId) throw new BadRequestError("Debe indicar turnoId.")
+        const turno = await this.turnoRepository.findById(turnoId);
+        if (!turno) throw new NotFoundError(`No se encontró el turno con id ${turnoId}.`);
+
+        // Buscamos al paciente
+        if (!pacienteId) throw new BadRequestError("Debe indicar pacienteId.")
+        const paciente = await this.pacienteRepository.findById(pacienteId);
+        if (!paciente) throw new NotFoundError(`No se encontró el paciente con id ${pacienteId}.`);
+
+        // Calculamos cobertura
+
+        const cobertura = this.obtenerCoberturaPaciente(paciente, turno);
+        const costoEstimado = this.calcularCostoPaciente({turno, cobertura});
 
         return {
-            ...resultado,
-            turnos: resultado.turnos.map((turno) => {
-                const cobertura = this.obtenerCoberturaPaciente(paciente, turno);
-
-                return {
-                    id: turno.id,
-                    medico: turno.medico,
-                    sede: turno.sede,
-                    tipoServicio: turno.tipoServicio,
-                    especialidad: turno.especialidad,
-                    practica: turno.practica,
-                    fechaHoraInicio: turno.fechaHoraInicio,
-                    fechaHoraFin: turno.fechaHoraFin,
-                    estado: turno.estado,
-                    cobertura: cobertura.nombre,
-                    costo: this.calcularCostoPaciente({turno, cobertura}),
-                };
-            }),
+            turno: {
+                id: turno.id,
+                medico: turno.medico,
+                sede: turno.sede,
+                tipoServicio: turno.tipoServicio,
+                especialidad: turno.especialidad,
+                practica: turno.practica,
+                fechaHoraInicio: turno.fechaHoraInicio,
+                fechaHoraFin: turno.fechaHoraFin,
+                estado: turno.estado,
+            },
+            cobertura: cobertura.nombre,
+            costo: costoEstimado,
         };
     }
 

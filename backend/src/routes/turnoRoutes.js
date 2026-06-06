@@ -8,11 +8,15 @@ export default function turnoRoutes(getController) {
     // Endpoints
     router.post("/", turnoController.crearTurno);
 
-    router.get("/opciones-servicio", turnoController.obtenerOpcionesServicio);
+    router.get("/disponibles", turnoController.buscarTurnosDisponibles);
 
-    router.get("/medicos-disponibles", turnoController.obtenerMedicosDisponibles);
+    router.get("/:turnoId/cotizacion", turnoController.obtenerCotizacionTurno);
 
-    router.get("/disponibles", turnoController.buscarDisponibles);
+    router.patch("/:turnoId/reserva", turnoController.reservarTurno);
+
+    router.patch("/:turnoId/cancelacion", turnoController.cancelarTurno);
+
+    router.patch("/:turnoId/realizacion", turnoController.marcarTurnoRealizado)
 
     return router;
 }

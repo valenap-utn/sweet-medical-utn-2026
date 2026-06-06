@@ -100,11 +100,11 @@ export class MedicoService {
     }
 
     async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
+        return await this.turnoRepository.buscarTurnosDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
     }
 
     async consultarDisponibilidadPractica({medicoId, practicaId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
+        return await this.turnoRepository.buscarTurnosDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
     }
 
     async agregarDisponibilidad({medicoId, disponibilidad}) {

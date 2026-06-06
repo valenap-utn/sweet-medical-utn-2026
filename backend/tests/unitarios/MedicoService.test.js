@@ -67,7 +67,7 @@ describe("MedicoService tests", () => {
             findById: jest.fn(),
             save: jest.fn(),
             findByPacienteId: jest.fn(),
-            buscarDisponibles: jest.fn(),
+            buscarTurnosDisponibles: jest.fn(),
         };
 
         especialidadRepository = {
@@ -460,7 +460,7 @@ describe("MedicoService tests", () => {
             especialidadId: "esp-1",
         });
 
-        expect(turnoRepository.buscarDisponibles).toHaveBeenCalledWith({
+        expect(turnoRepository.buscarTurnosDisponibles).toHaveBeenCalledWith({
             medicoId: medico._id,
             tipoServicio: TipoServicio.ESPECIALIDAD,
             especialidadId: "esp-1",
@@ -475,7 +475,7 @@ describe("MedicoService tests", () => {
             practicaId: "prac-1",
         });
 
-        expect(turnoRepository.buscarDisponibles).toHaveBeenCalledWith({
+        expect(turnoRepository.buscarTurnosDisponibles).toHaveBeenCalledWith({
             medicoId: medico._id,
             tipoServicio: TipoServicio.PRACTICA,
             practicaId: "prac-1",

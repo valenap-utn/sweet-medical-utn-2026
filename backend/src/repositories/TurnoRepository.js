@@ -41,19 +41,19 @@ export class TurnoRepository {
     // ** query object: objeto que se va construyendo dinámicamente para consultar Mongo
 
     // Búsqueda de Turnos DISPONIBLES
-    async buscarDisponibles({
-                                medicoId,
-                                sedeId,
-                                tipoServicio,
-                                especialidadId,
-                                practicaId,
-                                fechaDesde,
-                                fechaHasta,
-                                page = 1,
-                                limit = 10,
-                                sortBy = "fechaHoraInicio",
-                                sortOrder = "asc"
-                            }) {
+    async buscarTurnosDisponibles({
+                                      medicoId,
+                                      sedeId,
+                                      tipoServicio,
+                                      especialidadId,
+                                      practicaId,
+                                      fechaDesde,
+                                      fechaHasta,
+                                      page = 1,
+                                      limit = 10,
+                                      sortBy = "fechaHoraInicio",
+                                      sortOrder = "asc"
+                                  }) {
 
         const filtros = { // query object ** o filtro de búsqueda
             estado: EstadoTurno.DISPONIBLE.nombre,
