@@ -12,7 +12,7 @@ export class MedicoService {
         this.agendaService = agendaService;
     }
 
-    async cancelarTurno({medicoId, turnoId, motivo}) {
+    /*async cancelarTurno({medicoId, turnoId, motivo}) {
         if (!motivo) throw new BadRequestError("Debe indicar un motivo para cancelar el turno");
 
         const turno = await this.turnoRepository.findById(turnoId);
@@ -47,7 +47,7 @@ export class MedicoService {
             turnoId: turno._id,
         })
         return await this.turnoRepository.save(turno);
-    }
+    }*/
 
     async obtenerHistorial({pacienteId}) {
         return await this.turnoRepository.findByPacienteId(pacienteId);

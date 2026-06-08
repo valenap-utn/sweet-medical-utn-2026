@@ -12,7 +12,7 @@ export class PacienteService {
     /* ===== ESTADOS del TURNO ====================================================================================== */
 
     // EstadoTurno.RESERVADO.nombre
-    async reservarTurno({pacienteId, turnoId}) {
+    /*async reservarTurno({pacienteId, turnoId}) {
         // Buscamos al paciente y al turno indicados
         const paciente = await this.pacienteRepository.findById(pacienteId);
         if (!paciente) throw new NotFoundError(`No se encontró al paciente con id: ${pacienteId}.`);
@@ -64,7 +64,7 @@ export class PacienteService {
         })
 
         return await this.turnoRepository.save(turno);
-    }
+    }*/
 
     // EstadoTurno.CONFIRMADO.nombre
     async confirmarCambioFechaPropuestoPorMedico({pacienteId, turnoId}) {

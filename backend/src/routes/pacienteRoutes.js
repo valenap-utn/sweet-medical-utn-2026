@@ -8,9 +8,9 @@ export default function pacienteRoutes(getController) {
     // Endpoints
     router.get('/:pacienteId/turnos', pacienteController.obtenerHistorial);
 
-    router.post('/:pacienteId/turnos/:turnoId/reservar', pacienteController.reservarTurno)
+    // router.post('/:pacienteId/turnos/:turnoId/reservar', pacienteController.reservarTurno)
 
-    router.patch('/:pacienteId/turnos/:turnoId/cancelar', pacienteController.cancelarTurno);
+    // router.patch('/:pacienteId/turnos/:turnoId/cancelar', pacienteController.cancelarTurno);
 
     router.patch('/:pacienteId/turnos/:turnoId/solicitar-cambio', pacienteController.solicitarCambioFecha);
 
