@@ -17,6 +17,13 @@ export class BadRequestError extends AppError {
     }
 }
 
+// 401 - Unauthorized - Cuando el cliente no está autorizado
+export class UnauthorizedError extends AppError {
+    constructor(message) {
+        super(message, 401);
+    }
+}
+
 // 403 - Forbidden - Cuando existe pero no tiene permiso
 export class ForbiddenError extends AppError {
     constructor(message) {

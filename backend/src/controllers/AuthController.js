@@ -21,7 +21,7 @@ export class AuthController {
     refresh = async (req, res, next) => {
         try {
             const {accessToken} = this.authService.refresh(req.cookies?.refreshToken);
-            res.cookie("accesToken", accessToken, this.accessCookieOptions());
+            res.cookie("accessToken", accessToken, this.accessCookieOptions());
             res.status(200).json({
                 mensaje: "Access Token renovado."
             });
@@ -32,7 +32,7 @@ export class AuthController {
 
     logout = async (req, res, next) => {
         try {
-            res.clearCookie("accesToken");
+            res.clearCookie("accessToken");
             res.clearCookie("refreshToken");
 
             res.status(200).json({mensaje: "Logout exitoso!"});
@@ -50,7 +50,7 @@ export class AuthController {
     };
 
     setAuthCookies(res, {accessToken, refreshToken}) {
-        res.cookie("accesToken", accessToken, this.accessCookireOptions());
+        res.cookie("accessToken", accessToken, this.accessCookieOptions());
         res.cookie("refreshToken", refreshToken, {
             ...this.baseCookieOptions(),
             maxAge: 7 * 24 * 60 * 60 * 1000,
