@@ -21,6 +21,67 @@ export class TurnoController {
         }
     };
 
+
+    reservarTurno = async (req, res, next) => {
+        try {
+            const {turnoId} = req.params;
+
+            const turno = await this.turnoService.reservarTurno({
+                turnoId: turnoId,
+                usuario: req.user,
+            });
+
+            res.status(200).json(turno);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    cancelarTurno = async (req, res, next) => {
+        try {
+            const {turnoId} = req.params;
+            const {motivo} = req.body;
+
+            const turno = await this.turnoService.cancelarTurno({
+                turnoId: turnoId,
+                usuario: req.user,
+                motivo: motivo,
+            });
+
+            res.status(200).json(turno);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    marcarTurnoRealizado = async (req, res, next) => {
+        try{
+            const {turnoId} = req.params;
+            const turno = await this.turnoService.marcarTurnoRealizado({
+                turnoId: turnoId,
+                usuario: req.user,
+            });
+            res.status(200).json(turno);
+        }catch(error){
+            next(error);
+        }
+    }
+
+    obtenerCotizacionTurno = async (req, res, next) => {
+        try{
+            const {turnoId} = req.params;
+            const  cotizacion = await this.turnoService.obtenerCotizacionTurno({
+                turnoId: turnoId,
+                usuario: req.user,
+            });
+            res.status(200).json(cotizacion);
+        }catch(error){
+            next(error);
+        }
+    }
+
+    // ------ Estos los debería mover a otro lado ----------------------------------------------------------------------
+
     obtenerMedicosDisponibles = async (req, res, next) => {
         try {
             const medicos = await this.turnoService.obtenerMedicosDisponibles(req.query);
