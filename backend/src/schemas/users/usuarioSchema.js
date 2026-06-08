@@ -6,6 +6,7 @@ const UsuarioSchema = new mongoose.Schema({
     nombreUsuario: {
         type: String,
         required: true,
+        unique: true,
         trim: true,
         validate: {
             validator: function(value) {
