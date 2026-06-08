@@ -21,4 +21,11 @@ export class PacienteRepository {
     async findAll() {
         return await this.model.find();
     }
+
+    // Para encontrar pacientes por ID de Usuario
+    async findByUsuarioId(usuarioId) {
+        return await this.model
+            .findOne({usuario: usuarioId})
+            .populate("usuario");
+    }
 }

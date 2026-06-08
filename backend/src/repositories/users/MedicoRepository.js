@@ -24,4 +24,11 @@ export class MedicoRepository {
     async save(medico) {
         return await medico.save();
     }
+
+    // Para encontrar medicos por ID de Usuario
+    async findByUsuarioId(usuarioId) {
+        return await this.model
+            .findOne({usuario: usuarioId})
+            .populate("usuario");
+    }
 }
