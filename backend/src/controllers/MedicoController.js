@@ -3,36 +3,7 @@ export class MedicoController {
         this.medicoService = medicoService;
     }
 
-    cancelarTurno = async (req, res, next) => {
-        try {
-            const {medicoId, turnoId} = req.params;
-            const {motivo} = req.body;
 
-            const turno = await this.medicoService.cancelarTurno({
-                medicoId,
-                turnoId,
-                motivo
-            });
-
-            res.status(200).json(turno);
-        } catch (err) {
-            next(err);
-        }
-    }
-    marcarTurnoRealizado = async (req, res, next) => {
-        try {
-            const {medicoId, turnoId} = req.params;
-
-            const turno = await this.medicoService.marcarTurnoRealizado({
-                medicoId,
-                turnoId
-            });
-
-            res.status(200).json(turno);
-        } catch (err) {
-            next(err);
-        }
-    };
     obtenerHistorial = async (req, res, next) => {
         try {
             const {pacienteId} = req.params;
@@ -47,37 +18,6 @@ export class MedicoController {
         }
     };
 
-    proponerCambioFecha = async (req, res, next) => {
-        try {
-            const {medicoId, turnoId} = req.params;
-            const {nuevaFechaHora} = req.body;
-
-            const turno = await this.medicoService.proponerCambioFecha({
-                medicoId,
-                turnoId,
-                nuevaFechaHora
-            });
-
-            res.status(200).json(turno);
-        } catch (err) {
-            next(err);
-        }
-    };
-
-    confirmarCambioFechaSolicitadoPorPaciente = async (req, res, next) => {
-        try {
-            const {medicoId, turnoId} = req.params;
-
-            const turno = await this.medicoService.confirmarCambioFechaSolicitadoPorPaciente({
-                medicoId,
-                turnoId
-            });
-
-            res.status(200).json(turno);
-        } catch (err) {
-            next(err);
-        }
-    };
 
     consultarDisponibilidadEspecialidad = async (req, res, next) => {
         try {
