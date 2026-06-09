@@ -21,10 +21,10 @@ export class MedicoController {
 
     consultarDisponibilidadEspecialidad = async (req, res, next) => {
         try {
-            const {medicoId, especialidadId} = req.params;
+            const {especialidadId} = req.params;
 
             const disponibilidad = await this.medicoService.consultarDisponibilidadEspecialidad({
-                medicoId,
+                medicoId: req.user.medicoId,
                 especialidadId
             });
 
@@ -36,10 +36,10 @@ export class MedicoController {
 
     consultarDisponibilidadPractica = async (req, res, next) => {
         try {
-            const {medicoId, practicaId} = req.params;
+            const {practicaId} = req.params;
 
             const disponibilidad = await this.medicoService.consultarDisponibilidadPractica({
-                medicoId,
+                medicoId: req.user.medicoId,
                 practicaId
             });
 
@@ -50,14 +50,12 @@ export class MedicoController {
     };
 
 
-
     agregarDisponibilidad = async (req, res, next) => {
         try {
-            const {medicoId} = req.params;
             const {disponibilidad} = req.body;
 
             const medico = await this.medicoService.agregarDisponibilidad({
-                medicoId,
+                medicoId: req.user.medicoId,
                 disponibilidad
             });
 
@@ -69,11 +67,10 @@ export class MedicoController {
 
     quitarDisponibilidad = async (req, res, next) => {
         try {
-            const {medicoId} = req.params;
             const {disponibilidad} = req.body;
 
             const medico = await this.medicoService.quitarDisponibilidad({
-                medicoId,
+                medicoId: req.user.medicoId,
                 disponibilidad
             });
 
@@ -85,10 +82,10 @@ export class MedicoController {
 
     agregarPractica = async (req, res, next) => {
         try {
-            const {medicoId, practicaId} = req.params;
+            const {practicaId} = req.params;
 
             const medico = await this.medicoService.agregarPractica({
-                medicoId,
+                medicoId: req.user.medicoId,
                 practicaId
             });
 
@@ -100,10 +97,10 @@ export class MedicoController {
 
     quitarPractica = async (req, res, next) => {
         try {
-            const {medicoId, practicaId} = req.params;
+            const {practicaId} = req.params;
 
             const medico = await this.medicoService.quitarPractica({
-                medicoId,
+                medicoId: req.user.medicoId,
                 practicaId
             });
 
@@ -115,10 +112,10 @@ export class MedicoController {
 
     agregarEspecialidad = async (req, res, next) => {
         try {
-            const {medicoId, especialidadId} = req.params;
+            const {especialidadId} = req.params;
 
             const medico = await this.medicoService.agregarEspecialidad({
-                medicoId,
+                medicoId: req.user.medicoId,
                 especialidadId
             });
 
@@ -130,10 +127,10 @@ export class MedicoController {
 
     quitarEspecialidad = async (req, res, next) => {
         try {
-            const {medicoId, especialidadId} = req.params;
+            const {especialidadId} = req.params;
 
             const medico = await this.medicoService.quitarEspecialidad({
-                medicoId,
+                medicoId: req.user.medicoId,
                 especialidadId
             });
 
