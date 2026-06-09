@@ -25,4 +25,8 @@ export class EspecialidadRepository {
         return await especialidad.save();
     }
 
+    async findaAll() {
+        return await this.model.find({});
+    }
+
 }

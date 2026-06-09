@@ -6,13 +6,18 @@ import pacienteRoutes from "./pacienteRoutes.js";
 import turnoRoutes from "./turnoRoutes.js";
 import planRoutes from "./planRoutes.js";
 import notificacionRoutes from "./notificacionRoutes.js";
+import authRoutes from "./authRoutes.js";
+import especialidadRoutes from "./servicios/especialidadRoutes.js";
+import practicaRoutes from "./servicios/practicaRoutes.js";
 
 // Acá agrupamos las rutas principales !
 export default function createRouter(getController) {
     const router = express.Router();
 
     router.use("/healthcheck", healthRoutes);
-    // router.use("/plan", planRoutes);
+
+    const authRouter = authRoutes(getController);
+    router.use("/auth", authRouter);
 
     const medicoRouter = medicoRoutes(getController);
     router.use("/medicos", medicoRouter);
@@ -31,6 +36,12 @@ export default function createRouter(getController) {
 
     const notificacionRouter = notificacionRoutes(getController);
     router.use("/notificaciones", notificacionRouter);
+
+    const especialidadRouter = especialidadRoutes(getController);
+    router.use('/especialidades', especialidadRouter);
+
+    const practicaRouter = practicaRoutes(getController);
+    router.use('/practicas', practicaRouter);
 
     return router;
 }

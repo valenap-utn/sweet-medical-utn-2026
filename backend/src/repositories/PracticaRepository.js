@@ -24,4 +24,8 @@ export class PracticaRepository {
     async save(practica) {
         return await practica.save();
     }
+
+    async findAll() {
+        return await this.model.find({});
+    }
 }
