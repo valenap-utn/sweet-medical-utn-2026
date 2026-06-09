@@ -5,8 +5,9 @@ export class PacienteController {
 
     obtenerHistorial = async (req, res, next) => {
         try {
-            const {pacienteId} = req.params;
-            const turnos = await this.pacienteService.obtenerHistorial({pacienteId});
+            const turnos = await this.pacienteService.obtenerHistorial({
+                pacienteId: req.user.pacienteId,
+            });
             res.status(200).json(turnos);
         } catch (e) {
             next(e);
