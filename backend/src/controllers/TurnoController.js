@@ -21,7 +21,7 @@ export class TurnoController {
         }
     };
 
-
+    // Acciones de pacientes
     reservarTurno = async (req, res, next) => {
         try {
             const {turnoId} = req.params;
@@ -37,6 +37,23 @@ export class TurnoController {
         }
     }
 
+    solicitarCambioFecha = async (req, res, next) => {
+        try {
+            const {turnoId} = req.params;
+            const {nuevaFechaHora} = req.body;
+
+            const turno = await this.turnoService.solicitarCambioFecha({
+                turnoId: turnoId,
+                usuario: req.user,
+                nuevaFechaHora,
+            })
+            res.status(200).json(turno);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    // Acciones Generales
     cancelarTurno = async (req, res, next) => {
         try {
             const {turnoId} = req.params;
@@ -54,31 +71,61 @@ export class TurnoController {
         }
     }
 
-    marcarTurnoRealizado = async (req, res, next) => {
-        try{
+    obtenerCotizacionTurno = async (req, res, next) => {
+        try {
             const {turnoId} = req.params;
-            const turno = await this.turnoService.marcarTurnoRealizado({
+            const cotizacion = await this.turnoService.obtenerCotizacionTurno({
                 turnoId: turnoId,
                 usuario: req.user,
             });
+            res.status(200).json(cotizacion);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    confirmarCambioFecha = async (req, res, next) => {
+        try{
+            const {turnoId} = req.params;
+            const turno = await this.turnoService.confirmarCambioFecha({
+                turnoId: turnoId,
+                usuario: req.user,
+            })
             res.status(200).json(turno);
         }catch(error){
             next(error);
         }
     }
 
-    obtenerCotizacionTurno = async (req, res, next) => {
-        try{
+    // Acciones de Médicos
+    marcarTurnoRealizado = async (req, res, next) => {
+        try {
             const {turnoId} = req.params;
-            const  cotizacion = await this.turnoService.obtenerCotizacionTurno({
+            const turno = await this.turnoService.marcarTurnoRealizado({
                 turnoId: turnoId,
                 usuario: req.user,
             });
-            res.status(200).json(cotizacion);
-        }catch(error){
+            res.status(200).json(turno);
+        } catch (error) {
             next(error);
         }
     }
+
+    proponerCambioFecha = async (req, res, next) => {
+        try {
+            const {turnoId} = req.params;
+            const {nuevaFechaHora} = req.body;
+            const turno = await this.turnoService.proponerCambioFecha({
+                turnoId: turnoId,
+                usuario: req.user,
+                nuevaFechaHora,
+            })
+            res.status(200).json(turno);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 
     // ------ Estos los debería mover a otro lado ----------------------------------------------------------------------
 

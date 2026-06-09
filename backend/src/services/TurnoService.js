@@ -95,7 +95,7 @@ export class TurnoService {
     }
 
     // EstadoTurno.CONFIRMADO.nombre
-    async confirmarCambioFechaTurno({turnoId, usuario}) {
+    async confirmarCambioFecha({turnoId, usuario}) {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new NotFoundError(`El turno con id: ${turnoId} no fue encontrado.`);
 

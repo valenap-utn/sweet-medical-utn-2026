@@ -9,15 +9,25 @@ export default function turnoRoutes(getController) {
     // Endpoints
     router.post("/", turnoController.crearTurno);
 
+    // Generales
+    router.patch("/:turnoId/cancelacion", authMiddleware, turnoController.cancelarTurno);
+
     router.get("/disponibles", turnoController.buscarTurnosDisponibles);
 
     router.get("/:turnoId/cotizacion", authMiddleware, turnoController.obtenerCotizacionTurno);
 
+    router.patch("/:turnoId/confirmacion", authMiddleware, turnoController.confirmarCambioFecha);
+
+    // Solo médicos
+    router.patch("/:turnoId/realizacion", authMiddleware, turnoController.marcarTurnoRealizado);
+
+    router.patch("/:turnoId/propuesta-cambio-fecha", authMiddleware, turnoController.proponerCambioFecha);
+
+    // Solo pacientes
     router.patch("/:turnoId/reserva", authMiddleware, turnoController.reservarTurno);
 
-    router.patch("/:turnoId/cancelacion", authMiddleware, turnoController.cancelarTurno);
+    router.patch("/:turnoId/solicitud-cambio-fecha", authMiddleware, turnoController.solicitarCambioFecha);
 
-    router.patch("/:turnoId/realizacion", authMiddleware, turnoController.marcarTurnoRealizado)
 
     return router;
 }
