@@ -8,14 +8,6 @@ export default function medicoRoutes(getController) {
     // Endpoints
     router.get('/:medicoId/pacientes/:pacienteId/turnos', medicoController.obtenerHistorial);
 
-    // router.patch('/:medicoId/turnos/:turnoId/cancelar', medicoController.cancelarTurno);
-
-    // router.patch('/:medicoId/turnos/:turnoId/realizado', medicoController.marcarTurnoRealizado);
-
-    router.patch('/:medicoId/turnos/:turnoId/proponer-cambio', medicoController.proponerCambioFecha);
-
-    router.patch('/:medicoId/turnos/:turnoId/confirmacion', medicoController.confirmarCambioFechaSolicitadoPorPaciente);
-
     router.get('/:medicoId/especialidades/:especialidadId/turnos', medicoController.consultarDisponibilidadEspecialidad);
 
     router.get('/:medicoId/practicas/:practicaId/turnos', medicoController.consultarDisponibilidadPractica);
