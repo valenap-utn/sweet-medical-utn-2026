@@ -9,6 +9,7 @@ import notificacionRoutes from "./notificacionRoutes.js";
 import authRoutes from "./authRoutes.js";
 import especialidadRoutes from "./servicios/especialidadRoutes.js";
 import practicaRoutes from "./servicios/practicaRoutes.js";
+import obraSocialRoutes from "./obraSocialRoutes.js";
 
 // Acá agrupamos las rutas principales !
 export default function createRouter(getController) {
@@ -42,6 +43,9 @@ export default function createRouter(getController) {
 
     const practicaRouter = practicaRoutes(getController);
     router.use('/practicas', practicaRouter);
+
+    const obraSocialRouter = obraSocialRoutes(getController);
+    router.use('/obra-social', obraSocialRouter);
 
     return router;
 }
