@@ -1,12 +1,69 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import {NotFoundError, UnauthorizedError} from "../error/AppError.js";
+import {ConflictError, NotFoundError, UnauthorizedError} from "../error/AppError.js";
 
 export class AuthService {
     constructor(usuarioRepository, pacienteRepository, medicoRepository) {
         this.usuarioRepository = usuarioRepository;
         this.pacienteRepository = pacienteRepository;
         this.medicoRepository = medicoRepository;
+    }
+
+    // Registros
+    // /auth/register/paciente
+    async registrarPaciente({nombreUsuario, password, dni, nombre, obraSocial, plan}) {
+        const existe = await this.usuarioRepository.existsByNombreUsuario(nombreUsuario);
+        if (existe) throw new ConflictError(`El nombre de usuario ${nombreUsuario} ya está en uso.`);
+
+        const passwordHasheada = await bcrypt.hash(password, 10);
+
+        // Creamos el usuario asociado al paciente
+        const usuario = await this.usuarioRepository.create({
+            nombreUsuario,
+            password: passwordHasheada
+        });
+
+        const paciente = await this.pacienteRepository.create({
+            usuario: usuario._id, // se crea la relacion con la entidad Usuario
+            dni: dni,
+            nombre: nombre,
+            obraSocial: obraSocial,
+            plan: plan,
+        });
+
+        return {
+            usuarioId: usuario._id,
+            pacienteId: paciente._id,
+        };
+    }
+
+    // /auth/register/medico
+    async registrarMedico({nombreUsuario, password, nombre, matricula}) {
+        const existe = await this.usuarioRepository.existsByNombreUsuario(nombreUsuario);
+        if (existe) throw new ConflictError(`El nombre de usuario ${nombreUsuario} ya está en uso.`);
+
+        const passwordHasheada = await bcrypt.hash(password, 10);
+
+        // Creamos el usuario asociado al medico
+        const usuario = await this.usuarioRepository.create({
+            nombreUsuario,
+            password: passwordHasheada,
+        });
+
+        const medico = await this.medicoRepository.create({
+            usuario: usuario._id,
+            nombre: nombre,
+            matricula: matricula,
+            especialidades: [],
+            practicas: [],
+            sedes: [],
+            disponibilidades: [],
+        });
+
+        return {
+            usuarioId: usuario._id,
+            medicoId: medico._id,
+        }
     }
 
     // Login

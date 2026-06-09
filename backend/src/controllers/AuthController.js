@@ -3,6 +3,33 @@ export class AuthController {
         this.authService = authService;
     }
 
+    // Registros
+    registrarPaciente = async (req, res, next) => {
+        try{
+            const resultado = await this.authService.registrarPaciente(req.body);
+
+            res.status(201).json({
+                mensaje: "Paciente registrado exitosamente.",
+                ...resultado,
+            });
+        }catch(err){
+            next(err);
+        }
+    }
+
+    registrarMedico = async (req, res, next) => {
+        try{
+            const resultado = await this.authService.registrarMedico(req.body);
+
+            res.status(201).json({
+                mensaje: "Médico registrado exitosamente.",
+                ...resultado,
+            });
+        }catch(err){
+            next(err);
+        }
+    }
+
     login = async (req, res, next) => {
         try {
             const {accessToken, refreshToken, usuario} = await this.authService.login(req.body);

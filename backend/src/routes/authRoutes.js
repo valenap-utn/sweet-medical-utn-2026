@@ -1,8 +1,14 @@
 import express from "express";
 import {authMiddleware} from "../middlewares/authMiddleware.js";
+import {AuthController} from "../controllers/AuthController.js";
 
-export default function authRoutes(authController) {
+export default function authRoutes(getController) {
     const router = express.Router();
+    const authController = getController(AuthController);
+
+    router.post('/register/paciente', authController.registrarPaciente);
+
+    router.post('/register/medico', authController.registrarMedico);
 
     router.post("/login", authController.login);
 
