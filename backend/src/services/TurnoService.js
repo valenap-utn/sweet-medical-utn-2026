@@ -94,6 +94,31 @@ export class TurnoService {
         };
     }
 
+    // EstadoTurno.CONFIRMADO.nombre
+    async confirmarCambioFechaTurno({turnoId, usuario}) {
+        const turno = await this.turnoRepository.findById(turnoId);
+        if (!turno) throw new NotFoundError(`El turno con id: ${turnoId} no fue encontrado.`);
+
+        if (!turno.fechaHoraSolicitada) throw new ConflictError(`El turno con id: ${turno._id} no tiene una propuesta de cambio de fecha pendiente.`);
+
+        this.validarUsuarioPuedeConfirmarCambioFecha({turno, usuario});
+
+        // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
+        turno.fechaHoraInicio = turno.fechaHoraSolicitada;
+
+        // Limpiamos el campo temporal de solicitud
+        turno.fechaHoraSolicitada = null;
+
+        turno.actualizarEstado({
+            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
+            usuario: usuario.usuarioId,
+            motivo: "Cambio de fecha confirmado.",
+            turnoId: turno._id,
+        });
+
+        return await this.turnoRepository.save(turno);
+    }
+
     /* ===== ACCIONES DEL MEDICO sobre turnos ======================================================================= */
 
     // EstadoTurno.REALIZADO.nombre
@@ -138,30 +163,6 @@ export class TurnoService {
         return await this.turnoRepository.save(turno);
     }
 
-    async confirmarCambioFechaSolicitadoPorPaciente({turnoId, usuario}) {
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new NotFoundError(`No se encontró el turno con id: ${turnoId} .`);
-
-        this.validarUsuarioPuedeConfirmarSolicitudCambioFecha({turno, usuario});
-
-        if (!turno.fechaHoraSolicitada) throw new ConflictError(`El turno con id: ${turnoId} no tiene una propuesta de cambio de fecha pendiente.`);
-
-        // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
-        turno.fechaHoraInicio = turno.fechaHoraSolicitada;
-
-        // Limpiamos el campo temporal de solicitud
-        turno.fechaHoraSolicitada = null;
-
-        // El turno se consolida pasando a CONFIRMADO
-        turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
-            usuario: usuario.usuarioId,
-            motivo: "Modificación de fecha confirmada.",
-            turnoId: turnoId
-        });
-        return await this.turnoRepository.save(turno);
-    }
-
     /* ===== ACCIONES DEL PACIENTE sobre turnos ===================================================================== */
 
     // EstadoTurno.RESERVADO.nombre
@@ -182,31 +183,6 @@ export class TurnoService {
             turnoId: turno._id,
         })
 
-        return await this.turnoRepository.save(turno);
-    }
-
-    // EstadoTurno.CONFIRMADO.nombre
-    async confirmarCambioFechaPropuestoPorMedico({turnoId, usuario}) {
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new NotFoundError(`No se encontró el turno con id: ${turnoId}.`);
-
-        this.validarUsuarioPuedeConfirmarPropuestaCambioFecha({turno, usuario});
-
-        if (!turno.fechaHoraSolicitada) throw new ConflictError(`El turno con id: ${turno._id} no tiene una propuesta de cambio de fecha pendiente.`);
-
-        // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
-        turno.fechaHoraInicio = turno.fechaHoraSolicitada;
-
-        // Limpiamos el campo temporal de solicitud
-        turno.fechaHoraSolicitada = null;
-
-        // El turno se consolida pasando a CONFIRMADO
-        turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
-            usuario: usuario.usuarioId,
-            motivo: "El paciente confirmó la propuesta de cambio de fecha del médico.",
-            turnoId: turno._id,
-        });
         return await this.turnoRepository.save(turno);
     }
 
@@ -313,17 +289,13 @@ export class TurnoService {
         if (!esMedicoDelTurno) throw new ForbiddenError(`El usuario no tiene permisos para proponer un cambio de fecha sobre el turno con id: ${turno._id}.`);
     }
 
-    validarUsuarioPuedeConfirmarPropuestaCambioFecha({turno, usuario}) {
+    validarUsuarioPuedeConfirmarCambioFecha({turno, usuario}) {
         const pacienteId = usuario?.pacienteId?.toString();
-        if (!usuario?.pacienteId) throw new ForbiddenError("Solo un paciente puede confirmar una propuesta de cambio de fecha por parte de un médico.");
-        const esPacienteDelTurno = pacienteId && (turno.paciente?.toString() === pacienteId);
-        if (!esPacienteDelTurno) throw new ForbiddenError("El usuario no tiene permisos para confirmar esta propuesta de cambio de fecha.");
-    }
-
-    validarUsuarioPuedeConfirmarSolicitudCambioFecha({turno, usuario}) {
         const medicoId = usuario?.medicoId?.toString();
-        if (!usuario?.medicoId) throw new ForbiddenError("Solo un medico puede confirmar una solicitud de cambio de fecha por parte de un paciente.");
+
+        const esPacienteDelTurno = pacienteId && (turno.paciente?.toString() === pacienteId);
         const esMedicoDelTurno = medicoId && (turno.medico?.toString() === medicoId);
-        if (!esMedicoDelTurno) throw new ForbiddenError("El usuario no tiene permisos para confirmar esta solicitud de cambio de fecha.");
+
+        if (!esPacienteDelTurno && !esMedicoDelTurno) throw new ForbiddenError("El usuario no tiene permisos para confimar este cambio de fecha.");
     }
 }
