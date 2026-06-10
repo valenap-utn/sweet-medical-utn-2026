@@ -20,4 +20,14 @@ export class PracticaController {
             next(err);
         }
     }
+
+    eliminar = async (req, res, next) => {
+        try{
+            const {practicaId} = req.params;
+            const resultado = await this.practicaService.eliminar(practicaId);
+            res.status(200).json(resultado);
+        }catch(err){
+            next(err);
+        }
+    }
 }

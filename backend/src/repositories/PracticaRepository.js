@@ -28,4 +28,8 @@ export class PracticaRepository {
     async findAll() {
         return await this.model.find({});
     }
+
+    async delete(practicaId) {
+        return this.model.findByIdAndDelete(practicaId);
+    }
 }

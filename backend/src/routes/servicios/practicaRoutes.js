@@ -9,5 +9,7 @@ export default function practicaRoutes(getController) {
 
     router.get('/', practicaController.obtenerTodas);
 
+    router.delete('/:practicaId', practicaController.eliminar);
+
     return router;
 }
