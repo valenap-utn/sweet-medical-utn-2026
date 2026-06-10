@@ -49,6 +49,16 @@ export class MedicoController {
         }
     };
 
+    obtenerDisponibilidades = async (req, res, next) => {
+        try {
+            const disponibilidades = await this.medicoService.obtenerDisponibilidades({
+                medicoId: req.user.medicoId,
+            })
+            res.status(200).json(disponibilidades);
+        } catch (err) {
+            next(err);
+        }
+    };
 
     agregarDisponibilidad = async (req, res, next) => {
         try {

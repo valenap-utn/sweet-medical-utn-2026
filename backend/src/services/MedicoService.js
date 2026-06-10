@@ -14,7 +14,7 @@ export class MedicoService {
     async obtenerHistorial({pacienteId}) {
         return await this.turnoRepository.findByPacienteId(pacienteId);
     }
-    
+
     /* ===== Acciones sobre DISPONIBILIDADES ======================================================================== */
     async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
         return await this.turnoRepository.buscarTurnosDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
@@ -24,13 +24,20 @@ export class MedicoService {
         return await this.turnoRepository.buscarTurnosDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
     }
 
+    // Obtiene todas las disponibilidades del médico (sin importar el tipoServicio)
+    async obtenerDisponibilidades({medicoId}){
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        return medico.disponibilidades;
+    }
+
     async agregarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         if (!this.disponibilidadValida(disponibilidad)) throw new BadRequestError(`Disponibilidad ${disponibilidad._id} no válida`);
 
-        if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new ConflictError(`El médico ya tiene registrada la disponibilidad ${disponibilidad._id}`);
+        if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new ConflictError(`El médico ya tiene registrada la disponibilidad ${disponibilidad.diaSemana}`);
 
         medico.definirDisponibilidad(disponibilidad);
         await this.medicoRepository.save(medico);

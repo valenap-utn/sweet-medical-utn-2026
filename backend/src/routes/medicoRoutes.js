@@ -13,7 +13,9 @@ export default function medicoRoutes(getController) {
 
     router.get('/practicas/:practicaId/turnos', authMiddleware, medicoController.consultarDisponibilidadPractica);
 
-    router.post('/disponibilidades',authMiddleware, medicoController.agregarDisponibilidad);
+    router.get('/disponibilidades', authMiddleware, medicoController.obtenerDisponibilidades);
+
+    router.post('/disponibilidades', authMiddleware, medicoController.agregarDisponibilidad);
 
     router.delete('/disponibilidades', authMiddleware, medicoController.quitarDisponibilidad);
 

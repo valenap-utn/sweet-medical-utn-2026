@@ -7,6 +7,8 @@ import {swaggerSpec} from "./src/docs/swagger.js";
 
 import {Server} from "./src/config/Server.js";
 
+import {SedeModel} from "./src/schemas/sedeSchema.js";
+
 import {EspecialidadRepository} from "./src/repositories/EspecialidadRepository.js";
 import {PracticaRepository} from "./src/repositories/PracticaRepository.js";
 import {PacienteRepository} from "./src/repositories/users/PacienteRepository.js";
@@ -19,6 +21,7 @@ import {ObraSocialRepository} from "./src/repositories/ObraSocialRepository.js";
 
 import {PacienteService} from "./src/services/PacienteService.js";
 import {TurnoService} from "./src/services/TurnoService.js";
+import {AgendaService} from "./src/services/AgendaService.js";
 import {MedicoService} from "./src/services/medicoService.js";
 import {ServiciosMedicoService} from "./src/services/ServiciosMedicoService.js";
 import {PlanService} from "./src/services/PlanService.js";
@@ -69,7 +72,8 @@ const obraSocialRepository = new ObraSocialRepository();
 const pacienteService = new PacienteService({pacienteRepository, turnoRepository});
 const turnoService = new TurnoService(turnoRepository,pacienteRepository);
 const serviciosMedicoService = new ServiciosMedicoService({especialidadRepository, practicaRepository});
-const medicoService = new MedicoService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository});
+const agendaService = new AgendaService({medicoRepository, turnoRepository});
+const medicoService = new MedicoService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService});
 const planService = new PlanService(planRepository);
 const notificacionService = new NotificacionService(notificacionRepository);
 const authService = new AuthService(usuarioRepository,pacienteRepository,medicoRepository);
