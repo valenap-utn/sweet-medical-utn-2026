@@ -9,5 +9,7 @@ export default function especialidadRoutes(getController) {
 
     router.get('/', especialidadController.obtenerTodas);
 
+    router.delete('/:especialidadId', especialidadController.eliminar);
+
     return router;
 }

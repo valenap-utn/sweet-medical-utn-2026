@@ -21,4 +21,15 @@ export class EspecialidadController {
             next(err);
         }
     };
+
+    eliminar = async (req, res, next) => {
+        try{
+            const {especialidadId} = req.params;
+            const resultado = await this.especialidadService.eliminar(especialidadId);
+
+            res.status(200).json(resultado);
+        }catch(err){
+            next(err);
+        }
+    }
 }
