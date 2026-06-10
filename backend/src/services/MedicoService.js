@@ -17,6 +17,7 @@ export class MedicoService {
 
     /* ===== Acciones sobre DISPONIBILIDADES ======================================================================== */
     async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
+        console.log({medicoId, especialidadId});
         return await this.turnoRepository.buscarTurnosDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
     }
 
@@ -72,7 +73,7 @@ export class MedicoService {
         const especialidad = await this.especialidadRepository.findById(especialidadId);
         if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
 
-        if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new Error(`El medico ${medicoId} ya tiene la especialidad ${especialidadId}`);
+        if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new ConflictError(`El medico ${medicoId} ya tiene la especialidad ${especialidadId}`);
 
         medico.agregarEspecialidad(especialidad);
 
