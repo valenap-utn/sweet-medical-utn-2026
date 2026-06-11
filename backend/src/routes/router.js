@@ -11,12 +11,17 @@ import especialidadRoutes from "./servicios/especialidadRoutes.js";
 import practicaRoutes from "./servicios/practicaRoutes.js";
 import obraSocialRoutes from "./obraSocialRoutes.js";
 import sedeRoutes from "./sedeRoutes.js";
+import agendaRoutes from "./agendaRoutes.js";
+import adminRoutes from "./interno/adminRoutes.js";
 
 // Acá agrupamos las rutas principales !
 export default function createRouter(getController) {
     const router = express.Router();
 
     router.use("/healthcheck", healthRoutes);
+
+    const adminRouter = adminRoutes(getController);
+    router.use("/admin", adminRouter);
 
     const authRouter = authRoutes(getController);
     router.use("/auth", authRouter);
@@ -50,6 +55,9 @@ export default function createRouter(getController) {
 
     const sedeRouter = sedeRoutes(getController);
     router.use('/sedes', sedeRouter);
+
+    const agendaRouter = agendaRoutes(getController);
+    router.use('/agendas', agendaRouter);
 
     return router;
 }

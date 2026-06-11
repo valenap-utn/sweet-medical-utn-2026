@@ -31,6 +31,7 @@ import {EspecialidadService} from "./src/services/servicios/EspecialidadService.
 import {PracticaService} from "./src/services/servicios/PracticaService.js";
 import {ObraSocialService} from "./src/services/ObraSocialService.js";
 import {SedeService} from "./src/services/sedeService.js";
+import {TurnosBatchService} from "./src/services/TurnosBatchService.js";
 
 import {PacienteController} from "./src/controllers/PacienteController.js";
 import {TurnoController} from "./src/controllers/TurnoController.js";
@@ -43,6 +44,8 @@ import {EspecialidadController} from "./src/controllers/servicios/EspecialidadCo
 import {PracticaController} from "./src/controllers/servicios/PracticaController.js";
 import {ObraSocialController} from "./src/controllers/ObraSocialController.js";
 import {SedeController} from "./src/controllers/sedeController.js";
+import {AgendaController} from "./src/controllers/AgendaController.js";
+import {AdminController} from "./src/controllers/interno/AdminController.js";
 
 
 // Acá se arman dependencias, controllers, rutas y middlewares
@@ -75,8 +78,8 @@ const sedeRepository = new SedeRepository();
 const pacienteService = new PacienteService({pacienteRepository, turnoRepository});
 const turnoService = new TurnoService(turnoRepository,pacienteRepository);
 const serviciosMedicoService = new ServiciosMedicoService({especialidadRepository, practicaRepository});
-const agendaService = new AgendaService({medicoRepository, turnoRepository});
-const medicoService = new MedicoService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService});
+const agendaService = new AgendaService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository});
+const medicoService = new MedicoService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService, sedeRepository});
 const planService = new PlanService(planRepository);
 const notificacionService = new NotificacionService(notificacionRepository);
 const authService = new AuthService(usuarioRepository,pacienteRepository,medicoRepository);
@@ -84,6 +87,7 @@ const especialidadService = new EspecialidadService(especialidadRepository);
 const practicaService = new PracticaService(practicaRepository);
 const obraSocialService = new ObraSocialService(obraSocialRepository, planRepository);
 const sedeService = new SedeService(sedeRepository);
+const turnosBatchService = new TurnosBatchService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository})
 
 // Controllers
 const pacienteController = new PacienteController(pacienteService);
@@ -97,6 +101,8 @@ const especialidadController = new EspecialidadController(especialidadService);
 const practicaController = new PracticaController(practicaService);
 const obraSocialController = new ObraSocialController(obraSocialService);
 const sedeController = new SedeController(sedeService);
+const agendaController = new AgendaController(agendaService);
+const adminController = new AdminController(turnosBatchService, agendaService);
 
 // Registro de controllers dispo. para las rutas
 server.setController(PacienteController, pacienteController);
@@ -110,6 +116,8 @@ server.setController(EspecialidadController, especialidadController);
 server.setController(PracticaController, practicaController);
 server.setController(ObraSocialController, obraSocialController);
 server.setController(SedeController, sedeController);
+server.setController(AgendaController, agendaController);
+server.setController(AdminController, adminController);
 
 // SWAGGER
 app.use("/api-docs", swaggerUi.serve);
