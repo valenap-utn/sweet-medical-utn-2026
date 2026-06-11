@@ -2,11 +2,26 @@ import {Agenda} from '../domain/Agenda.js';
 import {addDays} from 'date-fns';
 import {BadRequestError, NotFoundError} from "../error/AppError.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
+import {TipoServicio} from "../domain/enums/TipoServicio.js";
 
 export class AgendaService {
-    constructor({medicoRepository, turnoRepository}) {
+    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
+        this.especialidadRepository = especialidadRepository;
+        this.practicaRepository = practicaRepository;
+    }
+
+    async resolverServicio(disponibilidad) {
+        if (disponibilidad.tipoServicio === TipoServicio.ESPECIALIDAD) {
+            return await this.especialidadRepository.findById(disponibilidad.servicio);
+        }
+
+        if (disponibilidad.tipoServicio === TipoServicio.PRACTICA) {
+            return await this.practicaRepository.findById(disponibilidad.servicio);
+        }
+
+        throw new BadRequestError(`Tipo de servicio inválido: ${disponibilidad.tipoServicio}`);
     }
 
     async regenerarAgenda({medicoId}) {
@@ -35,14 +50,21 @@ export class AgendaService {
             await this.turnoRepository.deleteMany(idsAEliminar);
         }
 
-        const servicios = [...(medico.especialidades || []), ...(medico.practicas || [])];
-        for (const servicio of servicios) {
-            agenda.generarTurnos(fechaDesde, fechaHasta, servicio);
+        for (const disponibilidad of medico.disponibilidades || []) {
+            const servicio = await this.resolverServicio(disponibilidad);
+            if (!servicio) throw new NotFoundError(`No se encontró el servicio asociado a la disponibilidad.`);
+
+            agenda.generarTurnos(fechaDesde, fechaHasta, disponibilidad, servicio);
         }
 
-        const nuevosTurnos = agenda.turnos.filter(turno => !turno._id);
+        /*console.log("Turnos totales en agenda:", agenda.turnos.length);
+        console.log("Turnos nuevos:", agenda.turnos.filter(t => !t._id).length);
+        console.log("Primer turno:", agenda.turnos[0]);*/
+
+        const nuevosTurnos = agenda.turnos.filter(turno => turno.esNuevo);
         if (nuevosTurnos.length > 0) {
-            await this.turnoRepository.insertMany(nuevosTurnos);
+            const turnosParaInsertar = nuevosTurnos.map(({esNuevo, ...turno}) => turno);
+            await this.turnoRepository.insertMany(turnosParaInsertar);
         }
 
         return {
@@ -61,14 +83,21 @@ export class AgendaService {
         const agenda = new Agenda(medico);
         agenda.turnos = turnosExistentes;
 
-        const servicios = [...(medico.especialidades || []), ...(medico.practicas || [])];
-        for (const servicio of servicios) {
-            agenda.generarTurnos(fechaDesde, fechaHasta, servicio);
+        for (const disponibilidad of medico.disponibilidades || []) {
+            const servicio = await this.resolverServicio(disponibilidad);
+            if (!servicio) throw new NotFoundError(`No se encontró el servicio asociado a la disponibilidad.`);
+
+            agenda.generarTurnos(fechaDesde, fechaHasta, disponibilidad, servicio);
         }
 
-        const nuevosTurnos = agenda.turnos.filter(turno => !turno._id);
+        /*console.log("Turnos totales en agenda:", agenda.turnos.length);
+        console.log("Turnos nuevos:", agenda.turnos.filter(t => !t._id).length);
+        console.log("Primer turno:", agenda.turnos[0]);*/
+
+        const nuevosTurnos = agenda.turnos.filter(turno => turno.esNuevo);
         if (nuevosTurnos.length > 0) {
-            await this.turnoRepository.insertMany(nuevosTurnos);
+            const turnosParaInsertar = nuevosTurnos.map(({esNuevo, ...turno}) => turno);
+            await this.turnoRepository.insertMany(turnosParaInsertar);
         }
 
         return {
