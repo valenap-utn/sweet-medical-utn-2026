@@ -18,7 +18,47 @@ export class MedicoController {
         }
     };
 
+    // Sedes
 
+    obtenerSedes = async (req, res, next) => {
+        try {
+            const sedes = await this.medicoService.obtenerSedes({
+                medicoId: req.user.medicoId,
+            })
+            res.status(200).json(sedes);
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    agregarSede = async (req, res, next) => {
+        try {
+            const {sedeId} = req.params;
+            const resultado = await this.medicoService.agregarSede({
+                medicoId: req.user.medicoId,
+                sedeId,
+            })
+
+            res.status(200).json(resultado);
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    quitarSede = async (req, res, next) => {
+        try {
+            const {sedeId} = req.params;
+            const resultado = await this.medicoService.quitarSede({
+                medicoId: req.user.medicoId,
+                sedeId,
+            })
+            res.status(200).json(resultado);
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // Disponibilidades
     consultarDisponibilidadEspecialidad = async (req, res, next) => {
         try {
             const {especialidadId} = req.params;
@@ -90,6 +130,7 @@ export class MedicoController {
         }
     };
 
+    // Practicas
     agregarPractica = async (req, res, next) => {
         try {
             const {practicaId} = req.params;
@@ -120,6 +161,7 @@ export class MedicoController {
         }
     };
 
+    // Especialidades
     agregarEspecialidad = async (req, res, next) => {
         try {
             const {especialidadId} = req.params;

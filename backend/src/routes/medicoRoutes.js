@@ -9,6 +9,14 @@ export default function medicoRoutes(getController) {
     // Endpoints
     router.get('/pacientes/:pacienteId/turnos', authMiddleware, medicoController.obtenerHistorial);
 
+    // Sedes
+    router.get('/sedes', authMiddleware, medicoController.obtenerSedes);
+
+    router.post('/sedes/:sedeId', authMiddleware, medicoController.agregarSede);
+
+    router.delete('/sedes/:sedeId', authMiddleware, medicoController.quitarSede);
+
+    // Disponibilidades
     router.get('/especialidades/:especialidadId/turnos', authMiddleware, medicoController.consultarDisponibilidadEspecialidad);
 
     router.get('/practicas/:practicaId/turnos', authMiddleware, medicoController.consultarDisponibilidadPractica);
@@ -19,10 +27,12 @@ export default function medicoRoutes(getController) {
 
     router.delete('/disponibilidades', authMiddleware, medicoController.quitarDisponibilidad);
 
+    // Practicas
     router.post('/practicas/:practicaId', authMiddleware, medicoController.agregarPractica);
 
     router.delete('/practicas/:practicaId', authMiddleware, medicoController.quitarPractica);
 
+    // Especialidades
     router.post('/especialidades/:especialidadId', authMiddleware, medicoController.agregarEspecialidad);
 
     router.delete('/especialidades/:especialidadId', authMiddleware, medicoController.quitarEspecialidad);
