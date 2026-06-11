@@ -1,11 +1,15 @@
 import cron from 'node-cron';
-import { addDays } from 'date-fns';
-import { Agenda } from '../domain/Agenda.js';
+import {addDays} from 'date-fns';
+import {Agenda} from '../domain/Agenda.js';
+import {TipoServicio} from "../domain/enums/TipoServicio.js";
+import {BadRequestError, NotFoundError} from "../error/AppError.js";
 
 export class TurnosBatchService {
-    constructor({ medicoRepository, turnoRepository }) {
+    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
+        this.especialidadRepository = especialidadRepository;
+        this.practicaRepository = practicaRepository;
     }
 
     iniciarCron() {
@@ -21,6 +25,18 @@ export class TurnosBatchService {
         });
     }
 
+    async resolverServicio(disponibilidad) {
+        if (disponibilidad.tipoServicio === TipoServicio.ESPECIALIDAD) {
+            return await this.especialidadRepository.findById(disponibilidad.servicio);
+        }
+
+        if (disponibilidad.tipoServicio === TipoServicio.PRACTICA) {
+            return await this.practicaRepository.findById(disponibilidad.servicio);
+        }
+
+        throw new BadRequestError(`Tipo de servicio inválido: ${disponibilidad.tipoServicio}`);
+    }
+
     async ejecutarGeneracion() {
         const fechaDesde = new Date();
         const fechaHasta = addDays(fechaDesde, 30);
@@ -33,20 +49,22 @@ export class TurnosBatchService {
             const turnosExistentes = await this.turnoRepository.findFuturosByMedico(medico._id, fechaDesde);
             agenda.turnos = turnosExistentes;
 
-            // Unificamos los servicios
-            const servicios = [...(medico.especialidades || []), ...(medico.practicas || [])];
 
             // Rellenamos la agenda para los próximos 30 días
-            for (const servicio of servicios) {
-                agenda.generarTurnos(fechaDesde, fechaHasta, servicio);
+            for (const disponibilidad of medico.disponibilidades || []) {
+                const servicio = await this.resolverServicio(disponibilidad);
+                if (!servicio) throw new NotFoundError(`No se encontró el servicio asociado a la disponibilidad.`);
+
+                agenda.generarTurnos(fechaDesde, fechaHasta, disponibilidad, servicio);
             }
 
             // Filtramos únicamente los turnos creados recién (no tienen _id de Mongoose)
-            const nuevosTurnos = agenda.turnos.filter(turno => !turno._id);
+            const nuevosTurnos = agenda.turnos.filter(turno => turno.esNuevo);
 
             // Persistimos masivamente
             if (nuevosTurnos.length > 0) {
-                await this.turnoRepository.insertMany(nuevosTurnos);
+                const turnosParaInsertar = nuevosTurnos.map(({esNuevo, ...turno}) => turno);
+                await this.turnoRepository.insertMany(turnosParaInsertar);
             }
         }
     }
