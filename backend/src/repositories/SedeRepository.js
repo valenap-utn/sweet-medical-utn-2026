@@ -10,10 +10,10 @@ export class SedeRepository {
     }
 
     async findById(id) {
-        return await this.model.find({id});
+        return await this.model.findById(id);
     }
 
-    async findAll(){
+    async findAll() {
         return this.model.find({});
     }
 

@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
-import { DisponibilidadHoraria } from "../domain/DisponibilidadHoraria.js";
-import { DiaSemana } from "../domain/enums/DiaSemana.js";
+import {DisponibilidadHoraria} from "../domain/DisponibilidadHoraria.js";
+import {DiaSemana} from "../domain/enums/DiaSemana.js";
+import {TipoServicio} from "../domain/enums/TipoServicio.js";
 
 const DisponibilidadHorariaSchema = new mongoose.Schema({
     diaSemana: {
         type: String,
         required: true,
         enum: Object.values(DiaSemana)
-            .filter(v => v instanceof DiaSemana)
-            .map(v => v.nombre)
     },
     horaDesde: {
         type: String,
@@ -19,6 +18,20 @@ const DisponibilidadHorariaSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    sede: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Sede",
+        required: true
+    },
+    tipoServicio: {
+        type: String,
+        enum: Object.values(TipoServicio),
+        required: true
+    },
+    servicio: { // Especialidad || Practica
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
     }
 }, {
     _id: false,
@@ -27,4 +40,4 @@ const DisponibilidadHorariaSchema = new mongoose.Schema({
 
 DisponibilidadHorariaSchema.loadClass(DisponibilidadHoraria);
 
-export { DisponibilidadHorariaSchema };
+export {DisponibilidadHorariaSchema};
