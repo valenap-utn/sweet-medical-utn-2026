@@ -51,7 +51,7 @@ export default function createRouter(getController) {
     router.use('/practicas', practicaRouter);
 
     const obraSocialRouter = obraSocialRoutes(getController);
-    router.use('/obra-social', obraSocialRouter);
+    router.use('/obras-sociales', obraSocialRouter);
 
     const sedeRouter = sedeRoutes(getController);
     router.use('/sedes', sedeRouter);
