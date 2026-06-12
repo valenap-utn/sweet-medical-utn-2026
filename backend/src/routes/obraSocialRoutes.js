@@ -13,5 +13,9 @@ export default function obraSocialRoutes(getController){
 
     router.get('/:obraSocialId/planes', obraSocialController.obtenerPlanes);
 
+    router.delete('/:obraSocialId/planes/:planId', obraSocialController.quitarPlan);
+
+    router.delete('/:obraSocialId', obraSocialController.eliminar);
+
     return router;
 }

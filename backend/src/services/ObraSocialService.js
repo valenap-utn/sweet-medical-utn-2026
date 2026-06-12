@@ -43,4 +43,20 @@ export class ObraSocialService {
         return obraSocial.planes;
     }
 
+    async quitarPlan({obraSocialId, planId}) {
+        const obraSocial = await this.obraSocialRepository.findById(obraSocialId);
+        if (!obraSocial) throw new NotFoundError(`No se encontró la obra social con id: ${obraSocialId}.`);
+
+        const plan = await this.planRepository.findById(planId);
+        if (!plan) throw new NotFoundError(`No se encontró el plan con id: ${planId}.`);
+
+        return this.obraSocialRepository.quitarPlan({obraSocialId, planId});
+    }
+
+    async eliminar({obraSocialId}) {
+        const obraSocial = await this.obraSocialRepository.eliminar(obraSocialId);
+        if (!obraSocial) throw new NotFoundError(`No se encontró la obra social con id: ${obraSocialId}.`);
+        return obraSocial;
+    }
+
 }

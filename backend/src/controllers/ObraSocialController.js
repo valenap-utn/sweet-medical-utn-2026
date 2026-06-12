@@ -47,4 +47,24 @@ export class ObraSocialController {
             next(err);
         }
     }
+
+    quitarPlan = async (req, res, next) => {
+        try{
+            const {obraSocialId, planId} = req.params;
+            const obraSocial = await this.obraSocialService.quitarPlan({obraSocialId, planId});
+            res.status(200).json(obraSocial);
+        }catch(err){
+            next(err);
+        }
+    }
+
+    eliminar = async (req, res, next) => {
+        try{
+            const {obraSocialId} = req.params;
+            const obraSocial = await this.obraSocialService.eliminar({obraSocialId});
+            res.status(200).json(obraSocial);
+        }catch(err){
+            next(err);
+        }
+    }
 }
