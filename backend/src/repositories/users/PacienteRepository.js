@@ -14,7 +14,17 @@ export class PacienteRepository {
     async findById(id) {
         return await this.model
             .findById(id)
-            .populate("plan")
+            .populate({
+                path: "plan",
+                populate: [
+                    {
+                        path: "coberturasEspecialidad.especialidad"
+                    },
+                    {
+                        path: "coberturasPractica.practica"
+                    }
+                ]
+            })
             .populate("obraSocial");
     }
 

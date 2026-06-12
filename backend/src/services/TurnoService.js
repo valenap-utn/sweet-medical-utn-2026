@@ -73,9 +73,9 @@ export class TurnoService {
         if (!paciente) throw new NotFoundError(`No se encontró el paciente con id ${usuario.pacienteId}.`);
 
         // Calculamos cobertura
-
         const cobertura = this.obtenerCoberturaPaciente(paciente, turno);
         const costoEstimado = this.calcularCostoPaciente({turno, cobertura});
+        const coberturaValor = cobertura?.nombre ?? cobertura?.toString?.() ?? cobertura;
 
         return {
             turno: {
@@ -89,7 +89,7 @@ export class TurnoService {
                 fechaHoraFin: turno.fechaHoraFin,
                 estado: turno.estado,
             },
-            cobertura: cobertura.nombre,
+            cobertura: coberturaValor,
             costo: costoEstimado,
         };
     }
@@ -245,9 +245,10 @@ export class TurnoService {
         if (!servicio) return 0;
 
         const costoBase = servicio.costo ?? 0;
+        const coberturaValor = cobertura?.nombre ?? cobertura?.toString() ?? cobertura;
 
-        if (cobertura === NivelCobertura.TOTAL) return 0;
-        if (cobertura === NivelCobertura.PARCIAL) return costoBase * 0.5;
+        if (coberturaValor === NivelCobertura.TOTAL.toString()) return 0;
+        if (coberturaValor === NivelCobertura.PARCIAL.toString()) return costoBase * 0.5;
         return costoBase;
     }
 
