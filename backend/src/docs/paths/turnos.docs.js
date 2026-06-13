@@ -117,6 +117,8 @@
  *   get:
  *     summary: Obtener la cotización de un turno para el paciente autenticado
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -126,6 +128,15 @@
  *     responses:
  *       200:
  *         description: Cotización obtenida correctamente
+ *         content:
+ *           application/json:
+ *             example:
+ *               turno:
+ *                 id: "682f1c2f7c4d2f0012345678"
+ *                 tipoServicio: "PRACTICA"
+ *                 estado: "Disponible"
+ *               cobertura: "PARCIAL"
+ *               costo: 10000
  *       403:
  *         description: Usuario no autorizado
  *       404:
@@ -137,7 +148,10 @@
  * /api/turnos/{turnoId}/reserva:
  *   patch:
  *     summary: Reservar un turno disponible
+ *     description: Asigna el paciente al turno, calcula la cobertura del plan y guarda el costo final del turno.
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -160,7 +174,10 @@
  * /api/turnos/{turnoId}/cancelacion:
  *   patch:
  *     summary: Cancelar un turno
+ *     description: Registra la cancelación en el historial y libera nuevamente el turno para que pueda ser reservado por otro paciente.
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -181,7 +198,7 @@
  *                 example: "No podré asistir al turno."
  *     responses:
  *       200:
- *         description: Turno cancelado correctamente
+ *         description: Turno cancelado y liberado correctamente
  *       400:
  *         description: Debe indicar un motivo
  *       403:
@@ -189,7 +206,7 @@
  *       404:
  *         description: Turno no encontrado
  *       409:
- *         description: El turno solo puede cancelarse con al menos una hora de anticipación
+ *         description: El turno no puede cancelarse por su estado actual o por falta de anticipación
  */
 
 /**
@@ -197,7 +214,10 @@
  * /api/turnos/{turnoId}/solicitud-cambio-fecha:
  *   patch:
  *     summary: Solicitar cambio de fecha de un turno como paciente
+ *     description: Registra una nueva fecha solicitada sin modificar todavía la fecha real del turno. Requiere confirmación posterior.
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -216,16 +236,9 @@
  *               nuevaFechaHora:
  *                 type: string
  *                 format: date-time
- *                 example: "2026-06-20T15:00:00.000Z"
  *     responses:
  *       200:
  *         description: Solicitud de cambio registrada correctamente
- *       400:
- *         description: Fecha inválida o faltante
- *       403:
- *         description: Usuario no autorizado
- *       404:
- *         description: Turno o paciente no encontrado
  */
 
 /**
@@ -233,7 +246,10 @@
  * /api/turnos/{turnoId}/propuesta-cambio-fecha:
  *   patch:
  *     summary: Proponer cambio de fecha de un turno como médico
+ *     description: Registra una nueva fecha propuesta sin modificar todavía la fecha real del turno. Requiere confirmación posterior.
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -252,24 +268,20 @@
  *               nuevaFechaHora:
  *                 type: string
  *                 format: date-time
- *                 example: "2026-06-20T15:00:00.000Z"
  *     responses:
  *       200:
  *         description: Propuesta de cambio registrada correctamente
- *       400:
- *         description: Fecha inválida o faltante
- *       403:
- *         description: Usuario no autorizado
- *       404:
- *         description: Turno no encontrado
  */
 
 /**
  * @swagger
  * /api/turnos/{turnoId}/confirmacion:
  *   patch:
- *     summary: Confirmar cambio de fecha pendiente
+ *     summary: Confirmar una propuesta o solicitud de cambio de fecha
+ *     description: Aplica la fecha propuesta al turno, recalcula la fecha de fin según la duración del servicio y elimina la fecha temporal pendiente.
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -284,7 +296,7 @@
  *       404:
  *         description: Turno no encontrado
  *       409:
- *         description: No hay cambio de fecha pendiente
+ *         description: No existe una propuesta de cambio pendiente
  */
 
 /**
@@ -292,7 +304,10 @@
  * /api/turnos/{turnoId}/realizacion:
  *   patch:
  *     summary: Marcar un turno como realizado
+ *     description: Solo el médico del turno puede realizar esta acción. El turno debe encontrarse en estado Reservado o Confirmado.
  *     tags: [Turnos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: turnoId
@@ -307,5 +322,15 @@
  *       404:
  *         description: Turno no encontrado
  *       409:
- *         description: El turno no está confirmado
+ *         description: El turno no se encuentra en un estado válido para ser realizado
+ */
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
