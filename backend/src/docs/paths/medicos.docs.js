@@ -71,7 +71,8 @@
  * @swagger
  * /api/medicos/disponibilidades:
  *   post:
- *     summary: Agregar disponibilidad al médico autenticado
+ *     summary: Agregar una disponibilidad al médico autenticado
+ *     description: Registra una disponibilidad horaria asociada a una sede y a un servicio (especialidad o práctica). La agenda podrá generar turnos a partir de estas disponibilidades.
  *     tags: [Médicos]
  *     security:
  *       - bearerAuth: []
@@ -86,26 +87,56 @@
  *             properties:
  *               disponibilidad:
  *                 type: object
+ *                 required:
+ *                   - diaSemana
+ *                   - horaDesde
+ *                   - horaHasta
+ *                   - sede
+ *                   - tipoServicio
+ *                   - servicio
  *                 properties:
  *                   diaSemana:
  *                     type: string
- *                     example: "LUNES"
+ *                     example: "Lunes"
  *                   horaDesde:
  *                     type: string
  *                     example: "09:00"
  *                   horaHasta:
  *                     type: string
  *                     example: "13:00"
+ *                   sede:
+ *                     type: string
+ *                     example: "682f1c2f7c4d2f0012345678"
+ *                   tipoServicio:
+ *                     type: string
+ *                     enum:
+ *                       - ESPECIALIDAD
+ *                       - PRACTICA
+ *                   servicio:
+ *                     type: string
+ *                     example: "682f1c2f7c4d2f0012349999"
+ *           example:
+ *             disponibilidad:
+ *               diaSemana: "Lunes"
+ *               horaDesde: "09:00"
+ *               horaHasta: "13:00"
+ *               sede: "682f1c2f7c4d2f0012345678"
+ *               tipoServicio: "ESPECIALIDAD"
+ *               servicio: "682f1c2f7c4d2f0012349999"
  *     responses:
  *       200:
  *         description: Disponibilidad agregada correctamente
+ *       400:
+ *         description: Datos inválidos
+ *       404:
+ *         description: Médico, sede o servicio no encontrados
  */
 
 /**
  * @swagger
  * /api/medicos/disponibilidades:
  *   delete:
- *     summary: Quitar disponibilidad del médico autenticado
+ *     summary: Quitar una disponibilidad del médico autenticado
  *     tags: [Médicos]
  *     security:
  *       - bearerAuth: []
@@ -113,26 +144,19 @@
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - disponibilidad
- *             properties:
- *               disponibilidad:
- *                 type: object
- *                 properties:
- *                   diaSemana:
- *                     type: string
- *                     example: "LUNES"
- *                   horaDesde:
- *                     type: string
- *                     example: "09:00"
- *                   horaHasta:
- *                     type: string
- *                     example: "13:00"
+ *           example:
+ *             disponibilidad:
+ *               diaSemana: "Lunes"
+ *               horaDesde: "09:00"
+ *               horaHasta: "13:00"
+ *               sede: "682f1c2f7c4d2f0012345678"
+ *               tipoServicio: "ESPECIALIDAD"
+ *               servicio: "682f1c2f7c4d2f0012349999"
  *     responses:
  *       200:
  *         description: Disponibilidad eliminada correctamente
+ *       404:
+ *         description: Disponibilidad no encontrada
  */
 
 /**
@@ -209,4 +233,77 @@
  *     responses:
  *       200:
  *         description: Especialidad eliminada correctamente
+ */
+
+/**
+ * @swagger
+ * /api/medicos/sedes:
+ *   get:
+ *     summary: Obtener las sedes asociadas al médico autenticado
+ *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de sedes obtenida correctamente
+ *       401:
+ *         description: No autenticado
+ */
+
+/**
+ * @swagger
+ * /api/medicos/sedes/{sedeId}:
+ *   post:
+ *     summary: Asociar una sede al médico autenticado
+ *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sedeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sede agregada correctamente
+ *       404:
+ *         description: Médico o sede no encontrados
+ */
+
+/**
+ * @swagger
+ * /api/medicos/sedes/{sedeId}:
+ *   delete:
+ *     summary: Quitar una sede del médico autenticado
+ *     description: Elimina también las disponibilidades asociadas a dicha sede.
+ *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sedeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sede eliminada correctamente
+ *       404:
+ *         description: Médico o sede no encontrados
+ */
+
+/**
+ * @swagger
+ * /api/medicos/disponibilidades:
+ *   get:
+ *     summary: Obtener las disponibilidades del médico autenticado
+ *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Disponibilidades obtenidas correctamente
+ *       401:
+ *         description: No autenticado
  */
