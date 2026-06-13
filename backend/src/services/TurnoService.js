@@ -29,7 +29,7 @@ export class TurnoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new NotFoundError(`No se encontró un turno con el id: ${turnoId}`);
 
-        // Chequeamos que se quiere CANCELAR un turno que se encuentra RESERVADO o CONFIRMADO
+        // Chequeamos que se quiere CANCELAR un turno que se encuentra RESERVADO
         if(turno.estado !== EstadoTurno.RESERVADO.nombre) throw new ConflictError(`El turno no puede cancelarse porque su estado actual es: ${turno.estado}`);
 
         this.validarUsuarioPuedeCancelarTurno({turno, usuario});
@@ -166,6 +166,8 @@ export class TurnoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new NotFoundError(`El turno con id: ${turnoId} no fue encontrado.`);
 
+        if(turno.estado === EstadoTurno.REALIZADO.nombre) throw new ConflictError(`No se puede proponer un cambio de fecha dado que el estado del turno es ${turno.estado}.`);
+
         this.validarUsuarioPuedeProponerCambioFecha({turno, usuario});
 
         const fechaParseada = parseISO(nuevaFechaHora);
@@ -225,6 +227,8 @@ export class TurnoService {
 
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new NotFoundError(`No se encontró el turno con id: ${turnoId}.`);
+
+        if(turno.estado === EstadoTurno.REALIZADO.nombre) throw new ConflictError(`No se puede proponer un cambio de fecha dado que el estado del turno es ${turno.estado}.`);
 
         //Chequeamos que el que quiere solicitar el cambio de fecha sea un paciente a quien le pertenece el turno
         this.validarUsuarioPuedeSolicitarCambioFecha({turno, usuario});
