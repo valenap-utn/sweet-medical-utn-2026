@@ -1,4 +1,4 @@
-import {isAfter, isValid, parseISO, subHours} from "date-fns";
+import {addMinutes, isAfter, isValid, parseISO, subHours} from "date-fns";
 import {NivelCobertura} from "../domain/enums/NivelCobertura.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 import {BadRequestError, ConflictError, ForbiddenError, NotFoundError} from "../error/AppError.js";
@@ -29,16 +29,31 @@ export class TurnoService {
         const turno = await this.turnoRepository.findById(turnoId);
         if (!turno) throw new NotFoundError(`No se encontró un turno con el id: ${turnoId}`);
 
+        // Chequeamos que se quiere CANCELAR un turno que se encuentra RESERVADO o CONFIRMADO
+        if(turno.estado !== EstadoTurno.RESERVADO.nombre) throw new ConflictError(`El turno no puede cancelarse porque su estado actual es: ${turno.estado}`);
+
         this.validarUsuarioPuedeCancelarTurno({turno, usuario});
 
         const unaHoraAntes = subHours(turno.fechaHoraInicio, 1);
 
         if (isAfter(new Date(), unaHoraAntes)) throw new ConflictError("El turno solo puede cancelarse con al menos una hora de anticipación.")
 
+        // Guardamos el estado de cancelación del turno
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.CANCELADO.nombre,
             usuario: usuario.usuarioId,
             motivo,
+            turnoId: turno._id,
+        });
+
+        // Y lo volvemos a dejar "Disponible"
+        turno.paciente = null;
+        turno.costo = null;
+
+        turno.actualizarEstado({
+            nuevoEstado: EstadoTurno.DISPONIBLE.nombre,
+            usuario: usuario.usuarioId,
+            motivo: "Turno liberado luego de cancelación.",
             turnoId: turno._id,
         });
 
@@ -104,7 +119,13 @@ export class TurnoService {
         this.validarUsuarioPuedeConfirmarCambioFecha({turno, usuario});
 
         // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
+        const nuevaFechaInicio = turno.fechaHoraSolicitada;
+
+        const servicio = turno.especialidad ?? turno.practica;
+        if(!servicio) throw new BadRequestError(`El turno ${turnoId} no tiene servicio asociado.`)
+
         turno.fechaHoraInicio = turno.fechaHoraSolicitada;
+        turno.fechaHoraFin = addMinutes(nuevaFechaInicio, servicio.duracionTurnoEnMins);
 
         // Limpiamos el campo temporal de solicitud
         turno.fechaHoraSolicitada = null;
@@ -175,6 +196,18 @@ export class TurnoService {
         if (turno.estado !== EstadoTurno.DISPONIBLE.nombre) throw new ConflictError(`El turno con id: ${turnoId} no se encuentra disponible.`);
 
         turno.paciente = usuario.pacienteId;
+
+        // Para agregar el costo del turno para el paciente
+        const paciente = await this.pacienteRepository.findById(usuario.pacienteId);
+        if (!paciente) {
+            throw new NotFoundError(`No se encontró el paciente con id ${usuario.pacienteId}.`);
+        }
+
+        const cobertura = this.obtenerCoberturaPaciente(paciente, turno);
+        const costoEstimado = this.calcularCostoPaciente({ turno, cobertura });
+
+        turno.paciente = usuario.pacienteId;
+        turno.costo = costoEstimado;
 
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.RESERVADO.nombre,
@@ -258,8 +291,11 @@ export class TurnoService {
         const pacienteId = usuario?.pacienteId?.toString();
         const medicoId = usuario?.medicoId?.toString();
 
-        const esPacienteDelTurno = pacienteId && (turno.paciente?.toString() === pacienteId);
-        const esMedicoDelTurno = medicoId && (turno.medico?.toString() === medicoId);
+        const turnoPacienteId = turno.paciente?._id ?? turno.paciente;
+        const turnoMedicoId = turno.medico?._id ?? turno.medico;
+
+        const esPacienteDelTurno = pacienteId && (String(turnoPacienteId) === String(pacienteId));
+        const esMedicoDelTurno = medicoId && (String(turnoMedicoId) === String(medicoId));
 
         if (!esPacienteDelTurno && !esMedicoDelTurno) throw new ForbiddenError("El usuario no tiene permisos para cancelar este turno.");
     }
@@ -271,7 +307,8 @@ export class TurnoService {
     validarUsuarioPuedeMarcarTurnoRealizado({turno, usuario}) {
         const medicoId = usuario?.medicoId?.toString();
 
-        const esMedicoDelTurno = medicoId && (turno.medico?.toString() === medicoId);
+        const turnoMedicoId = turno.medico?._id ?? turno.medico;
+        const esMedicoDelTurno = medicoId && (String(turnoMedicoId) === String(medicoId));
 
         if (!esMedicoDelTurno) throw new ForbiddenError("Solo el médico del turno puede marcarlo como realizado.");
     }
@@ -279,14 +316,20 @@ export class TurnoService {
     validarUsuarioPuedeSolicitarCambioFecha({turno, usuario}) {
         const pacienteId = usuario?.pacienteId?.toString();
         if (!usuario?.pacienteId) throw new ForbiddenError("Solo un paciente puede solicitar cambios de fecha.");
-        const esPacienteDelTurno = pacienteId && (turno.paciente?.toString() === pacienteId);
+
+        const turnoPacienteId = turno.paciente?._id ?? turno.paciente;
+        const esPacienteDelTurno = pacienteId && (String(turnoPacienteId) === String(pacienteId));
+
         if (!esPacienteDelTurno) throw new ForbiddenError(`El usuario no tiene permisos para solicitar un cambio de fecha sobre el turno con id: ${turno._id}.`);
     }
 
     validarUsuarioPuedeProponerCambioFecha({turno, usuario}) {
         const medicoId = usuario?.medicoId?.toString();
         if (!usuario?.medicoId) throw new ForbiddenError("Solo un médico puede proponer cambios de fecha.");
-        const esMedicoDelTurno = medicoId && (turno.medico?.toString() === medicoId);
+
+        const turnoMedicoId = turno.medico?._id ?? turno.medico;
+        const esMedicoDelTurno = medicoId && (String(turnoMedicoId) === String(medicoId));
+
         if (!esMedicoDelTurno) throw new ForbiddenError(`El usuario no tiene permisos para proponer un cambio de fecha sobre el turno con id: ${turno._id}.`);
     }
 
@@ -294,8 +337,11 @@ export class TurnoService {
         const pacienteId = usuario?.pacienteId?.toString();
         const medicoId = usuario?.medicoId?.toString();
 
-        const esPacienteDelTurno = pacienteId && (turno.paciente?.toString() === pacienteId);
-        const esMedicoDelTurno = medicoId && (turno.medico?.toString() === medicoId);
+        const turnoPacienteId = turno.paciente?._id ?? turno.paciente;
+        const turnoMedicoId = turno.medico?._id ?? turno.medico;
+
+        const esPacienteDelTurno = pacienteId && (String(turnoPacienteId) === String(pacienteId));
+        const esMedicoDelTurno = medicoId && (String(turnoMedicoId) === String(medicoId));
 
         if (!esPacienteDelTurno && !esMedicoDelTurno) throw new ForbiddenError("El usuario no tiene permisos para confimar este cambio de fecha.");
     }
