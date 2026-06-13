@@ -10,6 +10,7 @@
  * /api/pacientes/turnos:
  *   get:
  *     summary: Obtener historial de turnos del paciente autenticado
+ *     description: Devuelve todos los turnos asociados al paciente autenticado, ordenados cronológicamente.
  *     tags: [Pacientes]
  *     security:
  *       - bearerAuth: []
