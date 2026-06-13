@@ -1,12 +1,20 @@
-import {NotFoundError} from "../../error/AppError.js";
+import {BadRequestError, ConflictError, NotFoundError} from "../../error/AppError.js";
 
 export class EspecialidadService {
     constructor(especialidadRepository) {
         this.especialidadRepository = especialidadRepository;
     }
 
-    async crear(data) {
-        return await this.especialidadRepository.create(data);
+    async crear({nombre, duracionTurnoEnMins, costo}) {
+        if (!nombre || !duracionTurnoEnMins || costo == null) throw new BadRequestError(`Debe indicar nombre, duración del turno y costo de consulta para crear la especialidad.`)
+        if (duracionTurnoEnMins <= 0) throw new BadRequestError("La duración del turno debe ser mayor a 0.");
+        if (costo < 0) throw new BadRequestError("El costo no puede ser negativo.");
+
+        // Si ya existe => 409
+        if (await this.especialidadRepository.findOne(nombre, duracionTurnoEnMins, costo)) throw new ConflictError(`Ya existe una especialidad con nombre ${nombre}, duración ${duracionTurnoEnMins} minutos y costo ${costo}.`);
+
+        // Sino => 201
+        return await this.especialidadRepository.create({nombre, duracionTurnoEnMins, costo});
     }
 
     async obtenerTodas() {
@@ -14,42 +22,30 @@ export class EspecialidadService {
     }
 
     async obtenerPorId(id) {
-        return await this.especialidadRepository.findById(id);
+        const especialidad = await this.especialidadRepository.findById(id);
+        if (!especialidad) throw new NotFoundError(`La especialidad con id: ${id} no fue encontrada.`);
+        return especialidad
     }
 
-    async eliminar(especialidadId){
+    async eliminar(especialidadId) {
         const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if(!especialidad) throw new NotFoundError(`No se encontró la especialidad.`);
+        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId}.`);
         await this.especialidadRepository.delete(especialidadId);
         return {mensaje: "Especialidad eliminada correctamente."}
     }
 
-    // Métodos traídos de ServiciosMedicoService (después arreglar, para + validaciones, no lo hago ahora porque estoy con otra cosa)
-    /*async crearEspecialidad({nombre, duracionTurnoEnMins, costo}) {
-        if (!nombre || !duracionTurnoEnMins || costo == null) {
-            throw new BadRequestError(`Debe indicar nombre, duración del turno y costo de consulta para crear la especialidad.`)
+    // Endpoint pendiente
+    async modificar(especialidadId, {nombre, duracionTurnoEnMins, costo}) {
+        const especialidad = await this.especialidadRepository.findById(especialidadId);
+        if (!especialidad) {
+            throw new NotFoundError(`La especialidad con id ${especialidadId} no fue encontrada.`);
         }
 
-        if (await this.especialidadRepository.findOne(nombre, duracionTurnoEnMins, costo)) throw new ConflictError(`Ya existe una especialidad con nombre ${nombre}, duración ${duracionTurnoEnMins} minutos y costo ${costo}.`);
-
-        return await this.especialidadRepository.create({nombre, duracionTurnoEnMins, costo});
-    }
-
-    async borrarEspecialidad({especialidadId}) {
-        const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new NotFoundError(`La especialidad con id: ${especialidadId} no fue encontrada.`);
-
-        return await this.especialidadRepository.findByIdAndDelete(especialidadId);
-    }
-
-    async modificarEspecialidad(especialidadId, {nombre, duracionTurnoEnMins, costo}) {
-        const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new NotFoundError(`La especialidad con id: ${especialidadId} no fue encontrada.`);
-
-        especialidad.establecerNuevoNombre(nombre);
-        especialidad.establecerNuevaDuracion(duracionTurnoEnMins);
-        especialidad.establecerNuevoCosto(costo);
+        if (nombre !== undefined) especialidad.establecerNuevoNombre(nombre);
+        if (duracionTurnoEnMins !== undefined) especialidad.establecerNuevaDuracion(duracionTurnoEnMins);
+        if (costo !== undefined) especialidad.establecerNuevoCosto(costo);
 
         return await this.especialidadRepository.save(especialidad);
-    }*/
+    }
+
 }
