@@ -55,7 +55,25 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+
+// CORS: credentials:true es necesario para que el browser envie las cookies
+// httpOnly (accessToken/refreshToken) desde el frontend Next.js.
+const allowedOrigins = [
+    process.env.FRONTEND_URL || "http://localhost:3000",
+    "http://localhost:3001",
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS: origin no permitido: " + origin));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(cookieParser());
 
