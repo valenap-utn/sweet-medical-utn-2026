@@ -14,7 +14,12 @@ export class TurnoController {
 
     buscarTurnosDisponibles = async (req, res, next) => {
         try {
-            const resultado = await this.turnoService.buscarTurnosDisponibles(req.query);
+            const resultado =
+                await this.turnoService.buscarTurnosDisponibles({
+                    filtros: req.query,
+                    usuario: req.user,
+                });
+
             res.status(200).json(resultado);
         } catch (err) {
             next(err);

@@ -14,8 +14,6 @@ export default function turnoRoutes(getController) {
     // Generales
     router.patch("/:turnoId/cancelacion", authMiddleware, turnoController.cancelarTurno);
 
-    router.get("/disponibles", turnoController.buscarTurnosDisponibles);
-
     router.patch("/:turnoId/confirmacion", authMiddleware, turnoController.confirmarCambioFecha);
 
     // Solo médicos
@@ -29,6 +27,8 @@ export default function turnoRoutes(getController) {
     router.patch("/:turnoId/solicitud-cambio-fecha", authMiddleware, requireRole(RolUsuario.PACIENTE), turnoController.solicitarCambioFecha);
 
     router.get("/:turnoId/cotizacion", authMiddleware, requireRole(RolUsuario.PACIENTE), turnoController.obtenerCotizacionTurno);
+
+    router.get("/disponibles", authMiddleware, requireRole(RolUsuario.PACIENTE), turnoController.buscarTurnosDisponibles);
 
     return router;
 }

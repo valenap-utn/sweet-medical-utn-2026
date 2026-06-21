@@ -13,6 +13,63 @@ const LB = { fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSp
 
 const INITIAL = { nombre: "", dni: "", nombreUsuario: "", password: "", confirmarPassword: "", obraSocial: "", plan: "" };
 
+function Field({
+                 name,
+                 label,
+                 type = "text",
+                 placeholder,
+                 helper,
+                 autoComplete,
+                 value,
+                 onChange,
+                 error,
+               }) {
+  return (
+      <div>
+        <span style={LB}>{label} *</span>
+
+        <input
+            name={name}
+            type={type}
+            autoComplete={autoComplete}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            style={{
+              ...IS,
+              borderColor: error
+                  ? "#991b1b"
+                  : "var(--outline-v)",
+            }}
+        />
+
+        {helper && !error && (
+            <p
+                style={{
+                  fontSize: 11,
+                  color: "var(--secondary)",
+                  marginTop: 4,
+                }}
+            >
+              {helper}
+            </p>
+        )}
+
+        {error && (
+            <p
+                style={{
+                  fontSize: 11,
+                  color: "#991b1b",
+                  marginTop: 4,
+                }}
+            >
+              {error}
+            </p>
+        )}
+      </div>
+  );
+}
+
 export default function RegistroPacientePage() {
   const router = useRouter();
   const [form, setForm]           = useState(INITIAL);
@@ -37,7 +94,7 @@ export default function RegistroPacientePage() {
   }, []);
 
   useEffect(() => {
-    if (!form.obraSocial) { setPlanes([]); return; }
+    if (!form.obraSocial) { return; }
     let a = true;
     (async () => {
       setCargP(true);
@@ -82,16 +139,6 @@ export default function RegistroPacientePage() {
     finally { setLoading(false); }
   };
 
-  const Field = ({ name, label, type = "text", placeholder, helper, autoComplete }) => (
-    <div>
-      <span style={LB}>{label} *</span>
-      <input name={name} type={type} autoComplete={autoComplete} placeholder={placeholder} value={form[name]} onChange={handleChange}
-        style={{ ...IS, borderColor: errors[name] ? "#991b1b" : "var(--outline-v)" }} />
-      {helper && !errors[name] && <p style={{ fontSize: 11, color: "var(--secondary)", marginTop: 4 }}>{helper}</p>}
-      {errors[name] && <p style={{ fontSize: 11, color: "#991b1b", marginTop: 4 }}>{errors[name]}</p>}
-    </div>
-  );
-
   return (
     <div style={{ minHeight: "calc(100vh - 140px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px", background: "linear-gradient(135deg,#fdfaf8,#f9eef0 50%,#fdfaf8)" }}>
       <div style={{ width: "100%", maxWidth: 440 }}>
@@ -105,11 +152,58 @@ export default function RegistroPacientePage() {
           {success ? <Alert type="success">¡Cuenta creada! Redirigiendo al login...</Alert> : (
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }} noValidate>
               {apiError && <Alert type="error">{apiError}</Alert>}
-              <Field name="nombre"           label="Nombre completo"  placeholder="Ej: Cynthia Gómez"   autoComplete="name"/>
-              <Field name="dni"              label="DNI"              placeholder="Ej: 30123456"          autoComplete="off" type="text"/>
-              <Field name="nombreUsuario"    label="Nombre de usuario" placeholder="Mínimo 3 caracteres" autoComplete="username"/>
-              <Field name="password"         label="Contraseña"       type="password" placeholder="••••••••" helper={PASSWORD_HELP} autoComplete="new-password"/>
-              <Field name="confirmarPassword" label="Confirmar contraseña" type="password" placeholder="••••••••" autoComplete="new-password"/>
+              <Field
+                  name="nombre"
+                  label="Nombre completo"
+                  placeholder="Ej: Cynthia Gómez"
+                  autoComplete="name"
+                  value={form.nombre}
+                  onChange={handleChange}
+                  error={errors.nombre}
+              />
+
+              <Field
+                  name="dni"
+                  label="DNI"
+                  placeholder="Ej: 30123456"
+                  autoComplete="off"
+                  value={form.dni}
+                  onChange={handleChange}
+                  error={errors.dni}
+              />
+
+              <Field
+                  name="nombreUsuario"
+                  label="Nombre de usuario"
+                  placeholder="Mínimo 3 caracteres"
+                  autoComplete="username"
+                  value={form.nombreUsuario}
+                  onChange={handleChange}
+                  error={errors.nombreUsuario}
+              />
+
+              <Field
+                  name="password"
+                  label="Contraseña"
+                  type="password"
+                  placeholder="••••••••"
+                  helper={PASSWORD_HELP}
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={handleChange}
+                  error={errors.password}
+              />
+
+              <Field
+                  name="confirmarPassword"
+                  label="Confirmar contraseña"
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  value={form.confirmarPassword}
+                  onChange={handleChange}
+                  error={errors.confirmarPassword}
+              />
 
               <div>
                 <span style={LB}>Obra social *</span>
