@@ -3,11 +3,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCarrito } from "@/context/CarritoContext";
+import { RolUsuario } from "@/lib/roles";
 
-const NAV = [
+const NAV_PACIENTE = [
   { href: "/",       label: "Inicio" },
   { href: "/turnos", label: "Buscar turnos" },
   { href: "/planes", label: "Planes" },
+];
+
+const NAV_MEDICO = [
+  { href: "/", label: "Inicio" },
+  { href: "/medico", label: "Panel médico" },
 ];
 
 export default function Header() {
@@ -15,6 +21,9 @@ export default function Header() {
   const { items } = useCarrito();
   const pathname = usePathname();
   const router   = useRouter();
+  const esMedico = usuario?.rol === RolUsuario.MEDICO;
+  const navegacion = esMedico ? NAV_MEDICO : NAV_PACIENTE;
+  const cuentaHref = esMedico ? "/medico" : "/perfil";
 
   const handleLogout = async () => { await logout(); router.push("/"); };
 
@@ -29,12 +38,12 @@ export default function Header() {
         </Link>
 
         <nav style={{ display: "flex", gap: 28, alignItems: "center" }}>
-          {NAV.map(({ href, label }) => (
+          {navegacion.map(({ href, label }) => (
             <Link key={href} href={href} style={{
-              fontSize: 13, fontWeight: pathname === href ? 700 : 500,
-              color: pathname === href ? "var(--p)" : "var(--on-surf-v)",
+              fontSize: 13, fontWeight: pathname === href || (href === "/medico" && pathname.startsWith("/medico")) ? 700 : 500,
+              color: pathname === href || (href === "/medico" && pathname.startsWith("/medico")) ? "var(--p)" : "var(--on-surf-v)",
               textDecoration: "none",
-              borderBottom: pathname === href ? "2px solid var(--p)" : "2px solid transparent",
+              borderBottom: pathname === href || (href === "/medico" && pathname.startsWith("/medico")) ? "2px solid var(--p)" : "2px solid transparent",
               paddingBottom: 2, transition: "color .2s",
             }}>
               {label}
@@ -44,7 +53,7 @@ export default function Header() {
 
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           {/* Carrito */}
-          <div style={{ position: "relative" }}>
+          {!esMedico && <div style={{ position: "relative" }}>
             <Link href="/carrito" style={{
               display: "inline-flex", alignItems: "center", gap: 5,
               padding: "8px 16px", borderRadius: 999, border: "2px solid var(--p)",
@@ -61,16 +70,16 @@ export default function Header() {
                 fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center",
               }}>{items.length}</span>
             )}
-          </div>
+          </div>}
 
           {cargando ? null : usuario ? (
             <>
-              <Link href="/perfil" style={{
+              <Link href={cuentaHref} style={{
                 padding: "8px 16px", borderRadius: 999, background: "var(--p-fixed)",
                 color: "var(--p)", fontWeight: 700, fontSize: 12, textDecoration: "none",
                 border: "2px solid var(--p-fixed-dim)",
               }}>
-                {usuario.nombreUsuario ?? (usuario.pacienteId ? "Mi cuenta" : "Mi cuenta")}
+                {usuario.nombreUsuario ?? (esMedico ? "Panel médico" : "Mi cuenta")}
               </Link>
               <button onClick={handleLogout} style={{
                 padding: "8px 16px", borderRadius: 999, background: "transparent",
