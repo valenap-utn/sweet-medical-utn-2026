@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { RolUsuario } from "../domain/enums/RolUsuario.js";
 import {ConflictError, NotFoundError, UnauthorizedError} from "../error/AppError.js";
 
 export class AuthService {
@@ -20,7 +21,8 @@ export class AuthService {
         // Creamos el usuario asociado al paciente
         const usuario = await this.usuarioRepository.create({
             nombreUsuario,
-            password: passwordHasheada
+            password: passwordHasheada,
+            rol: RolUsuario.PACIENTE
         });
 
         const paciente = await this.pacienteRepository.create({
@@ -34,6 +36,7 @@ export class AuthService {
         return {
             usuarioId: usuario._id,
             pacienteId: paciente._id,
+            rol: usuario.rol,
         };
     }
 
@@ -48,6 +51,7 @@ export class AuthService {
         const usuario = await this.usuarioRepository.create({
             nombreUsuario,
             password: passwordHasheada,
+            rol: RolUsuario.MEDICO,
         });
 
         const medico = await this.medicoRepository.create({
@@ -63,6 +67,7 @@ export class AuthService {
         return {
             usuarioId: usuario._id,
             medicoId: medico._id,
+            rol: usuario.rol,
         }
     }
 
@@ -74,14 +79,43 @@ export class AuthService {
         const passwordValida = await bcrypt.compare(password, usuario.password);
         if (!passwordValida) throw new UnauthorizedError("La contraseña ingresada no es correcta");
 
-        const paciente = await this.pacienteRepository.findByUsuarioId(usuario._id);
-        const medico = await this.medicoRepository.findByUsuarioId(usuario._id);
+        let pacienteId = null;
+        let medicoId = null;
+
+        if (usuario.rol === RolUsuario.PACIENTE) {
+            const paciente =
+                await this.pacienteRepository.findByUsuarioId(usuario._id);
+
+            if (!paciente) {
+                throw new UnauthorizedError(
+                    "La cuenta de paciente no tiene un perfil asociado."
+                );
+            }
+
+            pacienteId = paciente._id.toString();
+        } else if (usuario.rol === RolUsuario.MEDICO) {
+            const medico =
+                await this.medicoRepository.findByUsuarioId(usuario._id);
+
+            if (!medico) {
+                throw new UnauthorizedError(
+                    "La cuenta médica no tiene un perfil asociado."
+                );
+            }
+
+            medicoId = medico._id.toString();
+        } else {
+            throw new UnauthorizedError(
+                `El usuario tiene un rol inválido: ${usuario.rol}.`
+            );
+        }
 
         const payload = {
             usuarioId: usuario._id.toString(),
-            pacienteId: paciente?._id.toString() ?? null,
-            medicoId: medico?._id.toString() ?? null,
-        }
+            rol: usuario.rol,
+            pacienteId,
+            medicoId,
+        };
 
         return {
             accessToken: this.generarAccessToken(payload),
@@ -98,6 +132,7 @@ export class AuthService {
 
         const nuevoPayload = {
             usuarioId: payload.usuarioId,
+            rol: payload.rol,
             pacienteId: payload.pacienteId ?? null,
             medicoId: payload.medicoId ?? null,
         }

@@ -6,6 +6,7 @@ import { useCarrito } from "@/context/CarritoContext";
 import { useAuth } from "@/context/AuthContext";
 import { reservarTurno } from "@/lib/turnosApi";
 import { getApiErrorMessage } from "@/lib/api";
+import { RolUsuario } from "@/lib/roles";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
 
@@ -13,7 +14,10 @@ export default function CarritoPage() {
   const { items, quitar, vaciar, total } = useCarrito();
   const { usuario } = useAuth();
   const router = useRouter();
-
+  const esPaciente =
+      usuario?.rol === RolUsuario.PACIENTE;
+  const puedeConfirmar =
+      Boolean(usuario && esPaciente);
   const [confirmando, setConfirmando] = useState(false);
   const [error, setError]             = useState("");
   const [exito, setExito]             = useState(false);
@@ -25,7 +29,7 @@ export default function CarritoPage() {
 
   const handleConfirmar = async () => {
     if (!usuario) { router.push("/login"); return; }
-    if (!usuario.pacienteId) {
+    if (usuario.rol !== RolUsuario.PACIENTE) {
       setError("Solo los pacientes pueden reservar turnos.");
       return;
     }
@@ -164,10 +168,23 @@ export default function CarritoPage() {
               </p>
             )}
 
+            {usuario && !esPaciente && (
+                <p
+                    style={{
+                      fontSize: 11,
+                      color: "#991b1b",
+                      marginTop: 12,
+                      textAlign: "center",
+                    }}
+                >
+                  Solo las cuentas de pacientes pueden reservar turnos.
+                </p>
+            )}
+
             <button
               onClick={handleConfirmar}
-              disabled={confirmando || !usuario}
-              style={{ width: "100%", marginTop: 14, padding: "13px 0", background: "var(--p)", color: "#fff", fontWeight: 700, borderRadius: 13, fontSize: 13, border: "none", cursor: confirmando || !usuario ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit", opacity: confirmando || !usuario ? 0.7 : 1 }}
+              disabled={confirmando || !puedeConfirmar}
+              style={{ width: "100%", marginTop: 14, padding: "13px 0", background: "var(--p)", color: "#fff", fontWeight: 700, borderRadius: 13, fontSize: 13, border: "none", cursor: confirmando || !puedeConfirmar ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit", opacity: confirmando || !puedeConfirmar ? 0.7 : 1 }}
             >
               {confirmando ? <Spinner size={16} /> : "✅"} {confirmando ? "Reservando..." : "Confirmar turnos"}
             </button>

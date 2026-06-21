@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [cargando, setCargando] = useState(true);
 
   // Carga el usuario al iniciar la app vía GET /auth/me
-  // req.user (JWT payload) tiene: { usuarioId, pacienteId, medicoId }
+  // req.user (JWT payload) tiene: { usuarioId,rol, pacienteId, medicoId }
   // NO tiene nombreUsuario — lo guardamos por separado en state
   useEffect(() => {
     let activo = true;
@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (credenciales) => {
     const data = await loginRequest(credenciales);
-    // El backend devuelve: { mensaje, usuario: { usuarioId, pacienteId, medicoId } }
+    // El backend devuelve: { mensaje, usuario: { usuarioId, rol, pacienteId, medicoId } }
     // Enriquecemos el objeto con el nombreUsuario que mandamos nosotros
     // porque el JWT payload no lo incluye
     const usuarioConNombre = {

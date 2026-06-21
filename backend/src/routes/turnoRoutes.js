@@ -1,4 +1,6 @@
 import express from "express";
+import { requireRole } from "../middlewares/roleMiddleware.js";
+import { RolUsuario } from "../domain/enums/RolUsuario.js";
 import {TurnoController} from "../controllers/TurnoController.js";
 import {authMiddleware} from "../middlewares/authMiddleware.js";
 
@@ -14,20 +16,19 @@ export default function turnoRoutes(getController) {
 
     router.get("/disponibles", turnoController.buscarTurnosDisponibles);
 
-    router.get("/:turnoId/cotizacion", authMiddleware, turnoController.obtenerCotizacionTurno);
-
     router.patch("/:turnoId/confirmacion", authMiddleware, turnoController.confirmarCambioFecha);
 
     // Solo médicos
-    router.patch("/:turnoId/realizacion", authMiddleware, turnoController.marcarTurnoRealizado);
+    router.patch("/:turnoId/realizacion", authMiddleware, requireRole(RolUsuario.MEDICO), turnoController.marcarTurnoRealizado);
 
-    router.patch("/:turnoId/propuesta-cambio-fecha", authMiddleware, turnoController.proponerCambioFecha);
+    router.patch("/:turnoId/propuesta-cambio-fecha", authMiddleware, requireRole(RolUsuario.MEDICO), turnoController.proponerCambioFecha);
 
     // Solo pacientes
-    router.patch("/:turnoId/reserva", authMiddleware, turnoController.reservarTurno);
+    router.patch("/:turnoId/reserva", authMiddleware, requireRole(RolUsuario.PACIENTE), turnoController.reservarTurno);
 
-    router.patch("/:turnoId/solicitud-cambio-fecha", authMiddleware, turnoController.solicitarCambioFecha);
+    router.patch("/:turnoId/solicitud-cambio-fecha", authMiddleware, requireRole(RolUsuario.PACIENTE), turnoController.solicitarCambioFecha);
 
+    router.get("/:turnoId/cotizacion", authMiddleware, requireRole(RolUsuario.PACIENTE), turnoController.obtenerCotizacionTurno);
 
     return router;
 }
