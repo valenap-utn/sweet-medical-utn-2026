@@ -18,6 +18,19 @@ export class MedicoController {
         }
     };
 
+    obtenerAgenda = async (req, res, next) => {
+        try {
+            const turnos = await this.medicoService.obtenerAgenda({
+                medicoId: req.user.medicoId,
+                filtros: req.query,
+            });
+
+            res.status(200).json(turnos);
+        } catch (err) {
+            next(err);
+        }
+    };
+
     // Sedes
 
     obtenerSedes = async (req, res, next) => {

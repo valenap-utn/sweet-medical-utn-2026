@@ -1,5 +1,7 @@
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {BadRequestError, ConflictError, NotFoundError} from "../error/AppError.js";
+import {endOfDay, isAfter, isValid, parseISO, startOfDay,} from "date-fns";
+import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 
 export class MedicoService {
     constructor({
@@ -28,6 +30,64 @@ export class MedicoService {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new NotFoundError(`No se encontró al médico con id: ${medicoId}`);
         return medico.sedes;
+    }
+
+    async obtenerAgenda({medicoId, filtros}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}.`
+            );
+        }
+
+        let fechaDesde = filtros.fechaDesde
+            ? parseISO(filtros.fechaDesde)
+            : new Date();
+
+        let fechaHasta = filtros.fechaHasta
+            ? parseISO(filtros.fechaHasta)
+            : undefined;
+
+        if (!isValid(fechaDesde)) {
+            throw new BadRequestError("La fechaDesde no es válida.");
+        }
+
+        if (fechaHasta && !isValid(fechaHasta)) {
+            throw new BadRequestError("La fechaHasta no es válida.");
+        }
+
+        fechaDesde = startOfDay(fechaDesde);
+
+        if (fechaHasta) {
+            fechaHasta = endOfDay(fechaHasta);
+        }
+
+        if (fechaHasta && isAfter(fechaDesde, fechaHasta)) {
+            throw new BadRequestError(
+                "La fechaDesde no puede ser posterior a fechaHasta."
+            );
+        }
+
+        const estadosValidos = Object.values(EstadoTurno)
+            .filter((estado) => estado instanceof EstadoTurno)
+            .map((estado) => estado.nombre);
+
+        if (
+            filtros.estado &&
+            !estadosValidos.includes(filtros.estado)
+        ) {
+            throw new BadRequestError(
+                `Estado inválido: ${filtros.estado}.`
+            );
+        }
+
+        return await this.turnoRepository.buscarAgendaMedico({
+            medicoId,
+            fechaDesde,
+            fechaHasta,
+            estado: filtros.estado,
+        });
     }
 
     async agregarSede({medicoId, sedeId}) {

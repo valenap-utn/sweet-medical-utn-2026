@@ -11,6 +11,9 @@ export default function medicoRoutes(getController) {
     // Endpoints
     router.get('/pacientes/:pacienteId/turnos', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerHistorial);
 
+    // Agenda
+    router.get("/agenda", authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerAgenda);
+
     // Sedes
     router.get('/sedes', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerSedes);
 
