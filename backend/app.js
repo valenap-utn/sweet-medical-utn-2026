@@ -44,7 +44,6 @@ import {EspecialidadController} from "./src/controllers/servicios/EspecialidadCo
 import {PracticaController} from "./src/controllers/servicios/PracticaController.js";
 import {ObraSocialController} from "./src/controllers/ObraSocialController.js";
 import {SedeController} from "./src/controllers/sedeController.js";
-import {AgendaController} from "./src/controllers/AgendaController.js";
 import {AdminController} from "./src/controllers/interno/AdminController.js";
 
 
@@ -119,7 +118,6 @@ const especialidadController = new EspecialidadController(especialidadService);
 const practicaController = new PracticaController(practicaService);
 const obraSocialController = new ObraSocialController(obraSocialService);
 const sedeController = new SedeController(sedeService);
-const agendaController = new AgendaController(agendaService);
 const adminController = new AdminController(turnosBatchService, agendaService);
 
 // Registro de controllers dispo. para las rutas
@@ -134,7 +132,6 @@ server.setController(EspecialidadController, especialidadController);
 server.setController(PracticaController, practicaController);
 server.setController(ObraSocialController, obraSocialController);
 server.setController(SedeController, sedeController);
-server.setController(AgendaController, agendaController);
 server.setController(AdminController, adminController);
 
 // SWAGGER
