@@ -12,6 +12,10 @@ export class TurnoRepository {
         return await this.model.create(turno);
     }
 
+    async createMany(turnos) {
+        return await this.model.insertMany(turnos);
+    }
+
     // Busca el turno y trae las entidades relacionadas
     async findById(id) {
         return await this.model
@@ -19,12 +23,15 @@ export class TurnoRepository {
             .populate("paciente")
             .populate("medico")
             .populate("sede")
-            .populate("especialidad")
-            .populate("practica")
+            .populate("servicio")
     }
 
     async save(turno) {
         return await turno.save();
+    }
+
+    async saveMany(turnos) {
+        return await turnos.map(t => t.save());
     }
 
     async findByPacienteId(pacienteId) {
@@ -34,19 +41,21 @@ export class TurnoRepository {
             .sort({fechaHoraInicio: -1})
             .populate("medico")
             .populate("sede")
-            .populate("especialidad")
-            .populate("practica")
+            .populate("servicio")
     }
 
+    async deleteManyByIds(ids) {
+        return await this.model.deleteMany({
+            _id: { $in: ids }
+        });
+    }
     // ** query object: objeto que se va construyendo dinámicamente para consultar Mongo
 
     // Búsqueda de Turnos DISPONIBLES
     async buscarTurnosDisponibles({
                                       medicoId,
                                       sedeId,
-                                      tipoServicio,
-                                      especialidadId,
-                                      practicaId,
+                                      servicioId,
                                       fechaDesde,
                                       fechaHasta,
                                       page = 1,
@@ -61,10 +70,7 @@ export class TurnoRepository {
 
         if (medicoId) filtros.medico = medicoId;
         if (sedeId) filtros.sede = sedeId;
-        if (tipoServicio) filtros.tipoServicio = tipoServicio;
-
-        if (tipoServicio === TipoServicio.ESPECIALIDAD && especialidadId) filtros.especialidad = especialidadId;
-        if (tipoServicio === TipoServicio.PRACTICA && practicaId) filtros.practica = practicaId;
+        if (servicioId) filtros.servicio = servicioId;
 
 
         if (fechaDesde || fechaHasta) {
@@ -92,8 +98,7 @@ export class TurnoRepository {
                 .limit(Number(limit)) // el límite será 10 por parámetro
                 .populate("medico")
                 .populate("sede")
-                .populate("especialidad")
-                .populate("practica"),
+                .populate("servicio"),
 
             this.model.countDocuments(filtros), //calcula cuantos docs. hay en TOTAL, que cumplan con los filtros
             // => si hay 50 docs. en total se pueden hacer calculos de cuantas paginas hay en total
@@ -116,10 +121,7 @@ export class TurnoRepository {
         };
         if (sedeId) filtros.sede = sedeId;
 
-        if (tipoServicio === TipoServicio.ESPECIALIDAD) return await this.model.distinct("especialidad", filtros);
-        if (tipoServicio === TipoServicio.PRACTICA) return await this.model.distinct("practica", filtros);
-
-        throw new Error("tipoServicio inválido.");
+        return await this.model.distinct("servicios", filtros);
     }
 
     // Obtiene los médicos especificos (según especialidad o practica) DISPONIBLES
@@ -165,9 +167,7 @@ export class TurnoRepository {
                 medico: turno.medico?._id ?? turno.medico,
                 paciente: turno.paciente?._id ?? turno.paciente ?? null,
                 sede: turno.sede?._id ?? turno.sede,
-                tipoServicio: turno.tipoServicio,
-                especialidad: turno.especialidad?._id ?? turno.especialidad ?? null,
-                practica: turno.practica?._id ?? turno.practica ?? null,
+                servicio: turno.servicio?._id ?? turno.servicio ?? null,
                 fechaHoraInicio: turno.fechaHoraInicio,
                 fechaHoraFin: turno.fechaHoraFin,
                 estado: turno.estado?.nombre ?? turno.estado,

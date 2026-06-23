@@ -2,7 +2,14 @@ import mongoose from "mongoose";
 import {CambioEstadoTurnoSchema} from "./cambioEstadoTurnoSchema.js";
 import {Turno} from "../../domain/Turno.js";
 import {EstadoTurno} from "../../domain/enums/EstadoTurno.js";
-import {TipoServicio} from "../../domain/enums/TipoServicio.js";
+import { toZonedTime, format } from 'date-fns-tz';
+
+const tz = 'America/Argentina/Buenos_Aires';
+
+const formatearFecha = (fecha) => {
+    if (!fecha) return null;
+    return format(toZonedTime(fecha, tz), "yyyy-MM-dd'T'HH:mm:ss");
+};
 
 
 const TurnoSchema = new mongoose.Schema({
@@ -21,19 +28,9 @@ const TurnoSchema = new mongoose.Schema({
         ref: "Sede",
         required: true
     },
-    tipoServicio:{
-        type: String,
-        enum: Object.values(TipoServicio),
-        required: true
-    },
-    especialidad: {
+    servicio: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Especialidad",
-        default: null
-    },
-    practica: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Practica",
+        ref: "Servicio",
         default: null
     },
     estado: {
@@ -65,6 +62,16 @@ const TurnoSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true,
+});
+
+// Pasamos las fechas y horas a el horario argentino
+TurnoSchema.set('toJSON', {
+    transform: (doc, ret) => {
+        ret.fechaHoraInicio = formatearFecha(ret.fechaHoraInicio);
+        ret.fechaHoraFin = formatearFecha(ret.fechaHoraFin);
+        ret.fechaHoraSolicitada = formatearFecha(ret.fechaHoraSolicitada);
+        return ret;
+    }
 });
 
 TurnoSchema.loadClass(Turno);

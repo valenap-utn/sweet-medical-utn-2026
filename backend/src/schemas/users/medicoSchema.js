@@ -19,17 +19,9 @@ const MedicoSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    especialidades: [{
+    servicios: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Especialidad"
-    }],
-    practicas: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Practica"
-    }],
-    sedes: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Sede"
+        ref: "Servicio"
     }],
     disponibilidades: [DisponibilidadHorariaSchema]
 }, {

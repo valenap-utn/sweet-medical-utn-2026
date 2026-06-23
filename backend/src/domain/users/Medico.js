@@ -5,12 +5,8 @@ export class Medico {
     usuario;
     matricula;
     nombre;
-    especialidades;
-    practicas;
-    sedes;
+    servicios;
     disponibilidades;
-
-    turnosExistentes; // para 'Agenda'
 
     constructor(id, usuario, nombre, matricula) {
         this.validarParametros(usuario, nombre, matricula)
@@ -18,12 +14,8 @@ export class Medico {
         this.usuario = usuario;
         this.matricula = matricula;
         this.nombre = nombre;
-        this.especialidades = [];
-        this.practicas = [];
-        this.sedes = [];
+        this.servicios = [];
         this.disponibilidades = [];
-
-        this.turnosExistentes = [];
     }
 
     validarParametros(usuario, nombre, matricula) {
@@ -50,21 +42,15 @@ export class Medico {
 
     }
 
-    agregarEspecialidad(especialidad) {
-        if (!this.especialidades.includes(especialidad)) {
-            this.especialidades.push(especialidad);
+    agregarServicio(servicio) {
+        if (!this.servicios.includes(servicio)) {
+            this.servicios.push(servicio);
         }
     }
 
-    agregarPractica(practica) {
-        if (!this.practicas.includes(practica)) {
-            this.practicas.push(practica);
-        }
-    }
-
-    agregarSede(sede) {
-        if (!this.sedes.includes(sede)) {
-            this.sedes.push(sede);
+    quitarServicio(servicio) {
+        if(this.servicios.includes(servicio)) {
+            this.servicios.splice(this.servicios.indexOf(servicio), 1);
         }
     }
 

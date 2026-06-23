@@ -10,14 +10,13 @@ export class MedicoRepository {
     }
 
     async findById(id) {
-        return await this.model.findById(id).populate("especialidades").populate("practicas").populate("sedes");
+        return await this.model.findById(id)
+            .populate("servicios")
     }
 
     async findAll() {
         return await this.model.find({})
-            .populate("especialidades")
-            .populate("practicas")
-            .populate("sedes");
+            .populate("servicios")
     }
 
     // Agrego este métod0 para poder actualizar al médico

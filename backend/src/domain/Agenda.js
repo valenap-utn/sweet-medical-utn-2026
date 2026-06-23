@@ -1,98 +1,107 @@
 import {Turno} from "./Turno.js";
 import {EstadoTurno} from "./enums/EstadoTurno.js";
-import {TipoServicio} from "./enums/TipoServicio.js";
-import {addDays, addMinutes, isAfter, isBefore} from "date-fns";
+import {addDays, addMinutes, getDay, isAfter, isBefore, set} from "date-fns";
+import {DiaSemana} from "./enums/DiaSemana.js";
 
 export class Agenda {
     constructor(medico) {
-        // if (!medico) {
-        //     throw new Error("La agenda debe estar asociada a un Médico");
-        // }
         this.medico = medico;
         this.turnos = [];
     }
 
     //Refresca la agenda basándose en cambios de disponibilidad
     //Elimina turnos futuros DISPONIBLES que ya no coincidan con la nueva disponibilidad.
-    refrescarTurnos() {
-        const ahora = new Date();
+    regenerarTurnos() {
+        const hoy = new Date();
+        const ultimaFecha = [...this.turnos].sort((a, b) => new Date(a.fechaHoraFin) - new Date(b.fechaHoraFin)).at(-1)?.fechaHoraFin;
+        const fechaHasta = ultimaFecha ? new Date(ultimaFecha) : addDays(hoy, 7);
+
 
         this.turnos = this.turnos.filter(turno => {
-            const esPasado = isBefore(turno.fechaHoraInicio, ahora);
-            const noEstaDisponible = turno.estado !== EstadoTurno.DISPONIBLE.nombre;
 
-            if (esPasado || noEstaDisponible) {
-                return true;
-            }
+            const esPasado = isBefore(turno.fechaHoraInicio, hoy);
 
-            return this.verificarSiCoincideConDisponibilidad(turno); // Si ya no coincide, devuelve false y se elimina
+            const debeConservarse =
+                turno.estado === EstadoTurno.RESERVADO.nombre ||
+                turno.estado === EstadoTurno.CONFIRMADO.nombre ||
+                turno.estado === EstadoTurno.REALIZADO.nombre;
+
+            return esPasado || debeConservarse;
         });
+
+        return this.generarTurnos(hoy, fechaHasta);
     }
 
     //Crea bloques nuevos donde haya espacio vacio
-    generarTurnos(fechaDesde, fechaHasta, servicio) {
-        let fechaActual = new Date(fechaDesde);
-        const finRango = new Date(fechaHasta);
-        const diasSemana = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+    generarTurnos() {
+        const turnos= [];
+        const fechaDesde = new Date();
+        const fechaHasta = addDays(fechaDesde, 15);
 
-        while (!isAfter(fechaActual, finRango)) {
-            const nombreDia = diasSemana[fechaActual.getDay()];
-            const disponibilidadesHoy = this.medico.disponibilidades?.filter(
-                disp => disp.diaSemana.toString() === nombreDia
-            ) || [];
+        const dias = [
+            DiaSemana.DOMINGO,
+            DiaSemana.LUNES,
+            DiaSemana.MARTES,
+            DiaSemana.MIERCOLES,
+            DiaSemana.JUEVES,
+            DiaSemana.VIERNES,
+            DiaSemana.SABADO
+        ];
+        let fechaActual = fechaDesde;
 
-            for (const disp of disponibilidadesHoy) {
-                const duracionMins = servicio.duracionTurnoEnMins;
-                const bloques = this.generarBloques(fechaActual, disp.horaDesde, disp.horaHasta, duracionMins);
+        while (!isAfter(fechaActual, fechaHasta)) {
 
-                for (const bloque of bloques) {
-                    const nuevoTurno = this.crearInstanciaTurno(bloque, servicio);
+            const disponibilidadesDelDia = this.medico.disponibilidades.filter(d => d.diaSemana === dias[getDay(fechaActual)]);
 
-                    if (!this.existeSolapamiento(nuevoTurno)) {
-                        this.turnos.push(nuevoTurno);
+            disponibilidadesDelDia.forEach(disponibilidad => {
+
+                const bloques = this.generarBloques(fechaActual, disponibilidad);
+
+                bloques.forEach(bloque => {
+                    if (!this.existeTurno(bloque.inicio, bloque.fin)) {
+                        const turno = this.crearTurno(bloque, disponibilidad);
+                        turnos.push(turno);
                     }
-                }
-            }
-            fechaActual = addDays(fechaActual, 1);
-        }
-    }
+                });
 
-    generarBloques(fechaAGenerar, horaDesde, horaHasta, duracionMins) {
-        const bloques = [];
-        const [hDesde, mDesde] = horaDesde.split(':').map(Number);
-        const [hHasta, mHasta] = horaHasta.split(':').map(Number);
-
-        let inicioBloque = new Date(fechaAGenerar);
-        inicioBloque.setHours(hDesde, mDesde, 0, 0);
-
-        const finDisponibilidad = new Date(fechaAGenerar);
-        finDisponibilidad.setHours(hHasta, mHasta, 0, 0);
-
-        while (isBefore(inicioBloque, finDisponibilidad)) {
-            const finBloque = addMinutes(inicioBloque, duracionMins);
-
-            if (isAfter(finBloque, finDisponibilidad)) break;
-
-            bloques.push({
-                inicio: inicioBloque,
-                fin: finBloque
             });
 
-            inicioBloque = finBloque;
+            fechaActual = addDays(fechaActual, 1);
+        }
+
+        return turnos;
+    }
+
+    generarBloques(fecha, disponibilidad) {
+        const duracion = disponibilidad.servicio.duracionTurnoEnMins;
+
+        const bloques = [];
+
+        const [horaDesde, minutoDesde] = disponibilidad.horaDesde.split(":").map(Number);
+        const [horaHasta, minutoHasta] = disponibilidad.horaHasta.split(":").map(Number);
+
+        let inicio = set(fecha, {hours: horaDesde, minutes: minutoDesde, seconds: 0, milliseconds: 0});
+        const finDisponibilidad = set(fecha, {hours: horaHasta, minutes: minutoHasta, seconds: 0, milliseconds: 0});
+
+        while (true) {
+
+            const fin = addMinutes(inicio, duracion);
+
+            if (fin > finDisponibilidad) {
+                break;
+            }
+
+            bloques.push({inicio: inicio, fin});
+            inicio = fin;
         }
 
         return bloques;
     }
 
-    existeSolapamiento(nuevoTurno) {
-        return this.turnos.some(turnoExistente => {
-            const inicioA = nuevoTurno.fechaHoraInicio.getTime();
-            const finA = nuevoTurno.fechaHoraFin.getTime();
-            const inicioB = turnoExistente.fechaHoraInicio.getTime();
-            const finB = turnoExistente.fechaHoraFin.getTime();
-
-            return inicioA < finB && finA > inicioB;
-        });
+    existeTurno(inicio, fin) {
+        return this.turnos.some(turno =>
+            turno.fechaHoraInicio.getTime() === inicio.getTime() && turno.fechaHoraFin.getTime() === fin.getTime()
+        );
     }
 
     // Buscar si el médico atiende ese día, y verificar que el horario del turno esté
@@ -128,22 +137,16 @@ export class Agenda {
         return false; // El turno no encajó en ninguna franja horaria válida para ese día
     }
 
-    crearInstanciaTurno(bloque, servicio) {
-        const esPractica = servicio.codigo !== undefined;
-        const tipoServicio = esPractica ? TipoServicio.PRACTICA : TipoServicio.ESPECIALIDAD;
-        const costo = servicio.costo;
-
+    crearTurno(bloque, disponibilidad) {
         return new Turno({
-            medico: this.medico,
+            medico: this.medico._id,
             paciente: null,
-            sede: this.medico.sedes?.[0] || null, // Asume la primera sede por defecto
-            tipoServicio: tipoServicio,
-            especialidad: !esPractica ? servicio : null,
-            practica: esPractica ? servicio : null,
+            sede: disponibilidad.sede._id,
+            servicio: disponibilidad.servicio._id,
             fechaHoraInicio: bloque.inicio,
             fechaHoraFin: bloque.fin,
             estado: EstadoTurno.DISPONIBLE.nombre,
-            costo: costo
+            costo: disponibilidad.servicio.costo
         });
     }
 }

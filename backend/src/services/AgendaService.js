@@ -1,94 +1,60 @@
+
 import {Agenda} from '../domain/Agenda.js';
 import {addDays} from 'date-fns';
 import {BadRequestError, NotFoundError} from "../error/AppError.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 
 export class AgendaService {
-    constructor({medicoRepository, turnoRepository}) {
+    constructor({agendaRepository, medicoRepository, turnoRepository}) {
+        this.agendaRepository = agendaRepository;
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
     }
 
-    async regenerarAgenda({medicoId}) {
+    async generarTurnos({medicoId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró un médico con id: ${medicoId}`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico ${medicoId}`);
 
-        const fechaDesde = new Date();
-        const fechaHasta = addDays(fechaDesde, 30);
-
-        const turnosFuturos = await this.turnoRepository.findFuturosByMedico(medicoId, fechaDesde);
-
-        const agenda = new Agenda(medico);
-        agenda.turnos = [...turnosFuturos];
-
-        // Se limpia la agenda en base a la disponibilidad ACTUAL del médico
-        agenda.refrescarTurnos();
-
-        const idsTurnosValidos = agenda.turnos.map(t => t._id?.toString()).filter(id => id);
-        const turnosAEliminar = turnosFuturos.filter(t =>
-            t.estado === EstadoTurno.DISPONIBLE.nombre && // para que no modifique aquellos futuros ya reservados
-            !idsTurnosValidos.includes(t._id?.toString())
-        );
-
-        if (turnosAEliminar.length > 0) {
-            const idsAEliminar = turnosAEliminar.map(t => t._id);
-            await this.turnoRepository.deleteMany(idsAEliminar);
+        let turnos = [];
+        let agenda = await this.agendaRepository.findByMedicoId(medicoId);
+        if (!agenda) {
+            agenda = await this.agendaRepository.create({medico, turnos: []});
+            turnos = agenda.generarTurnos();
+        } else {
+            turnos = agenda.regenerarTurnos();
         }
 
-        const servicios = [...(medico.especialidades || []), ...(medico.practicas || [])];
-        for (const servicio of servicios) {
-            agenda.generarTurnos(fechaDesde, fechaHasta, servicio);
-        }
+        const turnosPersistidos = await this.turnoRepository.createMany(turnos);
+        agenda.turnos.push(...turnosPersistidos);
 
-        const nuevosTurnos = agenda.turnos.filter(turno => !turno._id);
-        if (nuevosTurnos.length > 0) {
-            await this.turnoRepository.insertMany(nuevosTurnos);
-        }
-
-        return {
-            mensaje: "Agenda regenerada exitosamente.",
-            turnosEliminados: turnosAEliminar.length,
-            turnosGenerados: nuevosTurnos.length
-        };
+        return await this.agendaRepository.save(agenda);
     }
 
-    async generarTurnosParaMedico({medicoId, fechaDesde, fechaHasta}) {
+    async obtenerAgenda({medicoId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró un médico con id: ${medicoId}`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico ${medicoId}`);
 
-        const turnosExistentes = await this.turnoRepository.findFuturosByMedico(medicoId, fechaDesde);
+        const agenda = await this.agendaRepository.findByMedicoId(medicoId);
+        if (!agenda) throw new NotFoundError(`No se encontró la agenda del médico ${medicoId}`);
 
-        const agenda = new Agenda(medico);
-        agenda.turnos = turnosExistentes;
-
-        const servicios = [...(medico.especialidades || []), ...(medico.practicas || [])];
-        for (const servicio of servicios) {
-            agenda.generarTurnos(fechaDesde, fechaHasta, servicio);
-        }
-
-        const nuevosTurnos = agenda.turnos.filter(turno => !turno._id);
-        if (nuevosTurnos.length > 0) {
-            await this.turnoRepository.insertMany(nuevosTurnos);
-        }
-
-        return {
-            mensaje: "Turnos generados exitosamente.",
-            turnosGenerados: nuevosTurnos.length
-        };
+        return agenda;
     }
 
-    // TODO: chequear que esta implementación sea correcta
-    async modificarDisponibilidad({medicoId, nuevasDisponibilidades}) {
+    async borrarAgenda({medicoId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró un médico con id: ${medicoId}`);
 
-        // Actualizamos disponibilidades
-        if (!Array.isArray(nuevasDisponibilidades)) throw new BadRequestError(`Las disponibilidades deben enviarse como array, se recibió: ${typeof nuevasDisponibilidades} `);
+        if (!medico) throw new NotFoundError(`No se encontró el médico ${medicoId}`);
 
-        medico.disponibilidades = nuevasDisponibilidades;
-        await this.medicoRepository.save(medico); //"reescribimos" al medico que ya teníamos con sus nuevas disponibilidades
+        const agenda = await this.agendaRepository.findByMedicoId(medicoId);
 
-        // Regeneramos agenda futura
-        return await this.regenerarAgenda({medicoId});
+        if (!agenda) throw new NotFoundError(`No se encontró la agenda del médico ${medicoId}`);
+
+        const turnosIds = agenda.turnos.map(turno => turno._id || turno.id || turno);
+
+        await this.turnoRepository.deleteManyByIds(turnosIds);
+
+        await this.agendaRepository.deleteById(agenda.id);
+
+        return {message: "Agenda eliminada correctamente"};
     }
 }

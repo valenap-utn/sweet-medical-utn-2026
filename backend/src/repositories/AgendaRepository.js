@@ -44,4 +44,8 @@ export class AgendaRepository {
     async delete(agenda) {
         return await agenda.deleteOne();
     }
+
+    async deleteById(id) {
+        return await this.model.findByIdAndDelete(id);
+    }
 }

@@ -7,8 +7,6 @@ const DisponibilidadHorariaSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: Object.values(DiaSemana)
-            .filter(v => v instanceof DiaSemana)
-            .map(v => v.nombre)
     },
     horaDesde: {
         type: String,
@@ -19,6 +17,16 @@ const DisponibilidadHorariaSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    sede: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Sede",
+        required: true
+    },
+    servicio: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Servicio",
+        required: true
     }
 }, {
     _id: false,

@@ -7,7 +7,7 @@ export default function servicioRoutes(getController) {
 
     router.post('/', servicioController.crear);
 
-    router.get('/', servicioController.obtenerTodas);
+    router.get('/', servicioController.obtenerTodos);
 
     router.patch('/:servicioId', servicioController.modificar);
 

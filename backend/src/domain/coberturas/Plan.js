@@ -5,8 +5,7 @@ import {CoberturaInvalida} from "../../exceptions/CoberturaInvalida.js";
 export class Plan {
     id;
     nombre;
-    coberturasEspecialidad = [];
-    coberturasPractica = [];
+    coberturas = [];
 
     constructor(id, nombre) {
         this.validarParametros(id, nombre);
@@ -22,52 +21,24 @@ export class Plan {
         }
     }
 
-    // Método unificado: detecta si el servicio es Especialidad o Practica por duck-typing.
     obtenerCobertura(servicio) {
-        // Practica tiene campo "codigo"; Especialidad no.
-        if (servicio.codigo !== undefined) {
-            return this.obtenerCoberturaPractica(servicio);
+        const servicioId = servicio.id ?? servicio._id;
+        if (!servicioId) {
+            throw new CoberturaInvalida(`La cobertura para ${servicio} no pudo ser encontrada`);
         }
-        return this.obtenerCoberturaEspecialidad(servicio);
-    }
-
-    obtenerCoberturaEspecialidad(especialidad) {
-        const especialidadId = especialidad.id ?? especialidad._id;
-        if (!especialidadId) {
-            throw new CoberturaInvalida(`La cobertura para ${especialidad} no pudo ser encontrada`);
-        }
-        const tipoCobertura = this.coberturasEspecialidad.find(c => {
-            const coberturaEspecialidadId = c.especialidad.id ?? c.especialidad._id ?? c.especialidad;
-            return String(coberturaEspecialidadId) === String(especialidadId);
+        const tipoCobertura = this.coberturas.find(c => {
+            const coberturaId = c.servicio.id ?? c.servicio._id ?? c.servicio;
+            return String(coberturaId) === String(servicioId);
         });
         return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
     }
 
-    obtenerCoberturaPractica(practica) {
-        const practicaId = practica.id ?? practica._id;
-        if (!practicaId) {
-            throw new CoberturaInvalida(`La cobertura para ${practica} no pudo ser encontrada`);
-        }
-        const tipoCobertura = this.coberturasPractica.find(c => {
-            const coberturaPracticaId = c.practica.id ?? c.practica._id ?? c.practica;
-            return String(coberturaPracticaId) === String(practicaId);
-        });
-        return tipoCobertura ? tipoCobertura.nivel : NivelCobertura.NO_CUBIERTA;
-    }
-
-    agregarEspecialidad(coberturaEspecialidad) {
-        if (!this.coberturasEspecialidad.includes(coberturaEspecialidad)) {
-            this.coberturasEspecialidad.push(coberturaEspecialidad);
+    agregarServicio(cobertura) {
+        if (!this.coberturas.includes(cobertura)) {
+            this.coberturas.push(cobertura);
         } else {
-            console.log(`La especialidad ${coberturaEspecialidad} ya pertenece al plan ${this.nombre}`);
+            console.log(`El servicio ${cobertura.servicio} ya pertenece al plan ${this.nombre}`);
         }
     }
 
-    agregarPractica(coberturaPractica) {
-        if (!this.coberturasPractica.includes(coberturaPractica)) {
-            this.coberturasPractica.push(coberturaPractica);
-        } else {
-            console.log(`La practica ${coberturaPractica} ya pertenece al plan ${this.nombre}`);
-        }
-    }
 }

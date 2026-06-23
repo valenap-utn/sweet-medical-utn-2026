@@ -18,29 +18,24 @@ export class MedicoController {
         }
     };
 
-
-    consultarDisponibilidadEspecialidad = async (req, res, next) => {
+    obtenerAgenda = async (req, res, next) => {
         try {
-            const {especialidadId} = req.params;
+            const agenda = await this.medicoService.obtenerAgenda({medicoId: req.user.medicoId});
 
-            const disponibilidad = await this.medicoService.consultarDisponibilidadEspecialidad({
-                medicoId: req.user.medicoId,
-                especialidadId
-            });
-
-            res.status(200).json(disponibilidad);
+            res.status(200).json(agenda);
         } catch (err) {
             next(err);
         }
     };
 
-    consultarDisponibilidadPractica = async (req, res, next) => {
-        try {
-            const {practicaId} = req.params;
 
-            const disponibilidad = await this.medicoService.consultarDisponibilidadPractica({
+    consultarDisponibilidad = async (req, res, next) => {
+        try {
+            const {servicioId} = req.params;
+
+            const disponibilidad = await this.medicoService.consultarDisponibilidad({
                 medicoId: req.user.medicoId,
-                practicaId
+                servicioId
             });
 
             res.status(200).json(disponibilidad);
@@ -62,7 +57,7 @@ export class MedicoController {
 
     agregarDisponibilidad = async (req, res, next) => {
         try {
-            const {disponibilidad} = req.body;
+            const disponibilidad = req.body;
 
             const medico = await this.medicoService.agregarDisponibilidad({
                 medicoId: req.user.medicoId,
@@ -77,7 +72,7 @@ export class MedicoController {
 
     quitarDisponibilidad = async (req, res, next) => {
         try {
-            const {disponibilidad} = req.body;
+            const disponibilidad = req.body;
 
             const medico = await this.medicoService.quitarDisponibilidad({
                 medicoId: req.user.medicoId,
@@ -90,13 +85,13 @@ export class MedicoController {
         }
     };
 
-    agregarPractica = async (req, res, next) => {
+    agregarServicio = async (req, res, next) => {
         try {
-            const {practicaId} = req.params;
+            const {servicioId} = req.params;
 
-            const medico = await this.medicoService.agregarPractica({
+            const medico = await this.medicoService.agregarServicio({
                 medicoId: req.user.medicoId,
-                practicaId
+                servicioId
             });
 
             res.status(200).json(medico);
@@ -105,13 +100,13 @@ export class MedicoController {
         }
     };
 
-    quitarPractica = async (req, res, next) => {
+    quitarServicio = async (req, res, next) => {
         try {
-            const {practicaId} = req.params;
+            const {servicioId} = req.params;
 
-            const medico = await this.medicoService.quitarPractica({
+            const medico = await this.medicoService.quitarServicio({
                 medicoId: req.user.medicoId,
-                practicaId
+                servicioId
             });
 
             res.status(200).json(medico);
@@ -120,33 +115,4 @@ export class MedicoController {
         }
     };
 
-    agregarEspecialidad = async (req, res, next) => {
-        try {
-            const {especialidadId} = req.params;
-
-            const medico = await this.medicoService.agregarEspecialidad({
-                medicoId: req.user.medicoId,
-                especialidadId
-            });
-
-            res.status(200).json(medico);
-        } catch (err) {
-            next(err);
-        }
-    };
-
-    quitarEspecialidad = async (req, res, next) => {
-        try {
-            const {especialidadId} = req.params;
-
-            const medico = await this.medicoService.quitarEspecialidad({
-                medicoId: req.user.medicoId,
-                especialidadId
-            });
-
-            res.status(200).json(medico);
-        } catch (err) {
-            next(err);
-        }
-    };
 }
