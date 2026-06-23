@@ -15,7 +15,6 @@ const MODULOS = [
     descripcion:
       "Definí los días, horarios, sedes y servicios en los que atendés.",
     detalle: "Crear, consultar y eliminar franjas horarias.",
-    siguiente: true,
   },
   {
     numero: "02",
@@ -23,6 +22,7 @@ const MODULOS = [
     descripcion:
       "Consultá los turnos generados a partir de tus disponibilidades.",
     detalle: "Visualizar horarios disponibles y turnos reservados.",
+    href: "/medico/agenda",
   },
   {
     numero: "03",
@@ -90,11 +90,6 @@ export default function PanelMedicoPage() {
             </p>
           </div>
 
-          <div className={styles.nextStep}>
-            <span>Siguiente módulo</span>
-            <strong>Configurar disponibilidades</strong>
-            <small>Es el punto de partida para generar tu agenda.</small>
-          </div>
         </div>
       </section>
 
@@ -104,34 +99,26 @@ export default function PanelMedicoPage() {
             <span className={styles.eyebrow}>Gestión médica</span>
             <h2>¿Qué vas a poder administrar?</h2>
           </div>
-          <p>
-            Estos módulos reúnen las funcionalidades definidas para médicos en
-            el trabajo práctico.
-          </p>
         </div>
 
         <section className={styles.modules} aria-label="Módulos del panel médico">
           {MODULOS.map((modulo) => (
-            <article
-              key={modulo.numero}
-              className={`${styles.moduleCard} ${
-                modulo.siguiente ? styles.featuredCard : ""
-              }`}
-            >
-              <div className={styles.cardTop}>
-                <span className={styles.number}>{modulo.numero}</span>
-                <span
-                  className={`${styles.status} ${
-                    modulo.siguiente ? styles.statusNext : ""
+              <Link
+                  key={modulo.numero}
+                  href={modulo.href ?? "/medico"}
+                  className={`${styles.moduleCard} ${
+                      modulo.siguiente ? styles.featuredCard : ""
                   }`}
-                >
-                  {modulo.siguiente ? "Próximo paso" : "Próximamente"}
-                </span>
-              </div>
-              <h3>{modulo.titulo}</h3>
-              <p>{modulo.descripcion}</p>
-              <div className={styles.detail}>{modulo.detalle}</div>
-            </article>
+                  style={{ textDecoration: "none" }}
+              >
+                <div className={styles.cardTop}>
+                  <span className={styles.number}>{modulo.numero}</span>
+                </div>
+
+                <h3>{modulo.titulo}</h3>
+                <p>{modulo.descripcion}</p>
+                <div className={styles.detail}>{modulo.detalle}</div>
+              </Link>
           ))}
         </section>
 

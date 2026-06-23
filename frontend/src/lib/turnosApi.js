@@ -87,3 +87,23 @@ export async function obtenerCotizacion(turnoId) {
   const { data } = await api.get(`/turnos/${turnoId}/cotizacion`);
   return data;
 }
+
+/**
+ * Obtiene la agenda del médico autenticado.
+ * GET /medicos/agenda — requiere auth de médico
+ *
+ * Query params opcionales:
+ * - fechaDesde: YYYY-MM-DD
+ * - fechaHasta: YYYY-MM-DD
+ * - estado: Disponible | Reservado | Confirmado | Cancelado
+ */
+export async function obtenerAgendaMedico(params = {}) {
+  const query = {};
+
+  if (params.fechaDesde) query.fechaDesde = params.fechaDesde;
+  if (params.fechaHasta) query.fechaHasta = params.fechaHasta;
+  if (params.estado) query.estado = params.estado;
+
+  const { data } = await api.get("/medicos/agenda", { params: query });
+  return Array.isArray(data) ? data : [];
+}

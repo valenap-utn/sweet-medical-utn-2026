@@ -75,35 +75,6 @@
   line-height: 1.7;
 }
 
-.nextStep {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 20px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-}
-
-.nextStep span {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.nextStep strong {
-  font-family: "Literata", Georgia, serif;
-  font-size: 17px;
-}
-
-.nextStep small {
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.5;
-}
-
 .content {
   width: min(1120px, calc(100% - 80px));
   margin: 0 auto;
@@ -181,22 +152,6 @@
   font-family: "Literata", Georgia, serif;
   font-size: 24px;
   font-weight: 700;
-}
-
-.status {
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: #f0eded;
-  color: var(--on-surf-v);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.statusNext {
-  background: var(--p);
-  color: white;
 }
 
 .moduleCard h3 {
