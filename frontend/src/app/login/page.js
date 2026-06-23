@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
+import { RolUsuario } from "@/lib/roles";
 
 const S = {
   label: { fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--on-surf-v)", display: "block", marginBottom: 6 },
@@ -40,9 +41,26 @@ export default function LoginPage() {
     e.preventDefault(); setApiError("");
     if (!validate()) return;
     setLoading(true);
-    try { await login(form); router.push("/"); }
-    catch (error) { setApiError(getApiErrorMessage(error, "Datos incorrectos. Verificá e intentá de nuevo.")); }
-    finally { setLoading(false); }
+    try {
+      const data = await login(form);
+      const rol = data.usuario?.rol;
+
+      if (rol === RolUsuario.MEDICO) {
+        router.push("/medico");
+        return;
+      }
+
+      router.push("/turnos");
+    } catch (error) {
+      setApiError(
+          getApiErrorMessage(
+              error,
+              "Datos incorrectos. Verificá e intentá de nuevo."
+          )
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
