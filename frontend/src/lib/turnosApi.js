@@ -107,3 +107,62 @@ export async function obtenerAgendaMedico(params = {}) {
   const { data } = await api.get("/medicos/agenda", { params: query });
   return Array.isArray(data) ? data : [];
 }
+/**
+ * Obtiene las especialidades asociadas al médico autenticado.
+ * GET /medicos/especialidades
+ */
+export async function obtenerEspecialidadesMedico() {
+  const { data } = await api.get("/medicos/especialidades");
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Obtiene las prácticas asociadas al médico autenticado.
+ * GET /medicos/practicas
+ */
+export async function obtenerPracticasMedico() {
+  const { data } = await api.get("/medicos/practicas");
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Obtiene las disponibilidades del médico autenticado.
+ * GET /medicos/disponibilidades
+ */
+export async function obtenerDisponibilidadesMedico() {
+  const { data } = await api.get("/medicos/disponibilidades");
+  return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Crea una disponibilidad del médico autenticado.
+ * POST /medicos/disponibilidades
+ */
+export async function crearDisponibilidadMedico(disponibilidad) {
+  const { data } = await api.post("/medicos/disponibilidades", {
+    disponibilidad,
+  });
+
+  return data;
+}
+
+/**
+ * Elimina una disponibilidad del médico autenticado.
+ * DELETE /medicos/disponibilidades
+ */
+export async function eliminarDisponibilidadMedico(disponibilidad) {
+  const { data } = await api.delete("/medicos/disponibilidades", {
+    data: { disponibilidad },
+  });
+
+  return data;
+}
+
+/**
+ * Obtiene las sedes asociadas al médico autenticado.
+ * GET /medicos/sedes
+ */
+export async function obtenerSedesMedico() {
+  const { data } = await api.get("/medicos/sedes");
+  return Array.isArray(data) ? data : [];
+}
