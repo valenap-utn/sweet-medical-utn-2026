@@ -28,7 +28,16 @@ export default function Header() {
   const handleLogout = async () => { await logout(); router.push("/"); };
 
   return (
-    <header style={{ position: "sticky", top: 0, zIndex: 50 }} className="glass" >
+      <header
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            background: "var(--surf-card)",
+            borderBottom: "1px solid var(--outline-v)",
+            boxShadow: "0 2px 12px rgba(107,29,42,.06)",
+          }}
+      >
       <div style={{
         maxWidth: 1200, margin: "0 auto", padding: "13px 40px",
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
