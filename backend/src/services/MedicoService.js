@@ -32,6 +32,31 @@ export class MedicoService {
         return medico.sedes;
     }
 
+    async obtenerEspecialidades({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}`
+            );
+        }
+
+
+        return medico.especialidades;
+    }
+
+    async obtenerPracticas({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}`
+            );
+        }
+
+        return medico.practicas;
+    }
+
     async obtenerAgenda({medicoId, filtros}) {
         const medico = await this.medicoRepository.findById(medicoId);
 

@@ -33,11 +33,15 @@ export default function medicoRoutes(getController) {
     router.delete('/disponibilidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarDisponibilidad);
 
     // Practicas
+    router.get('/practicas', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerPracticas);
+
     router.post('/practicas/:practicaId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarPractica);
 
     router.delete('/practicas/:practicaId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarPractica);
 
     // Especialidades
+    router.get('/especialidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerEspecialidades);
+
     router.post('/especialidades/:especialidadId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarEspecialidad);
 
     router.delete('/especialidades/:especialidadId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarEspecialidad);

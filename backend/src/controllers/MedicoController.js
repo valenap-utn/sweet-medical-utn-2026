@@ -58,6 +58,30 @@ export class MedicoController {
         }
     }
 
+    obtenerEspecialidades = async (req, res, next) => {
+        try {
+            const especialidades = await this.medicoService.obtenerEspecialidades({
+                medicoId: req.user.medicoId,
+            });
+
+            res.status(200).json(especialidades);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    obtenerPracticas = async (req, res, next) => {
+        try {
+            const practicas = await this.medicoService.obtenerPracticas({
+                medicoId: req.user.medicoId,
+            });
+
+            res.status(200).json(practicas);
+        } catch (err) {
+            next(err);
+        }
+    };
+
     quitarSede = async (req, res, next) => {
         try {
             const {sedeId} = req.params;
