@@ -77,7 +77,10 @@ export default function PanelMedicoPage() {
     );
   }
 
-  const nombreVisible = usuario.nombreUsuario ?? "Profesional";
+  const nombreVisible =
+      usuario.nombre ||
+      usuario.nombreUsuario ||
+      "Profesional";
 
   return (
     <div className={styles.page}>

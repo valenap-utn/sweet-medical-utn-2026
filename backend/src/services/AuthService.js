@@ -74,6 +74,7 @@ export class AuthService {
     // Login
     async login({nombreUsuario, password}) {
         const usuario = await this.usuarioRepository.findByNombreUsuario(nombreUsuario);
+        let nombre = null;
         if (!usuario) throw new NotFoundError(`El nombre de usuario ${nombreUsuario} no es correcto.`);
 
         const passwordValida = await bcrypt.compare(password, usuario.password);
@@ -104,6 +105,7 @@ export class AuthService {
             }
 
             medicoId = medico._id.toString();
+            nombre = medico.nombre;
         } else {
             throw new UnauthorizedError(
                 `El usuario tiene un rol inválido: ${usuario.rol}.`
@@ -112,6 +114,8 @@ export class AuthService {
 
         const payload = {
             usuarioId: usuario._id.toString(),
+            nombreUsuario: usuario.nombreUsuario,
+            nombre,
             rol: usuario.rol,
             pacienteId,
             medicoId,
@@ -132,6 +136,8 @@ export class AuthService {
 
         const nuevoPayload = {
             usuarioId: payload.usuarioId,
+            nombreUsuario: payload.nombreUsuario ?? null,
+            nombre: payload.nombre ?? null,
             rol: payload.rol,
             pacienteId: payload.pacienteId ?? null,
             medicoId: payload.medicoId ?? null,
