@@ -67,3 +67,8 @@ export async function obtenerCotizacion(turnoId) {
   const { data } = await api.get(`/turnos/${turnoId}/cotizacion`);
   return data;
 }
+
+export async function obtenerPerfilCompleto() {
+  const { data } = await api.get("/auth/perfil");
+  return data;
+}
