@@ -25,18 +25,18 @@ export default function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <section style={{ position: "relative", overflow: "hidden", padding: "64px 40px 52px" }}>
+      <section style={{ position: "relative", overflow: "hidden", padding: "clamp(32px,6vw,64px) var(--page-px) 52px" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#fdfaf8 0%,#f9eef0 45%,#f5e4e8 70%,#fdfaf8 100%)" }} />
         <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle,rgba(107,29,42,.12) 0%,transparent 70%)", top: -120, right: -80, pointerEvents: "none" }} />
         <div style={{ position: "absolute", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle,rgba(107,29,42,.07) 0%,transparent 70%)", bottom: -80, left: 20, pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 310px", gap: 56, alignItems: "center" }}>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "minmax(0,1fr) min(310px,40%)", gap: 56, alignItems: "center" }}>
           {/* Left */}
           <div>
             <span className="glass-rose" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", color: "var(--p)", marginBottom: 20 }}>
               ✦ Tu salud, sin vueltas
             </span>
-            <h1 style={{ fontFamily: "'Literata', serif", fontSize: 52, fontWeight: 700, color: "var(--p)", lineHeight: 1.05, letterSpacing: "-.025em", marginBottom: 16 }}>
+            <h1 style={{ fontFamily: "'Literata', serif", fontSize: "clamp(32px,5vw,52px)", fontWeight: 700, color: "var(--p)", lineHeight: 1.05, letterSpacing: "-.025em", marginBottom: 16 }}>
               Reservá turnos<br /><span style={{ color: "var(--p-mid)" }}>médicos</span> en<br />minutos
             </h1>
             <p style={{ fontSize: 16, color: "var(--secondary)", lineHeight: 1.65, maxWidth: 430, marginBottom: 28 }}>
@@ -86,7 +86,7 @@ export default function HomePage() {
       </section>
 
       {/* FEATURES */}
-      <section style={{ padding: "28px 40px", maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+      <section style={{ padding: "clamp(16px,3vw,28px) var(--page-px)", maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
         {FEATS.map((f) => (
           <div key={f.title} className="glass wellness-card" style={{ borderRadius: 18, padding: 22 }}>
             <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
@@ -97,7 +97,7 @@ export default function HomePage() {
       </section>
 
       {/* STATS */}
-      <section style={{ background: "var(--p)", padding: "26px 40px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", textAlign: "center", maxWidth: "100%" }}>
+      <section style={{ background: "var(--p)", padding: "26px 40px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", textAlign: "center", maxWidth: "100%" }}>
         {[["500k+","Pacientes"],["1.2k+","Profesionales"],["40+","Especialidades"],["98%","Satisfacción"]].map(([n,l]) => (
           <div key={l}>
             <div style={{ fontFamily: "'Literata', serif", fontSize: 34, fontWeight: 700, color: "var(--p-fixed)" }}>{n}</div>
@@ -107,7 +107,7 @@ export default function HomePage() {
       </section>
 
       {/* DOCTORS */}
-      <section style={{ padding: "36px 40px 48px", maxWidth: 1200, margin: "0 auto" }}>
+      <section style={{ padding: "clamp(20px,4vw,36px) var(--page-px) 48px", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 22 }}>
           <div>
             <h2 style={{ fontFamily: "'Literata', serif", fontSize: 28, fontWeight: 700, color: "var(--p)", margin: 0 }}>Profesionales destacados</h2>
@@ -117,7 +117,7 @@ export default function HomePage() {
             Ver todos →
           </Link>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 18 }}>
           {DOCTORS.map((d, i) => (
             <div key={d.name} className="wellness-card" style={{ borderRadius: 20, overflow: "hidden" }}>
               <div style={{ height: 130, background: `linear-gradient(135deg,${["#f9eef0","#f5e4e8","#f0d4d9"][i]},${["#f0d4d9","#f9eef0","#e8c4cb"][i]})`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -146,3 +146,4 @@ export default function HomePage() {
     </div>
   );
 }
+
