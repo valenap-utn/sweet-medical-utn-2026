@@ -31,6 +31,7 @@ const MODULOS = [
     descripcion:
       "Administrá las especialidades y prácticas que ofrecés a pacientes.",
     detalle: "Asociar o quitar servicios existentes.",
+    href: "/medico/servicios",
   },
   {
     numero: "04",
