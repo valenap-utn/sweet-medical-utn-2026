@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +9,7 @@ import { obtenerAgendaMedico } from "@/lib/turnosApi";
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
+import styles from "./page.module.css";
 
 const ESTADOS = [
     "",
@@ -48,8 +49,24 @@ export default function AgendaMedicoPage() {
     });
 
     const [turnos, setTurnos] = useState([]);
-    const [cargandoAgenda, setCargandoAgenda] = useState(false);
+    const [cargandoAgenda, setCargandoAgenda] = useState(true);
     const [error, setError] = useState("");
+
+    const buscarAgenda = useCallback(async () => {
+        try {
+            const data = await obtenerAgendaMedico(filtros);
+            setTurnos(data);
+        } catch (err) {
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "No pudimos cargar la agenda médica."
+                )
+            );
+        } finally {
+            setCargandoAgenda(false);
+        }
+    }, [filtros]);
 
     useEffect(() => {
         if (cargando) return;
@@ -64,41 +81,54 @@ export default function AgendaMedicoPage() {
         }
     }, [cargando, usuario, esMedico, router]);
 
-    const buscarAgenda = async () => {
+    useEffect(() => {
+        if (cargando || !usuario || !esMedico) return;
+
+        let cancelado = false;
+
+        async function cargarAgendaInicial() {
+            try {
+                const data = await obtenerAgendaMedico({
+                    fechaDesde: "",
+                    fechaHasta: "",
+                    estado: "",
+                });
+
+                if (cancelado) return;
+
+                setTurnos(data);
+            } catch (err) {
+                if (cancelado) return;
+
+                setError(
+                    getApiErrorMessage(
+                        err,
+                        "No pudimos cargar la agenda médica."
+                    )
+                );
+            } finally {
+                if (!cancelado) {
+                    setCargandoAgenda(false);
+                }
+            }
+        }
+
+        cargarAgendaInicial();
+
+        return () => {
+            cancelado = true;
+        };
+    }, [cargando, usuario, esMedico]);
+
+    const handleBuscarAgenda = async () => {
         setCargandoAgenda(true);
         setError("");
-
-        try {
-            const data = await obtenerAgendaMedico(filtros);
-            setTurnos(data);
-        } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "No pudimos cargar la agenda médica."
-                )
-            );
-        } finally {
-            setCargandoAgenda(false);
-        }
+        await buscarAgenda();
     };
-
-    useEffect(() => {
-        if (!cargando && usuario && esMedico) {
-            buscarAgenda();
-        }
-    }, [cargando, usuario, esMedico]);
 
     if (cargando || !usuario || !esMedico) {
         return (
-            <div style={{
-                minHeight: "60vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
-                gap: 12,
-            }}>
+            <div className={styles.loading}>
                 <Spinner size={36} />
                 <span>Preparando agenda...</span>
             </div>
@@ -106,99 +136,58 @@ export default function AgendaMedicoPage() {
     }
 
     return (
-        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "40px" }}>
-            <Link
-                href="/medico"
-                style={{
-                    color: "var(--p)",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    textDecoration: "none",
-                }}
-            >
+        <div className={styles.page}>
+            <Link href="/medico" className={styles.backLink}>
                 ← Volver al panel médico
             </Link>
 
-            <div style={{ marginTop: 24, marginBottom: 28 }}>
-                <h1 style={{
-                    fontFamily: "'Literata', serif",
-                    color: "var(--p)",
-                    marginBottom: 8,
-                }}>
-                    Agenda médica
-                </h1>
+            <div className={styles.header}>
+                <h1 className={styles.title}>Agenda médica</h1>
 
-                <p style={{ color: "var(--secondary)", fontSize: 14 }}>
+                <p className={styles.description}>
                     Consultá tus turnos generados, filtrando por fecha y estado.
                 </p>
             </div>
 
-            <section
-                className="glass"
-                style={{
-                    borderRadius: 18,
-                    padding: 22,
-                    marginBottom: 24,
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr auto",
-                    gap: 14,
-                    alignItems: "end",
-                }}
-            >
-                <div>
-                    <label style={{ fontSize: 11, fontWeight: 700 }}>
-                        Fecha desde
-                    </label>
+            <section className={`glass ${styles.filters}`}>
+                <div className={styles.field}>
+                    <label>Fecha desde</label>
                     <input
                         type="date"
                         value={filtros.fechaDesde}
                         onChange={(e) =>
-                            setFiltros((f) => ({ ...f, fechaDesde: e.target.value }))
+                            setFiltros((f) => ({
+                                ...f,
+                                fechaDesde: e.target.value,
+                            }))
                         }
-                        style={{
-                            width: "100%",
-                            padding: 10,
-                            borderRadius: 10,
-                            border: "1px solid var(--outline-v)",
-                        }}
                     />
                 </div>
 
-                <div>
-                    <label style={{ fontSize: 11, fontWeight: 700 }}>
-                        Fecha hasta
-                    </label>
+                <div className={styles.field}>
+                    <label>Fecha hasta</label>
                     <input
                         type="date"
                         value={filtros.fechaHasta}
                         onChange={(e) =>
-                            setFiltros((f) => ({ ...f, fechaHasta: e.target.value }))
+                            setFiltros((f) => ({
+                                ...f,
+                                fechaHasta: e.target.value,
+                            }))
                         }
-                        style={{
-                            width: "100%",
-                            padding: 10,
-                            borderRadius: 10,
-                            border: "1px solid var(--outline-v)",
-                        }}
                     />
                 </div>
 
-                <div>
-                    <label style={{ fontSize: 11, fontWeight: 700 }}>
-                        Estado
-                    </label>
+                <div className={styles.field}>
+                    <label>Estado</label>
                     <select
                         value={filtros.estado}
                         onChange={(e) =>
-                            setFiltros((f) => ({ ...f, estado: e.target.value }))
+                            setFiltros((f) => ({
+                                ...f,
+                                estado: e.target.value,
+                            }))
                         }
-                        style={{
-                            width: "100%",
-                            padding: 10,
-                            borderRadius: 10,
-                            border: "1px solid var(--outline-v)",
-                            background: "#fff",
-                        }}
                     >
                         {ESTADOS.map((estado) => (
                             <option key={estado} value={estado}>
@@ -209,17 +198,9 @@ export default function AgendaMedicoPage() {
                 </div>
 
                 <button
-                    onClick={buscarAgenda}
+                    onClick={handleBuscarAgenda}
                     disabled={cargandoAgenda}
-                    style={{
-                        padding: "11px 18px",
-                        borderRadius: 11,
-                        border: "none",
-                        background: "var(--p)",
-                        color: "#fff",
-                        fontWeight: 700,
-                        cursor: cargandoAgenda ? "not-allowed" : "pointer",
-                    }}
+                    className={styles.searchButton}
                 >
                     {cargandoAgenda ? "Buscando..." : "Buscar"}
                 </button>
@@ -232,74 +213,46 @@ export default function AgendaMedicoPage() {
             )}
 
             {cargandoAgenda ? (
-                <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
+                <div className={styles.centered}>
                     <Spinner size={32} />
                 </div>
             ) : turnos.length === 0 ? (
-                <div style={{
-                    textAlign: "center",
-                    padding: 48,
-                    border: "1px solid var(--outline-v)",
-                    borderRadius: 18,
-                    background: "#fff",
-                }}>
-                    <h2 style={{ color: "var(--p)" }}>No hay turnos para mostrar</h2>
-                    <p style={{ color: "var(--secondary)" }}>
-                        Probá cambiando los filtros o generando nuevas disponibilidades.
+                <div className={styles.emptyState}>
+                    <h2>No hay turnos para mostrar</h2>
+                    <p>
+                        Probá cambiando los filtros o generando nuevas
+                        disponibilidades.
                     </p>
                 </div>
             ) : (
-                <div style={{ display: "grid", gap: 12 }}>
+                <div className={styles.list}>
                     {turnos.map((turno) => (
-                        <article
-                            key={turno._id}
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "1.2fr 1fr 1fr 120px",
-                                gap: 16,
-                                alignItems: "center",
-                                padding: 18,
-                                borderRadius: 16,
-                                border: "1px solid var(--outline-v)",
-                                background: "#fff",
-                            }}
-                        >
+                        <article key={turno._id} className={styles.card}>
                             <div>
-                                <strong style={{ color: "var(--p)" }}>
+                                <strong className={styles.date}>
                                     {formatearFecha(turno.fechaHoraInicio)}
                                 </strong>
-                                <div style={{ fontSize: 12, color: "var(--secondary)" }}>
+                                <div className={styles.muted}>
                                     hasta {formatearFecha(turno.fechaHoraFin)}
                                 </div>
                             </div>
 
                             <div>
                                 <strong>{obtenerServicio(turno)}</strong>
-                                <div style={{ fontSize: 12, color: "var(--secondary)" }}>
+                                <div className={styles.muted}>
                                     {turno.tipoServicio}
                                 </div>
                             </div>
 
                             <div>
                                 <strong>{turno.sede?.nombre ?? "Sin sede"}</strong>
-                                <div style={{ fontSize: 12, color: "var(--secondary)" }}>
-                                    Paciente: {turno.paciente?.nombre ?? "Sin asignar"}
+                                <div className={styles.muted}>
+                                    Paciente:{" "}
+                                    {turno.paciente?.nombre ?? "Sin asignar"}
                                 </div>
                             </div>
 
-                            <span
-                                style={{
-                                    justifySelf: "end",
-                                    padding: "6px 10px",
-                                    borderRadius: 999,
-                                    background: "var(--p-fixed)",
-                                    color: "var(--p)",
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                }}
-                            >
-                {turno.estado}
-              </span>
+                            <span className={styles.status}>{turno.estado}</span>
                         </article>
                     ))}
                 </div>
