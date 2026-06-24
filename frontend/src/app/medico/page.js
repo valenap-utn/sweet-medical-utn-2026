@@ -15,6 +15,7 @@ const MODULOS = [
     descripcion:
       "Definí los días, horarios, sedes y servicios en los que atendés.",
     detalle: "Crear, consultar y eliminar franjas horarias.",
+    href: "/medico/disponibilidades",
   },
   {
     numero: "02",
