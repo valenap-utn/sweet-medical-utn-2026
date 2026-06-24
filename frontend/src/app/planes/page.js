@@ -35,20 +35,20 @@ export default function PlanesPage() {
   return (
     <div>
       {/* Hero */}
-      <div style={{ position: "relative", overflow: "hidden", padding: "48px 40px 40px" }}>
+      <div style={{ position: "relative", overflow: "hidden", padding: "clamp(24px,5vw,48px) var(--page-px) 40px" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#fdf5f6 0%,#f9eef0 40%,#f5e4e8 70%,#fdfaf8 100%)" }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: "var(--page-max)", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "'Literata', serif", fontSize: 36, fontWeight: 700, color: "var(--p)", marginBottom: 8 }}>Planes de cobertura</h1>
           <p style={{ fontSize: 15, color: "var(--secondary)", maxWidth: 500 }}>Elegí el plan que mejor se adapte a tus necesidades de salud y tu familia.</p>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px 56px" }}>
+      <div style={{ maxWidth: "var(--page-max)", margin: "0 auto", padding: "0 var(--page-px) 56px" }}>
         {error && <Alert type="info" style={{ marginBottom: 20 }}>{error} Mostrando planes de referencia.</Alert>}
         {cargando ? (
           <div style={{ display: "flex", justifyContent: "center", padding: 56 }}><Spinner size={32} /></div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, marginTop: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, marginTop: 8 }}>
             {planes.map((plan, i) => {
               const hl = plan.highlight ?? i === 1;
               return (
