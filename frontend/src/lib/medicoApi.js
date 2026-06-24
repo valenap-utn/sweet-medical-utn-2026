@@ -79,6 +79,16 @@ export async function obtenerSedesMedico() {
  * Asocia una especialidad existente al médico autenticado.
  * POST /medicos/especialidades/:especialidadId
  */
+export async function agregarSedeMedico(sedeId) {
+  const { data } = await api.post(`/medicos/sedes/${sedeId}`);
+  return data;
+}
+
+export async function quitarSedeMedico(sedeId) {
+  const { data } = await api.delete(`/medicos/sedes/${sedeId}`);
+  return data;
+}
+
 export async function agregarEspecialidadMedico(especialidadId) {
   const { data } = await api.post(`/medicos/especialidades/${especialidadId}`);
   return data;

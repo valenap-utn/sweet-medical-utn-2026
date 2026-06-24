@@ -39,6 +39,7 @@ const MODULOS = [
     descripcion:
       "Indicá en qué centros de atención brindás cada servicio.",
     detalle: "Asociar o quitar sedes disponibles.",
+    href: "/medico/sedes",
   },
   {
     numero: "05",
