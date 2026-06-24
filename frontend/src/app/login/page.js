@@ -66,7 +66,7 @@ export default function LoginPage() {
   return (
     <div style={{ minHeight: "calc(100vh - 140px)", display: "flex" }}>
       {/* Left panel */}
-      <div style={{ width: "45%", background: "var(--p)", padding: "48px 52px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div style={{ width: "clamp(220px,42%,45%)", background: "var(--p)", padding: "clamp(28px,5vw,48px) clamp(24px,5vw,52px)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div style={{ fontFamily: "'Literata', serif", fontSize: 20, fontWeight: 700, color: "var(--p-fixed)" }}>Sweet Medical</div>
         <div>
           <h2 style={{ fontFamily: "'Literata', serif", fontSize: 36, fontWeight: 700, color: "var(--p-fixed)", lineHeight: 1.15, marginBottom: 14 }}>Tu salud,<br />en buenas manos.</h2>
@@ -82,7 +82,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right panel */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 52px", background: "#fff" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(28px,5vw,48px) clamp(24px,5vw,52px)", background: "#fff" }}>
         <div style={{ width: "100%", maxWidth: 380 }}>
           <h1 style={{ fontFamily: "'Literata', serif", fontSize: 28, fontWeight: 700, color: "var(--p)", marginBottom: 5 }}>Bienvenido de vuelta</h1>
           <p style={{ fontSize: 13, color: "var(--secondary)", marginBottom: 28 }}>Iniciá sesión para gestionar tus turnos.</p>
