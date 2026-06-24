@@ -18,10 +18,7 @@ export class PacienteRepository {
                 path: "plan",
                 populate: [
                     {
-                        path: "coberturasEspecialidad.especialidad"
-                    },
-                    {
-                        path: "coberturasPractica.practica"
+                        path: "coberturas.servicio"
                     }
                 ]
             })

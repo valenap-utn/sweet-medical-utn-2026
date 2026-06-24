@@ -14,11 +14,11 @@ export default function planRoutes(getController) {
     router.get("/:id", planController.obtenerPorId);
 
     // Coberturas
-    router.patch("/:id/coberturas/especialidades", planController.agregarCoberturaEspecialidad);
+    router.patch("/:id/coberturas/servicios", planController.agregarCobertura);
 
     router.patch("/:id/coberturas/practicas", planController.agregarCoberturaPractica);
 
-    router.delete("/:id/coberturas/especialidades/:especialidadId", planController.quitarCoberturaEspecialidad);
+    router.delete("/:id/coberturas/servicios/:servicioId", planController.quitarCobertura);
 
     router.delete("/:id/coberturas/practicas/:practicaId", planController.quitarCoberturaPractica);
 

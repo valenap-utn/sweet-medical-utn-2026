@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
-import {Practica} from "../../domain/coberturas/Practica.js";
+import {Servicio} from "../../domain/coberturas/Servicio.js";
+import {TipoServicio} from "../../domain/enums/TipoServicio.js";
 
-const PracticaSchema = new mongoose.Schema({
+const ServicioSchema = new mongoose.Schema({
     codigo: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
     },
     nombre:{
@@ -18,20 +19,25 @@ const PracticaSchema = new mongoose.Schema({
             message: "El nombre de la práctica debe tener al menos 3 caracteres."
         }
     },
+    tipoServicio:{
+        type: String,
+        enum: Object.values(TipoServicio),
+        required: true
+    },
     duracionTurnoEnMins: {
         type: Number,
-        required: true,
+        required: true
     },
     costo: {
         type: Number,
-        required: true,
-    }
+        required: true
+    },
 }, {
 
     timestamps: true
 })
 
-PracticaSchema.loadClass(Practica);
+ServicioSchema.loadClass(Servicio);
 
-export const PracticaModel = mongoose.model("Practica", PracticaSchema);
+export const ServicioModel = mongoose.model("Servicio", ServicioSchema);
 

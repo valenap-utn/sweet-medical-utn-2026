@@ -5,20 +5,11 @@ import { api } from "./api";
  * GET /especialidades — público
  * Response: array directo [{ _id, nombre, duracionTurnoEnMins }]
  */
-export async function getEspecialidades() {
-  const { data } = await api.get("/especialidades");
+export async function getServicios() {
+  const { data } = await api.get("/servicios");
   return Array.isArray(data) ? data : [];
 }
 
-/**
- * Obtiene todas las prácticas.
- * GET /practicas — público
- * Response: array directo [{ _id, nombre, duracionTurnoEnMins }]
- */
-export async function getPracticas() {
-  const { data } = await api.get("/practicas");
-  return Array.isArray(data) ? data : [];
-}
 
 /**
  * Obtiene todas las sedes.

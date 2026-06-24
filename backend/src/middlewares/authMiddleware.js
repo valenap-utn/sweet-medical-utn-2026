@@ -8,7 +8,7 @@ export function authMiddleware(req, res, next) {
         if(!token) {
             throw new UnauthorizedError("No hay sessión activa.");
         }
-
+//
         req.user = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
         next();
     } catch (e) {

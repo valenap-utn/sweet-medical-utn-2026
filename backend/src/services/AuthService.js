@@ -58,8 +58,7 @@ export class AuthService {
             usuario: usuario._id,
             nombre: nombre,
             matricula: matricula,
-            especialidades: [],
-            practicas: [],
+            servicios: [],
             sedes: [],
             disponibilidades: [],
         });

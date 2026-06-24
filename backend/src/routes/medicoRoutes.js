@@ -21,10 +21,7 @@ export default function medicoRoutes(getController) {
 
     router.delete('/sedes/:sedeId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarSede);
 
-    // Disponibilidades
-    router.get('/especialidades/:especialidadId/turnos', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.consultarDisponibilidadEspecialidad);
-
-    router.get('/practicas/:practicaId/turnos', authMiddleware,requireRole(RolUsuario.MEDICO), medicoController.consultarDisponibilidadPractica);
+    router.get('/servicios/:servicioId/turnos', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.consultarDisponibilidad);
 
     router.get('/disponibilidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerDisponibilidades);
 
@@ -32,19 +29,11 @@ export default function medicoRoutes(getController) {
 
     router.delete('/disponibilidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarDisponibilidad);
 
-    // Practicas
-    router.get('/practicas', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerPracticas);
+    router.get('/servicios', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerServicios);
 
-    router.post('/practicas/:practicaId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarPractica);
+    router.post('/servicios/:servicioId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarServicio);
 
-    router.delete('/practicas/:practicaId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarPractica);
-
-    // Especialidades
-    router.get('/especialidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerEspecialidades);
-
-    router.post('/especialidades/:especialidadId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarEspecialidad);
-
-    router.delete('/especialidades/:especialidadId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarEspecialidad);
+    router.delete('/servicios/:servicioId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarServicio);
 
     return router;
 }

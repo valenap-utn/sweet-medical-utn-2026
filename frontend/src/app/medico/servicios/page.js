@@ -6,14 +6,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { RolUsuario } from "@/lib/roles";
 import {
-    agregarEspecialidadMedico,
-    agregarPracticaMedico,
-    obtenerEspecialidadesMedico,
-    obtenerPracticasMedico,
-    quitarEspecialidadMedico,
-    quitarPracticaMedico,
+    agregarServicioMedico,
+    obtenerServiciosMedico,
+    quitarServicioMedico
 } from "@/lib/medicoApi";
-import { getEspecialidades, getPracticas } from "@/lib/serviciosApi";
+import { getServicios } from "@/lib/serviciosApi";
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
@@ -131,16 +128,17 @@ export default function ServiciosMedicoPage() {
     const cargarDatos = useCallback(async () => {
         try {
             const [
-                especialidadesMedicoData,
-                practicasMedicoData,
-                todasEspecialidadesData,
-                todasPracticasData,
+                serviciosMedicoData,
+                todosServiciosData,
             ] = await Promise.all([
-                obtenerEspecialidadesMedico(),
-                obtenerPracticasMedico(),
-                getEspecialidades(),
-                getPracticas(),
+                obtenerServiciosMedico(),
+                getServicios(),
             ]);
+
+            const especialidadesMedicoData = serviciosMedicoData.filter(s => s.tipoServicio === "ESPECIALIDAD");
+            const practicasMedicoData = serviciosMedicoData.filter(s => s.tipoServicio === "PRACTICA");
+            const todasEspecialidadesData = todosServiciosData.filter(s => s.tipoServicio === "ESPECIALIDAD");
+            const todasPracticasData = todosServiciosData.filter(s => s.tipoServicio === "PRACTICA");
 
             setEspecialidadesMedico(especialidadesMedicoData);
             setPracticasMedico(practicasMedicoData);
@@ -174,39 +172,8 @@ export default function ServiciosMedicoPage() {
         let cancelado = false;
 
         async function cargarServiciosIniciales() {
-            try {
-                const [
-                    especialidadesMedicoData,
-                    practicasMedicoData,
-                    todasEspecialidadesData,
-                    todasPracticasData,
-                ] = await Promise.all([
-                    obtenerEspecialidadesMedico(),
-                    obtenerPracticasMedico(),
-                    getEspecialidades(),
-                    getPracticas(),
-                ]);
-
-                if (cancelado) return;
-
-                setEspecialidadesMedico(especialidadesMedicoData);
-                setPracticasMedico(practicasMedicoData);
-                setTodasEspecialidades(todasEspecialidadesData);
-                setTodasPracticas(todasPracticasData);
-            } catch (err) {
-                if (cancelado) return;
-
-                setError(
-                    getApiErrorMessage(
-                        err,
-                        "No pudimos cargar los servicios."
-                    )
-                );
-            } finally {
-                if (!cancelado) {
-                    setCargandoDatos(false);
-                }
-            }
+            if(cancelado) setCargandoDatos(false);
+            await cargarDatos();
         }
 
         cargarServiciosIniciales();
@@ -214,7 +181,7 @@ export default function ServiciosMedicoPage() {
         return () => {
             cancelado = true;
         };
-    }, [cargando, usuario, esMedico]);
+    }, [cargando, usuario, esMedico, cargarDatos]);
 
     const especialidadesParaAgregar = filtrarNoAsociados(
         todasEspecialidades,
@@ -236,7 +203,7 @@ export default function ServiciosMedicoPage() {
         setMensaje("");
 
         try {
-            await agregarEspecialidadMedico(especialidadSeleccionada);
+            await agregarServicioMedico(especialidadSeleccionada);
             setMensaje("Especialidad asociada correctamente.");
             setEspecialidadSeleccionada("");
             setCargandoDatos(true);
@@ -263,7 +230,7 @@ export default function ServiciosMedicoPage() {
         setMensaje("");
 
         try {
-            await agregarPracticaMedico(practicaSeleccionada);
+            await agregarServicioMedico(practicaSeleccionada);
             setMensaje("Práctica asociada correctamente.");
             setPracticaSeleccionada("");
             setCargandoDatos(true);
@@ -283,7 +250,7 @@ export default function ServiciosMedicoPage() {
         setMensaje("");
 
         try {
-            await quitarEspecialidadMedico(especialidadId);
+            await quitarServicioMedico(especialidadId);
             setMensaje("Especialidad quitada correctamente.");
             setCargandoDatos(true);
             await cargarDatos();
@@ -302,7 +269,7 @@ export default function ServiciosMedicoPage() {
         setMensaje("");
 
         try {
-            await quitarPracticaMedico(practicaId);
+            await quitarServicioMedico(practicaId);
             setMensaje("Práctica quitada correctamente.");
             setCargandoDatos(true);
             await cargarDatos();

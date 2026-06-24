@@ -34,14 +34,14 @@ export class PlanController {
         }
     }
 
-    agregarCoberturaEspecialidad = async (req, res, next) => {
+    agregarCobertura = async (req, res, next) => {
         try {
             const {id} = req.params;
-            const {especialidadId, nivel} = req.body;
+            const {servicioId, nivel} = req.body;
 
-            const plan = await this.planService.agregarCoberturaEspecialidad({
+            const plan = await this.planService.agregarCobertura({
                 planId: id,
-                especialidadId,
+                servicioId,
                 nivel
             });
 
@@ -68,12 +68,12 @@ export class PlanController {
         }
     }
 
-    quitarCoberturaEspecialidad = async (req, res, next) => {
+    quitarCobertura = async (req, res, next) => {
         try {
-            const {id, especialidadId} = req.params;
-            const plan = await this.planService.quitarCoberturaEspecialidad({
+            const {id, servicioId} = req.params;
+            const plan = await this.planService.quitarCobertura({
                 planId: id,
-                especialidadId
+                servicioId
             });
             res.status(200).json({data: plan});
         } catch (err) {

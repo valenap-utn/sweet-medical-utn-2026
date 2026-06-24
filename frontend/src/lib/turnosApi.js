@@ -8,6 +8,7 @@ export async function buscarTurnosDisponibles(params = {}) {
   const query = {};
 
   if (params.tipoServicio) query.tipoServicio = params.tipoServicio;
+  if (params.servicioId) query.servicioId = params.servicioId;
   if (params.sedeId) query.sedeId = params.sedeId;
   if (params.medicoId) query.medicoId = params.medicoId;
   if (params.fechaDesde) query.fechaDesde = params.fechaDesde;
@@ -18,13 +19,7 @@ export async function buscarTurnosDisponibles(params = {}) {
   query.sortBy = params.sortBy ?? "fechaHoraInicio";
   query.sortOrder = params.sortOrder ?? "asc";
 
-  if (params.tipoServicio === "ESPECIALIDAD" && params.especialidadId) {
-    query.especialidadId = params.especialidadId;
-  }
-
-  if (params.tipoServicio === "PRACTICA" && params.practicaId) {
-    query.practicaId = params.practicaId;
-  }
+  console.log("QUERY ENVIADA:", query);
 
   const { data } = await api.get("/turnos/disponibles", { params: query });
   return data;

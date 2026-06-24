@@ -9,7 +9,7 @@ export class PlanService {
     async crear({nombre, coberturasEspecialidad = [], coberturasPractica = []}) {
         if (!nombre) throw new BadRequestError("El nombre del plan es obligatorio");
 
-        const existente = this.planRepository.findByNombre(nombre);
+        const existente = await this.planRepository.findByNombre(nombre);
         if (existente) throw new ConflictError(`Ya existe un plan con nombre ${nombre}.`)
 
         const plan = {
@@ -35,14 +35,14 @@ export class PlanService {
 
     // Coberturas
 
-    async agregarCoberturaEspecialidad({planId, especialidadId, nivel}) {
+    async agregarCobertura({planId, servicioId, nivel}) {
         this.validarNivelCobertura(nivel)
 
-        if (!especialidadId) throw new BadRequestError("La especialidad es obligatoria.");
+        if (!servicioId) throw new BadRequestError("La especialidad es obligatoria.");
 
-        const plan = await this.planRepository.agregarCoberturaEspecialidad({
+        const plan = await this.planRepository.agregarCobertura({
             planId,
-            especialidadId,
+            servicioId,
             nivel
         });
         if (!plan) throw new NotFoundError(`No se encontró un plan con id: ${planId}`);
@@ -65,12 +65,12 @@ export class PlanService {
         return plan;
     }
 
-    async quitarCoberturaEspecialidad({planId, especialidadId}) {
-        if (!especialidadId) throw new BadRequestError("La especialidad es obligatoria.");
+    async quitarCobertura({planId, servicioId}) {
+        if (!servicioId) throw new BadRequestError("La especialidad es obligatoria.");
 
-        const plan = await this.planRepository.quitarCoberturaEspecialidad({
+        const plan = await this.planRepository.quitarCobertura({
             planId,
-            especialidadId
+            servicioId
         });
         if (!plan) throw new NotFoundError(`No se encontró un plan con id: ${planId}`);
 

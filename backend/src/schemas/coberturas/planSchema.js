@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import {Plan} from "../../domain/coberturas/Plan.js";
-import {CoberturaEspecialidadSchema} from "./coberturaEspecialidadSchema.js";
-import {CoberturaPracticaSchema} from "./coberturaPracticaSchema.js";
+import {CoberturaSchema} from "./coberturaSchema.js";
 
 const PlanSchema = new mongoose.Schema({
     nombre: {
@@ -15,14 +14,10 @@ const PlanSchema = new mongoose.Schema({
             message: 'El plan necesita un nombre con al menos 3 caracteres.'
         }
     },
-    coberturasEspecialidad: {
-        type: [CoberturaEspecialidadSchema],
+    coberturas: {
+        type: [CoberturaSchema],
         default: []
     },
-    coberturasPractica: {
-        type: [CoberturaPracticaSchema],
-        default: []
-    }
 }, {
     // Para trazabilidad ( createdAt , updatedAt )
     timestamps: true

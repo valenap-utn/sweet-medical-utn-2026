@@ -1,7 +1,7 @@
 "use client";
 import {useState, useEffect, useCallback} from "react";
 import {buscarTurnosDisponibles} from "@/lib/turnosApi";
-import {getEspecialidades, getPracticas, getSedes} from "@/lib/serviciosApi";
+import {getServicios, getSedes} from "@/lib/serviciosApi";
 import {getApiErrorMessage} from "@/lib/api";
 import {useCarrito} from "@/context/CarritoContext";
 import Alert from "@/components/ui/Alert";
@@ -46,10 +46,11 @@ const S = {
 
 function TurnoCard({turno, onAgregar, enCarrito}) {
     const cobertura = turno.cobertura ?? "NO_CUBIERTA";
-    const es = turno.tipoServicio === "ESPECIALIDAD";
-    const nombre = es ? turno.especialidad?.nombre : turno.practica?.nombre;
+    const es = turno.servicio?.tipoServicio === "ESPECIALIDAD";
+    const nombre = turno.servicio?.nombre;
     const medico = turno.medico?.nombre ?? "-";
     const sede = turno.sede?.nombre ?? "-";
+    console.log(turno);
 
     const fecha = turno.fechaHoraInicio ? new Date(turno.fechaHoraInicio).toLocaleString("es-AR", {
         dateStyle: "medium",
@@ -167,8 +168,7 @@ export default function TurnosPage() {
 
     const [filtros, setFiltros] = useState({
         tipoServicio: "",
-        especialidadId: "",
-        practicaId: "",
+        servicioId: "",
         sedeId: "",
         fechaDesde: "",
         sortOrder: "asc"
@@ -188,17 +188,21 @@ export default function TurnosPage() {
     const [sedes, setSedes] = useState([]);
 
     useEffect(() => {
-        Promise.all([getEspecialidades(), getPracticas(), getSedes()])
-            .then(([e, p, s]) => {
-                setEspecialidades(e);
-                setPracticas(p);
+        Promise.all([getServicios(), getSedes()])
+            .then(([ss, s]) => {
+                setEspecialidades(ss.filter(s => s.tipoServicio === "ESPECIALIDAD"));
+                setPracticas(ss.filter(s => s.tipoServicio === "PRACTICA"));
                 setSedes(s);
             })
             .catch(() => {
             });
     }, []);
 
+    const serviciosDisponibles = filtros.tipoServicio === "PRACTICA" ? practicas : especialidades;
+
     const buscar = useCallback(async (p = 1) => {
+        console.log("Entré a buscar");
+
         if (authCargando) {
             return;
         }
@@ -227,13 +231,7 @@ export default function TurnosPage() {
             limit: LIMIT,
         };
 
-        if (filtros.tipoServicio === "ESPECIALIDAD") {
-            delete params.practicaId;
-        }
-
-        if (filtros.tipoServicio === "PRACTICA") {
-            delete params.especialidadId;
-        }
+        console.log(params);
 
         try {
             const res =
@@ -305,8 +303,7 @@ export default function TurnosPage() {
                                 <select style={S.select} value={filtros.tipoServicio} onChange={e => setFiltros(f => ({
                                     ...f,
                                     tipoServicio: e.target.value,
-                                    especialidadId: "",
-                                    practicaId: ""
+                                    servicioId: ""
                                 }))}>
                                     <option value="">Todos</option>
                                     <option value="ESPECIALIDAD">Especialidad</option>
@@ -315,20 +312,14 @@ export default function TurnosPage() {
                             </div>
                             <div>
                                 <span
-                                    style={S.label}>{filtros.tipoServicio === "PRACTICA" ? "Práctica" : "Especialidad"}</span>
-                                {filtros.tipoServicio === "PRACTICA" ? (
-                                    <select style={S.select} value={filtros.practicaId}
-                                            onChange={e => setFiltros(f => ({...f, practicaId: e.target.value}))}>
-                                        <option value="">Todas</option>
-                                        {practicas.map(p => <option key={p._id} value={p._id}>{p.nombre}</option>)}
-                                    </select>
-                                ) : (
-                                    <select style={S.select} value={filtros.especialidadId}
-                                            onChange={e => setFiltros(f => ({...f, especialidadId: e.target.value}))}>
-                                        <option value="">Todas</option>
-                                        {especialidades.map(e => <option key={e._id} value={e._id}>{e.nombre}</option>)}
-                                    </select>
-                                )}
+                                    style={S.label}>{filtros.tipoServicio === "PRACTICA" ? "Práctica" : /*filtros.tipoServicio === "ESPECIALIDAD" ?*/ "Especialidad" /*: "Servicio"*/}</span>
+                                <select
+                                    style={S.select} value={filtros.servicioId}
+                                        onChange={e => setFiltros(f => ({...f, servicioId: e.target.value}))}>
+                                    <option value="">Todas</option>
+                                    {serviciosDisponibles.map(s => <option key={s._id} value={s._id}>{s.nombre}</option>)}
+                                </select>
+
                             </div>
                             <div>
                                 <span style={S.label}>Sede</span>

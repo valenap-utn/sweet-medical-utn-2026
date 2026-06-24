@@ -3,25 +3,19 @@ import {addDays} from 'date-fns';
 import {BadRequestError, NotFoundError} from "../error/AppError.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
+import {ServicioInvalido} from "../exceptions/ServicioInvalido.js";
 
 export class AgendaService {
-    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository}) {
+    constructor({medicoRepository, turnoRepository, servicioRepository}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
-        this.especialidadRepository = especialidadRepository;
-        this.practicaRepository = practicaRepository;
+        this.servicioRepository = servicioRepository;
     }
 
     async resolverServicio(disponibilidad) {
-        if (disponibilidad.tipoServicio === TipoServicio.ESPECIALIDAD) {
-            return await this.especialidadRepository.findById(disponibilidad.servicio);
-        }
-
-        if (disponibilidad.tipoServicio === TipoServicio.PRACTICA) {
-            return await this.practicaRepository.findById(disponibilidad.servicio);
-        }
-
-        throw new BadRequestError(`Tipo de servicio inválido: ${disponibilidad.tipoServicio}`);
+        const servicio = await this.servicioRepository.findById(disponibilidad.servicio)
+        if (!servicio) throw new ServicioInvalido(`Servicio inválido: ${disponibilidad.servicio}`);
+        return servicio;
     }
 
     async regenerarAgenda({medicoId}) {

@@ -1,15 +1,14 @@
 import cron from 'node-cron';
 import {addDays} from 'date-fns';
 import {Agenda} from '../domain/Agenda.js';
-import {TipoServicio} from "../domain/enums/TipoServicio.js";
-import {BadRequestError, NotFoundError} from "../error/AppError.js";
+import {NotFoundError} from "../error/AppError.js";
+import {ServicioInvalido} from "../exceptions/ServicioInvalido.js";
 
 export class TurnosBatchService {
-    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository}) {
+    constructor({medicoRepository, turnoRepository, servicioRepository}) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
-        this.especialidadRepository = especialidadRepository;
-        this.practicaRepository = practicaRepository;
+        this.servicioRepository = servicioRepository;
     }
 
     iniciarCron() {
@@ -26,15 +25,10 @@ export class TurnosBatchService {
     }
 
     async resolverServicio(disponibilidad) {
-        if (disponibilidad.tipoServicio === TipoServicio.ESPECIALIDAD) {
-            return await this.especialidadRepository.findById(disponibilidad.servicio);
-        }
+        const servicio = await this.servicioRepository.findById(disponibilidad.servicio);
+        if (!servicio) throw new ServicioInvalido(`Servicio ${disponibilidad.servicio} no existe`);
 
-        if (disponibilidad.tipoServicio === TipoServicio.PRACTICA) {
-            return await this.practicaRepository.findById(disponibilidad.servicio);
-        }
-
-        throw new BadRequestError(`Tipo de servicio inválido: ${disponibilidad.tipoServicio}`);
+        return servicio
     }
 
     async ejecutarGeneracion() {

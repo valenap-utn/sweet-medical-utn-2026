@@ -7,15 +7,13 @@ export class MedicoService {
     constructor({
                     medicoRepository,
                     turnoRepository,
-                    especialidadRepository,
-                    practicaRepository,
+                    servicioRepository,
                     agendaService,
                     sedeRepository
                 }) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
-        this.especialidadRepository = especialidadRepository;
-        this.practicaRepository = practicaRepository;
+        this.servicioRepository = servicioRepository;
         this.agendaService = agendaService;
         this.sedeRepository = sedeRepository;
     }
@@ -32,7 +30,7 @@ export class MedicoService {
         return medico.sedes;
     }
 
-    async obtenerEspecialidades({medicoId}) {
+    async obtenerServicios({medicoId}) {
         const medico = await this.medicoRepository.findById(medicoId);
 
         if (!medico) {
@@ -42,7 +40,7 @@ export class MedicoService {
         }
 
 
-        return medico.especialidades;
+        return medico.servicios;
     }
 
     async obtenerPracticas({medicoId}) {
@@ -159,21 +157,9 @@ export class MedicoService {
 
 
     /* ===== Acciones sobre DISPONIBILIDADES ======================================================================== */
-    async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
-        console.log({medicoId, especialidadId});
-        return await this.turnoRepository.buscarTurnosDisponibles({
-            medicoId: medicoId,
-            tipoServicio: TipoServicio.ESPECIALIDAD,
-            especialidadId: especialidadId
-        })
-    }
-
-    async consultarDisponibilidadPractica({medicoId, practicaId}) {
-        return await this.turnoRepository.buscarTurnosDisponibles({
-            medicoId: medicoId,
-            tipoServicio: TipoServicio.PRACTICA,
-            practicaId: practicaId
-        })
+    async consultarDisponibilidad({medicoId, servicioId}) {
+        console.log({medicoId, servicioId});
+        return await this.turnoRepository.buscarTurnosDisponibles({medicoId: medicoId, servicioId: servicioId})
     }
 
     // Obtiene todas las disponibilidades del médico (sin importar el tipoServicio)
@@ -225,68 +211,37 @@ export class MedicoService {
 
     }
 
-    /* ===== Acciones sobre ESPECIALIDADES ======================================================================== */
-    async agregarEspecialidad({medicoId, especialidadId}) {
+    /* ===== Acciones sobre SERVICIOS ======================================================================== */
+    async agregarServicio({medicoId, servicioId}) {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
-        const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
+        const servicio = await this.servicioRepository.findById(servicioId);
+        if (!servicio) throw new NotFoundError(`No se encontró el servicio con id: ${servicioId} .`);
 
-        if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new ConflictError(`El medico ${medicoId} ya tiene la especialidad ${especialidadId}`);
+        if (medico.servicios.some(s => this.servicioCoincide(s, servicio))) throw new ConflictError(`El medico ${medicoId} ya tiene el servicio ${servicioId}`);
 
-        medico.agregarEspecialidad(especialidad);
+        medico.agregarServicio(servicio);
 
         return await this.medicoRepository.save(medico);
 
     }
 
-    async quitarEspecialidad({medicoId, especialidadId}) {
+    async quitarServicio({medicoId, servicioId}) {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
-        const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
+        const servicio = await this.servicioRepository.findById(servicioId);
+        if (!servicio) throw new NotFoundError(`No se encontró el servicio con id: ${servicioId} .`);
 
-        const cantidadOriginal = medico.especialidades.length;
+        const cantidadOriginal = medico.servicios.length;
 
-        medico.especialidades = medico.especialidades.filter(e => !(this.servicioCoincide(e, especialidad)));
-        if (cantidadOriginal === medico.especialidades.length) throw new Error(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
+        medico.servicios = medico.servicios.filter(s => !(this.servicioCoincide(s, servicio)));
+        if (cantidadOriginal === medico.servicios.length) throw new Error(`El medico ${medicoId} no tiene el servicio ${servicioId}`);
 
         return await this.medicoRepository.save(medico);
 
     }
-
-    /* ===== Acciones sobre PRACTICAS ======================================================================== */
-    async agregarPractica({medicoId, practicaId}) {
-        const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
-
-        const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
-
-        if (medico.practicas.some(p => this.servicioCoincide(p, practica))) throw new ConflictError(`El medico ${medicoId} ya tiene la práctica ${practicaId}`);
-
-        medico.agregarPractica(practica);
-
-        return await this.medicoRepository.save(medico);
-    }
-
-    async quitarPractica({medicoId, practicaId}) {
-        const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
-
-        const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
-
-        const cantidadOriginal = medico.practicas.length;
-
-        medico.practicas = medico.practicas.filter(p => !(this.servicioCoincide(p, practica)));
-        if (cantidadOriginal === medico.practicas.length) throw new Error(`El medico ${medicoId} no tiene la práctica ${practicaId}`);
-
-        return await this.medicoRepository.save(medico);
-    }
-
 
     // -------------------------------------------- FUNCIONES AUXILIARES -----------------------------------------------------------------
 
@@ -330,29 +285,15 @@ export class MedicoService {
 
         if (!sedeExisteEnMedico) throw new BadRequestError("El médico no atiende en la sede indicada.");
 
-        let servicio;
+        const servicio = await this.servicioRepository.findById(disponibilidad.servicio);
+        if (!servicio) throw new NotFoundError(`No se encontró la especialidad con id: ${disponibilidad.servicio}`);
 
-        if (disponibilidad.tipoServicio === TipoServicio.ESPECIALIDAD) {
-            servicio = await this.especialidadRepository.findById(disponibilidad.servicio);
-            if (!servicio) throw new NotFoundError(`No se encontró la especialidad con id: ${disponibilidad.servicio}`);
+        const medicoTieneServicio = medico.servicios.some(e =>
+            e._id?.toString() === disponibilidad.servicio.toString()
+        );
 
-            const medicoTieneEspecialidad = medico.especialidades.some(e =>
-                e._id?.toString() === disponibilidad.servicio.toString()
-            );
+        if (!medicoTieneServicio) throw new BadRequestError(`El médico no tiene asociado ese servicio.`);
 
-            if (!medicoTieneEspecialidad) throw new BadRequestError(`El médico no tiene asociada esa especialidad.`);
-        }
-
-        if (disponibilidad.tipoServicio === TipoServicio.PRACTICA) {
-            servicio = await this.practicaRepository.findById(disponibilidad.servicio);
-            if (!servicio) throw new NotFoundError(`No se encontró la practica con id: ${disponibilidad.servicio}`);
-
-            const medicoTienePractica = medico.practicas.some(p =>
-                p._id?.toString() === disponibilidad.servicio.toString()
-            );
-
-            if (!medicoTienePractica) throw new BadRequestError(`El médico no tiene asociada esa práctica.`);
-        }
 
         return {
             diaSemana: disponibilidad.diaSemana,

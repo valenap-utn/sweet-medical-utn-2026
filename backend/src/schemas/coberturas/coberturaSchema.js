@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import {CoberturaPractica} from "../../domain/coberturas/CoberturaPractica.js";
+import {Cobertura} from "../../domain/coberturas/Cobertura.js";
 import {NivelCobertura} from "../../domain/enums/NivelCobertura.js";
 
-const CoberturaPracticaSchema = new mongoose.Schema({
-    practica: {
+const CoberturaSchema = new mongoose.Schema({
+    servicio: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Practica",
+        ref: "Servicio",
         required: true,
     },
     nivel: {
@@ -19,7 +19,7 @@ const CoberturaPracticaSchema = new mongoose.Schema({
     _id: false, // para no generar un 'id' automatico a cada subdocumento del array
 });
 
-CoberturaPracticaSchema.loadClass(CoberturaPractica);
+CoberturaSchema.loadClass(Cobertura);
 
-export const CoberturaPracticaModel = mongoose.model("CoberturaPractica", CoberturaPracticaSchema);
-export { CoberturaPracticaSchema };
+export const CoberturaModel = mongoose.model("Cobertura", CoberturaSchema);
+export { CoberturaSchema };

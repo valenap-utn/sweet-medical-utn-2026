@@ -173,9 +173,7 @@ export class TurnoService {
                 id: turno.id,
                 medico: turno.medico,
                 sede: turno.sede,
-                tipoServicio: turno.tipoServicio,
-                especialidad: turno.especialidad,
-                practica: turno.practica,
+                servicio: turno.servicio,
                 fechaHoraInicio: turno.fechaHoraInicio,
                 fechaHoraFin: turno.fechaHoraFin,
                 estado: turno.estado,
@@ -348,15 +346,13 @@ export class TurnoService {
     obtenerCoberturaPaciente(paciente, turno) {
         if (!paciente.plan) return NivelCobertura.NO_CUBIERTA;
 
-        if (turno.especialidad) return paciente.plan.obtenerCoberturaEspecialidad(turno.especialidad);
-
-        if (turno.practica) return paciente.plan.obtenerCoberturaPractica(turno.practica);
+        if (turno.servicio) return paciente.plan.obtenerCobertura(turno.servicio);
 
         return NivelCobertura.NO_CUBIERTA;
     }
 
     calcularCostoPaciente({turno, cobertura}) {
-        const servicio = turno.especialidad ?? turno.practica;
+        const servicio = turno.servicio;
         if (!servicio) return 0;
 
         const costoBase = servicio.costo ?? 0;

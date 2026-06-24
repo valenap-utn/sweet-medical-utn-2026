@@ -9,8 +9,7 @@ import {
     crearDisponibilidadMedico,
     eliminarDisponibilidadMedico,
     obtenerDisponibilidadesMedico,
-    obtenerEspecialidadesMedico,
-    obtenerPracticasMedico,
+    obtenerServiciosMedico,
     obtenerSedesMedico,
 } from "@/lib/medicoApi";
 import { getApiErrorMessage } from "@/lib/api";
@@ -102,14 +101,15 @@ export default function DisponibilidadesMedicoPage() {
             const [
                 disponibilidadesData,
                 sedesData,
-                especialidadesData,
-                practicasData,
+                serviciosData,
             ] = await Promise.all([
                 obtenerDisponibilidadesMedico(),
                 obtenerSedesMedico(),
-                obtenerEspecialidadesMedico(),
-                obtenerPracticasMedico(),
+                obtenerServiciosMedico(),
             ]);
+
+            const especialidadesData = serviciosData.filter(s => s.tipoServicio === "ESPECIALIDAD");
+            const practicasData = serviciosData.filter(s => s.tipoServicio === "PRACTICA");
 
             setDisponibilidades(
                 armarDisponibilidadesParaMostrar(
@@ -157,14 +157,15 @@ export default function DisponibilidadesMedicoPage() {
                 const [
                     disponibilidadesData,
                     sedesData,
-                    especialidadesData,
-                    practicasData,
+                    serviciosData,
                 ] = await Promise.all([
                     obtenerDisponibilidadesMedico(),
                     obtenerSedesMedico(),
-                    obtenerEspecialidadesMedico(),
-                    obtenerPracticasMedico(),
+                    obtenerServiciosMedico(),
                 ]);
+
+                const especialidadesData = serviciosData.filter(s => s.tipoServicio === "ESPECIALIDAD");
+                const practicasData = serviciosData.filter(s => s.tipoServicio === "PRACTICA");
 
                 if (cancelado) return;
 

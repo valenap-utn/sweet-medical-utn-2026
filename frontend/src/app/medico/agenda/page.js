@@ -29,11 +29,7 @@ function formatearFecha(fecha) {
 }
 
 function obtenerServicio(turno) {
-    if (turno.tipoServicio === "PRACTICA") {
-        return turno.practica?.nombre ?? "Práctica";
-    }
-
-    return turno.especialidad?.nombre ?? "Especialidad";
+    return turno.servicio?.nombre ?? turno.tipoServicio;
 }
 
 export default function AgendaMedicoPage() {

@@ -6,38 +6,36 @@ export class PlanRepository {
     }
 
     async obtenerTodos() {
-        return this.model.find().populate("coberturasEspecialidad.especialidad").populate("coberturasPractica.practica").lean();
+        return this.model.find().populate("coberturas.servicio").lean();
     }
 
     async obtenerPorId({id}) {
-        return this.model.findById(id).populate("coberturasEspecialidad.especialidad").populate("coberturasPractica.practica").lean();
+        return this.model.findById(id).populate("coberturas.servicio").lean();
     }
 
     async guardar({plan}) {
         const doc = new this.model({
             nombre: plan.nombre,
-            coberturasEspecialidad: plan.coberturasEspecialidad ?? [],
-            coberturasPractica: plan.coberturasPractica ?? [],
+            coberturas: plan.coberturas ?? []
         });
         return doc.save();
     }
 
     // Coberturas
-    async agregarCoberturaEspecialidad({planId, especialidadId, nivel}) {
+    async agregarCobertura({planId, servicioId, nivel}) {
         return this.model.findByIdAndUpdate(
             planId,
             {
                 $addToSet: {
-                    coberturasEspecialidad: {
-                        especialidad: especialidadId,
+                    coberturas: {
+                        servicio: servicioId,
                         nivel
                     }
                 }
             },
             {new: true, runValidators: true}
         )
-            .populate("coberturasEspecialidad.especialidad")
-            .populate("coberturasPractica.practica")
+            .populate("coberturas.servicio")
             // .lean();
     }
 
@@ -59,20 +57,19 @@ export class PlanRepository {
             // .lean();
     }
 
-    async quitarCoberturaEspecialidad({planId, especialidadId}) {
+    async quitarCobertura({planId, servicioId}) {
         return this.model.findByIdAndUpdate(
             planId,
             {
                 $pull: {
-                    coberturasEspecialidad: {
-                        especialidad: especialidadId
+                    coberturas: {
+                        servicio: servicioId
                     }
                 }
             },
             {new: true, runValidators: true}
         )
-            .populate("coberturasEspecialidad.especialidad")
-            .populate("coberturasPractica.practica")
+            .populate("coberturas.servicio")
             // .lean();
     }
 
@@ -100,8 +97,7 @@ export class PlanRepository {
     async findById(id){
         return await this.model
             .findById(id)
-            .populate("coberturasEspecialidad.especialidad")
-            .populate("coberturasPractica.practica")
+            .populate("coberturas.servicio")
             // .lean();
     }
 

@@ -21,19 +21,9 @@ const TurnoSchema = new mongoose.Schema({
         ref: "Sede",
         required: true
     },
-    tipoServicio:{
-        type: String,
-        enum: Object.values(TipoServicio),
-        required: true
-    },
-    especialidad: {
+    servicio: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Especialidad",
-        default: null
-    },
-    practica: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Practica",
+        ref: "Servicio",
         default: null
     },
     estado: {
