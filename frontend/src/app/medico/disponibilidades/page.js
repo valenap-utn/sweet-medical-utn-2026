@@ -12,7 +12,7 @@ import {
     obtenerEspecialidadesMedico,
     obtenerPracticasMedico,
     obtenerSedesMedico,
-} from "@/lib/turnosApi";
+} from "@/lib/medicoApi";
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";

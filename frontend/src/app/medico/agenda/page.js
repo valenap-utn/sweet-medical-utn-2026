@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { RolUsuario } from "@/lib/roles";
-import { obtenerAgendaMedico } from "@/lib/turnosApi";
+import { obtenerAgendaMedico } from "@/lib/medicoApi";
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
