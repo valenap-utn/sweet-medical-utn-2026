@@ -251,9 +251,18 @@ export class MedicoService {
         const cantidadOriginal = medico.especialidades.length;
 
         medico.especialidades = medico.especialidades.filter(e => !(this.servicioCoincide(e, especialidad)));
-        if (cantidadOriginal === medico.especialidades.length) throw new Error(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
+        if (cantidadOriginal === medico.especialidades.length) throw new NotFoundError(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
 
-        return await this.medicoRepository.save(medico);
+        medico.disponibilidades = (medico.disponibilidades || []).filter(d =>
+            !(
+                d.tipoServicio === TipoServicio.ESPECIALIDAD &&
+                d.servicio?.toString() === especialidadId.toString()
+            )
+        );
+
+        await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId });
+        return { mensaje: "Especialidad quitada y agenda regenerada." };
 
     }
 
@@ -272,19 +281,38 @@ export class MedicoService {
         return await this.medicoRepository.save(medico);
     }
 
-    async quitarPractica({medicoId, practicaId}) {
+    async quitarPractica({ medicoId, practicaId }) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        if (!medico) {
+            throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        }
 
         const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
+        if (!practica) {
+            throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
+        }
 
         const cantidadOriginal = medico.practicas.length;
 
-        medico.practicas = medico.practicas.filter(p => !(this.servicioCoincide(p, practica)));
-        if (cantidadOriginal === medico.practicas.length) throw new Error(`El medico ${medicoId} no tiene la práctica ${practicaId}`);
+        medico.practicas = medico.practicas.filter(p =>
+            !this.servicioCoincide(p, practica)
+        );
 
-        return await this.medicoRepository.save(medico);
+        if (cantidadOriginal === medico.practicas.length) {
+            throw new NotFoundError(`El médico ${medicoId} no tiene la práctica ${practicaId}`);
+        }
+
+        medico.disponibilidades = (medico.disponibilidades || []).filter(d =>
+            !(
+                d.tipoServicio === TipoServicio.PRACTICA &&
+                d.servicio?.toString() === practicaId.toString()
+            )
+        );
+
+        await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId });
+
+        return { mensaje: "Práctica quitada y agenda regenerada." };
     }
 
 
