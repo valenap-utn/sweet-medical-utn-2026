@@ -44,6 +44,9 @@
     grid-template-columns: 1fr 1fr 1fr auto;
     gap: 14px;
     align-items: end;
+    background: #fff;
+    border: 1px solid var(--outline-v);
+    box-shadow: 0 8px 22px rgba(107, 29, 42, 0.06);
 }
 
 .field label {
