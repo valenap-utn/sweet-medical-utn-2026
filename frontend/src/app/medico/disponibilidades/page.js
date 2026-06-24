@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +16,7 @@ import {
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
+import styles from "./page.module.css";
 
 const DIAS = [
     "Lunes",
@@ -204,6 +204,7 @@ export default function DisponibilidadesMedicoPage() {
 
     const serviciosDisponibles =
         form.tipoServicio === "PRACTICA" ? practicas : especialidades;
+
     const handleChange = (campo, valor) => {
         setForm((actual) => ({
             ...actual,
@@ -259,6 +260,7 @@ export default function DisponibilidadesMedicoPage() {
             setGuardando(false);
         }
     };
+
     const eliminarDisponibilidad = async (disponibilidad) => {
         setError("");
         setMensaje("");
@@ -278,6 +280,7 @@ export default function DisponibilidadesMedicoPage() {
             setMensaje(
                 "Disponibilidad eliminada correctamente. La agenda fue regenerada."
             );
+            setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
             setError(
@@ -291,16 +294,7 @@ export default function DisponibilidadesMedicoPage() {
 
     if (cargando || !usuario || !esMedico) {
         return (
-            <div
-                style={{
-                    minHeight: "60vh",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexDirection: "column",
-                    gap: 12,
-                }}
-            >
+            <div className={styles.loading}>
                 <Spinner size={36} />
                 <span>Preparando disponibilidades...</span>
             </div>
@@ -308,32 +302,17 @@ export default function DisponibilidadesMedicoPage() {
     }
 
     return (
-        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "40px" }}>
-            <Link
-                href="/medico"
-                style={{
-                    color: "var(--p)",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    textDecoration: "none",
-                }}
-            >
+        <div className={styles.page}>
+            <Link href="/medico" className={styles.backLink}>
                 ← Volver al panel médico
             </Link>
 
-            <div style={{ marginTop: 24, marginBottom: 28 }}>
-                <h1
-                    style={{
-                        fontFamily: "'Literata', serif",
-                        color: "var(--p)",
-                        marginBottom: 8,
-                    }}
-                >
-                    Disponibilidades
-                </h1>
+            <div className={styles.header}>
+                <h1 className={styles.title}>Disponibilidades</h1>
 
-                <p style={{ color: "var(--secondary)", fontSize: 14 }}>
-                    Definí los días, horarios, sedes y servicios en los que atendés.
+                <p className={styles.description}>
+                    Definí los días, horarios, sedes y servicios en los que
+                    atendés.
                 </p>
             </div>
 
@@ -349,37 +328,15 @@ export default function DisponibilidadesMedicoPage() {
                 </Alert>
             )}
 
-            <section
-                className="glass"
-                style={{
-                    borderRadius: 18,
-                    padding: 22,
-                    marginBottom: 24,
-                }}
-            >
-                <form
-                    onSubmit={crearDisponibilidad}
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr 1fr",
-                        gap: 14,
-                        alignItems: "end",
-                    }}
-                >
-                    <div>
-                        <label style={{ fontSize: 11, fontWeight: 700 }}>
-                            Día
-                        </label>
+            <section className={`glass ${styles.formCard}`}>
+                <form onSubmit={crearDisponibilidad} className={styles.formGrid}>
+                    <div className={styles.field}>
+                        <label>Día</label>
                         <select
                             value={form.diaSemana}
                             onChange={(e) =>
                                 handleChange("diaSemana", e.target.value)
                             }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
                         >
                             {DIAS.map((dia) => (
                                 <option key={dia} value={dia}>
@@ -389,56 +346,35 @@ export default function DisponibilidadesMedicoPage() {
                         </select>
                     </div>
 
-                    <div>
-                        <label style={{ fontSize: 11, fontWeight: 700 }}>
-                            Hora desde
-                        </label>
+                    <div className={styles.field}>
+                        <label>Hora desde</label>
                         <input
                             type="time"
                             value={form.horaDesde}
                             onChange={(e) =>
                                 handleChange("horaDesde", e.target.value)
                             }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
                         />
                     </div>
 
-                    <div>
-                        <label style={{ fontSize: 11, fontWeight: 700 }}>
-                            Hora hasta
-                        </label>
+                    <div className={styles.field}>
+                        <label>Hora hasta</label>
                         <input
                             type="time"
                             value={form.horaHasta}
                             onChange={(e) =>
                                 handleChange("horaHasta", e.target.value)
                             }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
                         />
                     </div>
 
-                    <div>
-                        <label style={{ fontSize: 11, fontWeight: 700 }}>
-                            Sede
-                        </label>
+                    <div className={styles.field}>
+                        <label>Sede</label>
                         <select
                             value={form.sedeId}
                             onChange={(e) =>
                                 handleChange("sedeId", e.target.value)
                             }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
                         >
                             <option value="">Seleccionar sede</option>
                             {sedes.map((sede) => (
@@ -449,20 +385,13 @@ export default function DisponibilidadesMedicoPage() {
                         </select>
                     </div>
 
-                    <div>
-                        <label style={{ fontSize: 11, fontWeight: 700 }}>
-                            Tipo de servicio
-                        </label>
+                    <div className={styles.field}>
+                        <label>Tipo de servicio</label>
                         <select
                             value={form.tipoServicio}
                             onChange={(e) =>
                                 handleChange("tipoServicio", e.target.value)
                             }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
                         >
                             {TIPOS_SERVICIO.map((tipo) => (
                                 <option key={tipo.value} value={tipo.value}>
@@ -472,20 +401,13 @@ export default function DisponibilidadesMedicoPage() {
                         </select>
                     </div>
 
-                    <div>
-                        <label style={{ fontSize: 11, fontWeight: 700 }}>
-                            Servicio
-                        </label>
+                    <div className={styles.field}>
+                        <label>Servicio</label>
                         <select
                             value={form.servicio}
                             onChange={(e) =>
                                 handleChange("servicio", e.target.value)
                             }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
                         >
                             <option value="">Seleccionar servicio</option>
                             {serviciosDisponibles.map((servicio) => (
@@ -499,15 +421,7 @@ export default function DisponibilidadesMedicoPage() {
                     <button
                         type="submit"
                         disabled={guardando}
-                        style={{
-                            padding: "11px 18px",
-                            borderRadius: 11,
-                            border: "none",
-                            background: "var(--p)",
-                            color: "#fff",
-                            fontWeight: 700,
-                            cursor: guardando ? "not-allowed" : "pointer",
-                        }}
+                        className={styles.submitButton}
                     >
                         {guardando ? "Guardando..." : "Crear disponibilidad"}
                     </button>
@@ -515,79 +429,41 @@ export default function DisponibilidadesMedicoPage() {
             </section>
 
             {cargandoDatos ? (
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        padding: 40,
-                    }}
-                >
+                <div className={styles.centered}>
                     <Spinner size={32} />
                 </div>
             ) : disponibilidades.length === 0 ? (
-                <div
-                    style={{
-                        textAlign: "center",
-                        padding: 48,
-                        border: "1px solid var(--outline-v)",
-                        borderRadius: 18,
-                        background: "#fff",
-                    }}
-                >
-                    <h2 style={{ color: "var(--p)" }}>
-                        No tenés disponibilidades cargadas
-                    </h2>
-                    <p style={{ color: "var(--secondary)" }}>
-                        Creá una disponibilidad para que el sistema genere tu agenda.
+                <div className={styles.emptyState}>
+                    <h2>No tenés disponibilidades cargadas</h2>
+                    <p>
+                        Creá una disponibilidad para que el sistema genere tu
+                        agenda.
                     </p>
                 </div>
             ) : (
-                <div style={{ display: "grid", gap: 12 }}>
+                <div className={styles.list}>
                     {disponibilidades.map((disponibilidad, index) => (
                         <article
                             key={`${disponibilidad.diaSemana}-${disponibilidad.horaDesde}-${disponibilidad.horaHasta}-${index}`}
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr 1fr 140px",
-                                gap: 16,
-                                alignItems: "center",
-                                padding: 18,
-                                borderRadius: 16,
-                                border: "1px solid var(--outline-v)",
-                                background: "#fff",
-                            }}
+                            className={styles.card}
                         >
                             <div>
-                                <strong style={{ color: "var(--p)" }}>
+                                <strong className={styles.day}>
                                     {disponibilidad.diaSemana}
                                 </strong>
-                                <div
-                                    style={{
-                                        fontSize: 12,
-                                        color: "var(--secondary)",
-                                    }}
-                                >
+                                <div className={styles.muted}>
                                     {disponibilidad.horaDesde} a{" "}
                                     {disponibilidad.horaHasta}
                                 </div>
                             </div>
 
                             <div>
-                                <strong>
-                                    {disponibilidad.sedeNombre}
-                                </strong>
+                                <strong>{disponibilidad.sedeNombre}</strong>
                             </div>
 
                             <div>
-                                <strong>
-                                    {disponibilidad.servicioNombre}
-                                </strong>
-                                <div
-                                    style={{
-                                        fontSize: 12,
-                                        color: "var(--secondary)",
-                                    }}
-                                >
+                                <strong>{disponibilidad.servicioNombre}</strong>
+                                <div className={styles.muted}>
                                     {disponibilidad.tipoServicio}
                                 </div>
                             </div>
@@ -596,16 +472,7 @@ export default function DisponibilidadesMedicoPage() {
                                 onClick={() =>
                                     eliminarDisponibilidad(disponibilidad)
                                 }
-                                style={{
-                                    justifySelf: "end",
-                                    padding: "8px 12px",
-                                    borderRadius: 10,
-                                    border: "1px solid var(--outline-v)",
-                                    background: "#fff",
-                                    color: "var(--p)",
-                                    fontWeight: 700,
-                                    cursor: "pointer",
-                                }}
+                                className={styles.deleteButton}
                             >
                                 Eliminar
                             </button>
