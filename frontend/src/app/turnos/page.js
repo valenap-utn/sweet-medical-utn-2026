@@ -281,7 +281,7 @@ export default function TurnosPage() {
                     pointerEvents: "none"
                 }}/>
                 <div
-                    style={{position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto", padding: "36px 40px 0"}}>
+                    style={{position: "relative", zIndex: 1, maxWidth: "var(--page-max)", margin: "0 auto", padding: "clamp(20px,4vw,36px) var(--page-px) 0"}}>
                     <h1 style={{
                         fontFamily: "'Literata', serif",
                         fontSize: 28,
@@ -296,7 +296,7 @@ export default function TurnosPage() {
                     <div className="glass" style={{borderRadius: "20px 20px 0 0", padding: "20px 24px"}}>
                         <div style={{
                             display: "grid",
-                            gridTemplateColumns: "1fr 1fr 1fr 1fr auto",
+                            gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr)) auto",
                             gap: 14,
                             alignItems: "end"
                         }}>
@@ -369,7 +369,7 @@ export default function TurnosPage() {
             </div>
 
             {/* Results */}
-            <div style={{maxWidth: 1200, margin: "0 auto", padding: "20px 40px 48px"}}>
+            <div style={{maxWidth: "var(--page-max)", margin: "0 auto", padding: "16px var(--page-px) 48px"}}>
                 {!authCargando && !usuario && (
                     <Alert
                         type="info"
