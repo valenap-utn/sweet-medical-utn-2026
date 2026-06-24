@@ -66,7 +66,7 @@ export default function Header() {
           {!esMedico && (
             <div style={{ position: "relative" }}>
               <Link href="/carrito" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "8px 14px", borderRadius: 999, border: "2px solid var(--p)", color: "var(--p)", fontWeight: 700, fontSize: 12, textDecoration: "none" }}>
-                📅 Carrito
+                📅 Turno
               </Link>
               {items.length > 0 && (
                 <span style={{ position: "absolute", top: -5, right: -5, width: 17, height: 17, background: "var(--p)", color: "#fff", borderRadius: "50%", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -121,7 +121,7 @@ export default function Header() {
           {!esMedico && (
             <Link href="/carrito" onClick={() => setMenuOpen(false)}
               style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 0", fontSize: 14, fontWeight: 600, color: "var(--p)", textDecoration: "none", borderBottom: "1px solid var(--outline-v)" }}>
-              📅 Carrito {items.length > 0 && (
+              📅 Turno {items.length > 0 && (
                 <span style={{ padding: "1px 7px", background: "var(--p)", color: "#fff", borderRadius: 999, fontSize: 10, fontWeight: 700 }}>{items.length}</span>
               )}
             </Link>
