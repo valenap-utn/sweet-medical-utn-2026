@@ -68,6 +68,35 @@ export async function obtenerCotizacion(turnoId) {
   return data;
 }
 
+/**
+ * Marca un turno como realizado.
+ * PATCH /turnos/:turnoId/realizacion
+ */
+export async function marcarTurnoRealizado(turnoId) {
+  const { data } = await api.patch(`/turnos/${turnoId}/realizacion`);
+  return data;
+}
+
+/**
+ * Propone un cambio de fecha para un turno.
+ * PATCH /turnos/:turnoId/propuesta-cambio-fecha
+ */
+export async function proponerCambioFecha(turnoId, nuevaFechaHora) {
+  const { data } = await api.patch(`/turnos/${turnoId}/propuesta-cambio-fecha`, {
+    nuevaFechaHora,
+  });
+  return data;
+}
+
+/**
+ * Confirma un turno reservado.
+ * PATCH /turnos/:turnoId/confirmacion
+ */
+export async function confirmarTurno(turnoId) {
+  const { data } = await api.patch(`/turnos/${turnoId}/confirmacion`);
+  return data;
+}
+
 export async function obtenerPerfilCompleto() {
   const { data } = await api.get("/auth/perfil");
   return data;

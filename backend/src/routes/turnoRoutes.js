@@ -14,7 +14,9 @@ export default function turnoRoutes(getController) {
     // Generales
     router.patch("/:turnoId/cancelacion", authMiddleware, turnoController.cancelarTurno);
 
-    router.patch("/:turnoId/confirmacion", authMiddleware, turnoController.confirmarCambioFecha);
+    router.patch("/:turnoId/confirmacion", authMiddleware, turnoController.confirmarTurno);
+
+    router.patch("/:turnoId/confirmacion-cambio-fecha", authMiddleware, turnoController.confirmarCambioFecha);
 
     // Solo médicos
     router.patch("/:turnoId/realizacion", authMiddleware, requireRole(RolUsuario.MEDICO), turnoController.marcarTurnoRealizado);
