@@ -3,55 +3,36 @@ import { api } from "./api";
 /**
  * Busca turnos disponibles.
  * GET /turnos/disponibles — público, sin auth
- *
- * Query params aceptados por el backend (TurnoRepository.buscarTurnosDisponibles):
- *   - tipoServicio:   "ESPECIALIDAD" | "PRACTICA"
- *   - especialidadId: ObjectId (solo si tipoServicio === "ESPECIALIDAD")
- *   - practicaId:     ObjectId (solo si tipoServicio === "PRACTICA")
- *   - sedeId:         ObjectId
- *   - medicoId:       ObjectId
- *   - fechaDesde:     ISO string (parseado con parseISO en el servicio)
- *   - fechaHasta:     ISO string
- *   - page:           number (default 1)
- *   - limit:          number (default 10)
- *   - sortBy:         string (default "fechaHoraInicio")
- *   - sortOrder:      "asc" | "desc"
- *
- * Response: { turnos: [...], total: number, page: number, limit: number }
- * Cada turno tiene: { _id, medico (populated), sede (populated),
- *                     especialidad (populated), practica (populated),
- *                     tipoServicio, fechaHoraInicio, fechaHoraFin,
- *                     estado, duracionEnMins?, costo? }
  */
 export async function buscarTurnosDisponibles(params = {}) {
   const query = {};
 
-  if (params.tipoServicio)   query.tipoServicio   = params.tipoServicio;
-  if (params.sedeId)         query.sedeId         = params.sedeId;
-  if (params.medicoId)       query.medicoId       = params.medicoId;
-  if (params.fechaDesde)     query.fechaDesde     = params.fechaDesde;
-  if (params.fechaHasta)     query.fechaHasta     = params.fechaHasta;
-  if (params.page)           query.page           = params.page;
-  if (params.limit)          query.limit          = params.limit;
-  query.sortBy    = params.sortBy    ?? "fechaHoraInicio";
+  if (params.tipoServicio) query.tipoServicio = params.tipoServicio;
+  if (params.sedeId) query.sedeId = params.sedeId;
+  if (params.medicoId) query.medicoId = params.medicoId;
+  if (params.fechaDesde) query.fechaDesde = params.fechaDesde;
+  if (params.fechaHasta) query.fechaHasta = params.fechaHasta;
+  if (params.page) query.page = params.page;
+  if (params.limit) query.limit = params.limit;
+
+  query.sortBy = params.sortBy ?? "fechaHoraInicio";
   query.sortOrder = params.sortOrder ?? "asc";
 
-  // El backend filtra por especialidad o práctica dependiendo del tipoServicio
   if (params.tipoServicio === "ESPECIALIDAD" && params.especialidadId) {
     query.especialidadId = params.especialidadId;
   }
+
   if (params.tipoServicio === "PRACTICA" && params.practicaId) {
     query.practicaId = params.practicaId;
   }
 
   const { data } = await api.get("/turnos/disponibles", { params: query });
-  return data; // { turnos, total, page, limit }
+  return data;
 }
 
 /**
  * Obtiene el historial de turnos del paciente autenticado.
- * GET /pacientes/turnos — requiere auth (cookie accessToken)
- * Response: array de turnos del paciente (todos los estados)
+ * GET /pacientes/turnos
  */
 export async function obtenerHistorialPaciente() {
   const { data } = await api.get("/pacientes/turnos");
@@ -60,8 +41,7 @@ export async function obtenerHistorialPaciente() {
 
 /**
  * Reserva un turno disponible para el paciente autenticado.
- * PATCH /turnos/:turnoId/reserva — requiere auth
- * Response: turno actualizado con estado "Reservado"
+ * PATCH /turnos/:turnoId/reserva
  */
 export async function reservarTurno(turnoId) {
   const { data } = await api.patch(`/turnos/${turnoId}/reserva`);
@@ -69,21 +49,55 @@ export async function reservarTurno(turnoId) {
 }
 
 /**
- * Cancela un turno (paciente o médico autenticado).
- * PATCH /turnos/:turnoId/cancelacion — requiere auth
- * Body: { motivo?: string }
+ * Cancela un turno.
+ * PATCH /turnos/:turnoId/cancelacion
  */
 export async function cancelarTurno(turnoId, motivo = "") {
-  const { data } = await api.patch(`/turnos/${turnoId}/cancelacion`, { motivo });
+  const { data } = await api.patch(`/turnos/${turnoId}/cancelacion`, {
+    motivo,
+  });
   return data;
 }
 
 /**
  * Obtiene la cotización estimada de un turno para el paciente autenticado.
- * GET /turnos/:turnoId/cotizacion — requiere auth
- * Response: { turno, cobertura, costo }
+ * GET /turnos/:turnoId/cotizacion
  */
 export async function obtenerCotizacion(turnoId) {
   const { data } = await api.get(`/turnos/${turnoId}/cotizacion`);
+  return data;
+}
+
+/**
+ * Marca un turno como realizado.
+ * PATCH /turnos/:turnoId/realizacion
+ */
+export async function marcarTurnoRealizado(turnoId) {
+  const { data } = await api.patch(`/turnos/${turnoId}/realizacion`);
+  return data;
+}
+
+/**
+ * Propone un cambio de fecha para un turno.
+ * PATCH /turnos/:turnoId/propuesta-cambio-fecha
+ */
+export async function proponerCambioFecha(turnoId, nuevaFechaHora) {
+  const { data } = await api.patch(`/turnos/${turnoId}/propuesta-cambio-fecha`, {
+    nuevaFechaHora,
+  });
+  return data;
+}
+
+/**
+ * Confirma un turno reservado.
+ * PATCH /turnos/:turnoId/confirmacion
+ */
+export async function confirmarTurno(turnoId) {
+  const { data } = await api.patch(`/turnos/${turnoId}/confirmacion`);
+  return data;
+}
+
+export async function obtenerPerfilCompleto() {
+  const { data } = await api.get("/auth/perfil");
   return data;
 }

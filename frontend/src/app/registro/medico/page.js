@@ -59,7 +59,7 @@ export default function RegistroMedicoPage() {
 
   return (
     <div style={{ minHeight: "calc(100vh - 140px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px", background: "linear-gradient(135deg,#fdfaf8,#f9eef0 50%,#fdfaf8)" }}>
-      <div style={{ width: "100%", maxWidth: 440 }}>
+      <div style={{ width: "100%", maxWidth: "min(440px,100%)" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ fontFamily: "'Literata', serif", fontSize: 20, fontWeight: 700, color: "var(--p)", marginBottom: 16 }}>Sweet Medical</div>
           <h1 style={{ fontFamily: "'Literata', serif", fontSize: 26, fontWeight: 700, color: "var(--p)", marginBottom: 5 }}>Registro de médico</h1>

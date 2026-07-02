@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getApiErrorMessage } from "@/lib/api";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
+import { RolUsuario } from "@/lib/roles";
 
 const S = {
   label: { fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--on-surf-v)", display: "block", marginBottom: 6 },
@@ -40,15 +41,32 @@ export default function LoginPage() {
     e.preventDefault(); setApiError("");
     if (!validate()) return;
     setLoading(true);
-    try { await login(form); router.push("/"); }
-    catch (error) { setApiError(getApiErrorMessage(error, "Datos incorrectos. Verificá e intentá de nuevo.")); }
-    finally { setLoading(false); }
+    try {
+      const data = await login(form);
+      const rol = data.usuario?.rol;
+
+      if (rol === RolUsuario.MEDICO) {
+        router.push("/medico");
+        return;
+      }
+
+      router.push("/turnos");
+    } catch (error) {
+      setApiError(
+          getApiErrorMessage(
+              error,
+              "Datos incorrectos. Verificá e intentá de nuevo."
+          )
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ minHeight: "calc(100vh - 140px)", display: "flex" }}>
+    <div className="login-layout" style={{ minHeight: "calc(100vh - 140px)", display: "flex" }}>
       {/* Left panel */}
-      <div style={{ width: "45%", background: "var(--p)", padding: "48px 52px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div className="login-side-panel" style={{ width: "clamp(220px,42%,45%)", background: "var(--p)", padding: "clamp(28px,5vw,48px) clamp(24px,5vw,52px)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div style={{ fontFamily: "'Literata', serif", fontSize: 20, fontWeight: 700, color: "var(--p-fixed)" }}>Sweet Medical</div>
         <div>
           <h2 style={{ fontFamily: "'Literata', serif", fontSize: 36, fontWeight: 700, color: "var(--p-fixed)", lineHeight: 1.15, marginBottom: 14 }}>Tu salud,<br />en buenas manos.</h2>
@@ -64,7 +82,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right panel */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 52px", background: "#fff" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(28px,5vw,48px) clamp(24px,5vw,52px)", background: "#fff" }}>
         <div style={{ width: "100%", maxWidth: 380 }}>
           <h1 style={{ fontFamily: "'Literata', serif", fontSize: 28, fontWeight: 700, color: "var(--p)", marginBottom: 5 }}>Bienvenido de vuelta</h1>
           <p style={{ fontSize: 13, color: "var(--secondary)", marginBottom: 28 }}>Iniciá sesión para gestionar tus turnos.</p>
@@ -100,12 +118,41 @@ export default function LoginPage() {
               <div style={{ flex: 1, borderTop: "1px solid var(--outline-v)" }} />
             </div>
 
-            <Link href="/registro" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 0", background: "transparent", border: "2px solid var(--p)", color: "var(--p)", fontWeight: 700, borderRadius: 12, fontSize: 13, textDecoration: "none" }}>
+            <Link href="/registro" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 44, gap: 8, padding: "12px 0", background: "transparent", border: "2px solid var(--p)", color: "var(--p)", fontWeight: 700, borderRadius: 12, fontSize: 13, textDecoration: "none" }}>
               👤 Crear cuenta
             </Link>
           </form>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 760px) {
+          .login-layout {
+            display: block !important;
+            min-height: auto !important;
+          }
+      
+          .login-side-panel {
+            width: 100% !important;
+            min-height: auto !important;
+            gap: 24px;
+          }
+        }
+      
+        /* En pantallas chicas el panel decorativo se oculta y el formulario ocupa todo */
+        @media (max-width: 600px) {
+          .login-side-panel {
+            display: none !important;
+          }
+        }
+      
+        @media (max-width: 480px) {
+          .login-side-panel h2 {
+            font-size: 28px !important;
+          }
+        }
+    `}</style>
+
     </div>
   );
 }

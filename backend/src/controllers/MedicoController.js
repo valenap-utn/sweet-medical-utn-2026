@@ -18,6 +18,19 @@ export class MedicoController {
         }
     };
 
+    obtenerAgenda = async (req, res, next) => {
+        try {
+            const turnos = await this.medicoService.obtenerAgenda({
+                medicoId: req.user.medicoId,
+                filtros: req.query,
+            });
+
+            res.status(200).json(turnos);
+        } catch (err) {
+            next(err);
+        }
+    };
+
     // Sedes
 
     obtenerSedes = async (req, res, next) => {
@@ -44,6 +57,30 @@ export class MedicoController {
             next(err);
         }
     }
+
+    obtenerEspecialidades = async (req, res, next) => {
+        try {
+            const especialidades = await this.medicoService.obtenerEspecialidades({
+                medicoId: req.user.medicoId,
+            });
+
+            res.status(200).json(especialidades);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    obtenerPracticas = async (req, res, next) => {
+        try {
+            const practicas = await this.medicoService.obtenerPracticas({
+                medicoId: req.user.medicoId,
+            });
+
+            res.status(200).json(practicas);
+        } catch (err) {
+            next(err);
+        }
+    };
 
     quitarSede = async (req, res, next) => {
         try {

@@ -14,7 +14,12 @@ export class TurnoController {
 
     buscarTurnosDisponibles = async (req, res, next) => {
         try {
-            const resultado = await this.turnoService.buscarTurnosDisponibles(req.query);
+            const resultado =
+                await this.turnoService.buscarTurnosDisponibles({
+                    filtros: req.query,
+                    usuario: req.user,
+                });
+
             res.status(200).json(resultado);
         } catch (err) {
             next(err);
@@ -27,6 +32,21 @@ export class TurnoController {
             const {turnoId} = req.params;
 
             const turno = await this.turnoService.reservarTurno({
+                turnoId: turnoId,
+                usuario: req.user,
+            });
+
+            res.status(200).json(turno);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    confirmarTurno = async (req, res, next) => {
+        try {
+            const {turnoId} = req.params;
+
+            const turno = await this.turnoService.confirmarTurno({
                 turnoId: turnoId,
                 usuario: req.user,
             });

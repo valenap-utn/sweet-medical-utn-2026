@@ -61,19 +61,95 @@ export class TurnoService {
     }
 
     // Busca turnos disponibles según filtros
-    async buscarTurnosDisponibles(filtros) {
+    async buscarTurnosDisponibles({ filtros, usuario }) {
+        if (!usuario?.pacienteId) {
+            throw new ForbiddenError(
+                "Solo un paciente puede buscar turnos personalizados."
+            );
+        }
 
-        const fechaDesde = filtros.fechaDesde ? parseISO(filtros.fechaDesde) : undefined;
-        const fechaHasta = filtros.fechaHasta ? parseISO(filtros.fechaHasta) : undefined;
+        // Convertimos las fechas recibidas como texto.
+        const fechaDesde = filtros.fechaDesde
+            ? parseISO(filtros.fechaDesde)
+            : undefined;
 
-        if (fechaDesde && !isValid(fechaDesde)) throw new BadRequestError(`La fechaDesde no es válida: ${filtros.fechaDesde}.`);
-        if (fechaHasta && !isValid(fechaHasta)) throw new BadRequestError(`La fechaHasta no es válida: ${filtros.fechaHasta}.`);
+        const fechaHasta = filtros.fechaHasta
+            ? parseISO(filtros.fechaHasta)
+            : undefined;
 
-        return await this.turnoRepository.buscarTurnosDisponibles({
-            ...filtros,
-            fechaDesde,
-            fechaHasta,
-        });
+        // Validamos las fechas antes de consultar MongoDB.
+        if (fechaDesde && !isValid(fechaDesde)) {
+            throw new BadRequestError(
+                `La fechaDesde no es válida: ${filtros.fechaDesde}.`
+            );
+        }
+
+        if (fechaHasta && !isValid(fechaHasta)) {
+            throw new BadRequestError(
+                `La fechaHasta no es válida: ${filtros.fechaHasta}.`
+            );
+        }
+
+        // Cargamos al paciente junto con su plan y coberturas.
+        const paciente =
+            await this.pacienteRepository.findById(
+                usuario.pacienteId
+            );
+
+        if (!paciente) {
+            throw new NotFoundError(
+                `No se encontró el paciente con id ${usuario.pacienteId}.`
+            );
+        }
+
+        // Buscamos los turnos disponibles como antes.
+        const resultado =
+            await this.turnoRepository.buscarTurnosDisponibles({
+                ...filtros,
+                fechaDesde,
+                fechaHasta,
+            });
+
+        // Agregamos cobertura y costo estimado a cada resultado.
+        const turnosPersonalizados = resultado.turnos.map(
+            (turno) => {
+                const cobertura =
+                    this.obtenerCoberturaPaciente(
+                        paciente,
+                        turno
+                    );
+
+                const costoEstimado =
+                    this.calcularCostoPaciente({
+                        turno,
+                        cobertura,
+                    });
+
+                const coberturaValor =
+                    cobertura?.nombre ??
+                    cobertura?.toString?.() ??
+                    cobertura;
+
+                // Los resultados de Mongoose son documentos.
+                // Los convertimos en objetos comunes para agregar campos.
+                const turnoPlano =
+                    typeof turno.toObject === "function"
+                        ? turno.toObject()
+                        : turno;
+
+                return {
+                    ...turnoPlano,
+                    cobertura: coberturaValor,
+                    costo: costoEstimado,
+                };
+            }
+        );
+
+        // Conservamos total, página y límite del repositorio.
+        return {
+            ...resultado,
+            turnos: turnosPersonalizados,
+        };
     }
 
     async obtenerCotizacionTurno({turnoId, usuario}) {
@@ -149,14 +225,31 @@ export class TurnoService {
 
         this.validarUsuarioPuedeMarcarTurnoRealizado({turno, usuario});
 
-        // El turno se puede marcar como REALIZADO si el estado del mismo es RESERVADO o CONFIRMADO
-        const estadosPermitidos = [EstadoTurno.RESERVADO.nombre, EstadoTurno.CONFIRMADO.nombre];
-        if (!estadosPermitidos.includes(turno.estado)) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
+        // El turno se puede marcar como REALIZADO si el estado del mismo es CONFIRMADO
+        if (!(turno.estado === EstadoTurno.CONFIRMADO.nombre)) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
 
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.REALIZADO.nombre,
             usuario: usuario.usuarioId,
             motivo: "Turno realizado",
+            turnoId: turno._id,
+        })
+        return await this.turnoRepository.save(turno);
+    }
+
+    async confirmarTurno({turnoId, usuario}) {
+        const turno = await this.turnoRepository.findById(turnoId);
+        if (!turno) throw new NotFoundError(`El turno con id: ${turnoId} no fue encontrado.`);
+
+        this.validarUsuarioPuedeMarcarTurnoRealizado({turno, usuario});
+
+        // El turno se puede marcar como CONFIRMADO si el estado del mismo es RESERVADO
+        if (!(turno.estado === EstadoTurno.RESERVADO.nombre)) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
+
+        turno.actualizarEstado({
+            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
+            usuario: usuario.usuarioId,
+            motivo: "Turno confirmado",
             turnoId: turno._id,
         })
         return await this.turnoRepository.save(turno);

@@ -7,13 +7,13 @@ const OPTS = [
 export default function RegistroPage() {
   return (
     <div style={{ minHeight: "calc(100vh - 140px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px", background: "linear-gradient(135deg,#fdfaf8,#f9eef0 50%,#fdfaf8)" }}>
-      <div style={{ width: "100%", maxWidth: 640 }}>
+      <div style={{ width: "100%", maxWidth: "min(640px,100%)" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <div style={{ fontFamily: "'Literata', serif", fontSize: 20, fontWeight: 700, color: "var(--p)", marginBottom: 20 }}>Sweet Medical</div>
-          <h1 style={{ fontFamily: "'Literata', serif", fontSize: 32, fontWeight: 700, color: "var(--p)", marginBottom: 8 }}>Creá tu cuenta</h1>
+          <h1 style={{ fontFamily: "'Literata', serif", fontSize: "clamp(24px,5vw,32px)", fontWeight: 700, color: "var(--p)", marginBottom: 8 }}>Creá tu cuenta</h1>
           <p style={{ fontSize: 14, color: "var(--secondary)" }}>Contanos quién sos para mostrarte lo que necesitás.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 16 }}>
           {OPTS.map((o) => (
             <Link key={o.href} href={o.href} style={{ display: "block", background: "#fff", border: "2px solid var(--outline-v)", borderRadius: 20, padding: 28, textDecoration: "none", transition: "all .2s", boxShadow: "0 4px 16px rgba(107,29,42,.05)" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--p)"; e.currentTarget.style.background = "var(--p-fixed)"; }}

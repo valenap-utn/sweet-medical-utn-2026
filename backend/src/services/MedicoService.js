@@ -1,5 +1,7 @@
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
 import {BadRequestError, ConflictError, NotFoundError} from "../error/AppError.js";
+import {endOfDay, isAfter, isValid, parseISO, startOfDay,} from "date-fns";
+import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 
 export class MedicoService {
     constructor({
@@ -28,6 +30,89 @@ export class MedicoService {
         const medico = await this.medicoRepository.findById(medicoId);
         if (!medico) throw new NotFoundError(`No se encontró al médico con id: ${medicoId}`);
         return medico.sedes;
+    }
+
+    async obtenerEspecialidades({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}`
+            );
+        }
+
+
+        return medico.especialidades;
+    }
+
+    async obtenerPracticas({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}`
+            );
+        }
+
+        return medico.practicas;
+    }
+
+    async obtenerAgenda({medicoId, filtros}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}.`
+            );
+        }
+
+        let fechaDesde = filtros.fechaDesde
+            ? parseISO(filtros.fechaDesde)
+            : new Date();
+
+        let fechaHasta = filtros.fechaHasta
+            ? parseISO(filtros.fechaHasta)
+            : undefined;
+
+        if (!isValid(fechaDesde)) {
+            throw new BadRequestError("La fechaDesde no es válida.");
+        }
+
+        if (fechaHasta && !isValid(fechaHasta)) {
+            throw new BadRequestError("La fechaHasta no es válida.");
+        }
+
+        fechaDesde = startOfDay(fechaDesde);
+
+        if (fechaHasta) {
+            fechaHasta = endOfDay(fechaHasta);
+        }
+
+        if (fechaHasta && isAfter(fechaDesde, fechaHasta)) {
+            throw new BadRequestError(
+                "La fechaDesde no puede ser posterior a fechaHasta."
+            );
+        }
+
+        const estadosValidos = Object.values(EstadoTurno)
+            .filter((estado) => estado instanceof EstadoTurno)
+            .map((estado) => estado.nombre);
+
+        if (
+            filtros.estado &&
+            !estadosValidos.includes(filtros.estado)
+        ) {
+            throw new BadRequestError(
+                `Estado inválido: ${filtros.estado}.`
+            );
+        }
+
+        return await this.turnoRepository.buscarAgendaMedico({
+            medicoId,
+            fechaDesde,
+            fechaHasta,
+            estado: filtros.estado,
+        });
     }
 
     async agregarSede({medicoId, sedeId}) {
@@ -166,9 +251,18 @@ export class MedicoService {
         const cantidadOriginal = medico.especialidades.length;
 
         medico.especialidades = medico.especialidades.filter(e => !(this.servicioCoincide(e, especialidad)));
-        if (cantidadOriginal === medico.especialidades.length) throw new Error(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
+        if (cantidadOriginal === medico.especialidades.length) throw new NotFoundError(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
 
-        return await this.medicoRepository.save(medico);
+        medico.disponibilidades = (medico.disponibilidades || []).filter(d =>
+            !(
+                d.tipoServicio === TipoServicio.ESPECIALIDAD &&
+                d.servicio?.toString() === especialidadId.toString()
+            )
+        );
+
+        await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId });
+        return { mensaje: "Especialidad quitada y agenda regenerada." };
 
     }
 
@@ -187,19 +281,38 @@ export class MedicoService {
         return await this.medicoRepository.save(medico);
     }
 
-    async quitarPractica({medicoId, practicaId}) {
+    async quitarPractica({ medicoId, practicaId }) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        if (!medico) {
+            throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        }
 
         const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
+        if (!practica) {
+            throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
+        }
 
         const cantidadOriginal = medico.practicas.length;
 
-        medico.practicas = medico.practicas.filter(p => !(this.servicioCoincide(p, practica)));
-        if (cantidadOriginal === medico.practicas.length) throw new Error(`El medico ${medicoId} no tiene la práctica ${practicaId}`);
+        medico.practicas = medico.practicas.filter(p =>
+            !this.servicioCoincide(p, practica)
+        );
 
-        return await this.medicoRepository.save(medico);
+        if (cantidadOriginal === medico.practicas.length) {
+            throw new NotFoundError(`El médico ${medicoId} no tiene la práctica ${practicaId}`);
+        }
+
+        medico.disponibilidades = (medico.disponibilidades || []).filter(d =>
+            !(
+                d.tipoServicio === TipoServicio.PRACTICA &&
+                d.servicio?.toString() === practicaId.toString()
+            )
+        );
+
+        await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId });
+
+        return { mensaje: "Práctica quitada y agenda regenerada." };
     }
 
 

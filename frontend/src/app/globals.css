@@ -18,6 +18,9 @@
   --glass-border: rgba(255,255,255,0.82);
   --input-bg:   #FFFFFF;
   --input-bg-focus: #FFFBFC;
+
+  --page-max: 1200px;
+  --page-px: clamp(16px, 4vw, 40px);
 }
 
 @theme inline {
@@ -88,6 +91,13 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(107,29,42,0.09);
 }
 
+.page-container {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-left: var(--page-px);
+  padding-right: var(--page-px);
+}
+
 /* Pulse animation */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -107,6 +117,24 @@ input:focus, select:focus, textarea:focus {
   border-radius: 8px;
 }
 
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(26,18,20,0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 32px);
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 24px 64px rgba(107,29,42,0.18);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
 :focus-visible {
   outline: 2px solid var(--p);
   outline-offset: 2px;
@@ -117,5 +145,40 @@ input:focus, select:focus, textarea:focus {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+
+html, body {
+  overflow-x: hidden;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+}
+
+button, a, input, select, textarea {
+  min-width: 0;
+}
+
+/* Touch targets — mínimo 44px de alto en controles interactivos */
+button,
+select,
+textarea,
+input:not([type="checkbox"]):not([type="radio"]) {
+  min-height: 44px;
+}
+
+/* Utilidad para links usados como botón: garantiza área táctil de 44px */
+.tap-44 {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
   }
 }

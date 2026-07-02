@@ -35,24 +35,24 @@ export default function PlanesPage() {
   return (
     <div>
       {/* Hero */}
-      <div style={{ position: "relative", overflow: "hidden", padding: "48px 40px 40px" }}>
+      <div style={{ position: "relative", overflow: "hidden", padding: "clamp(24px,5vw,48px) var(--page-px) 40px" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#fdf5f6 0%,#f9eef0 40%,#f5e4e8 70%,#fdfaf8 100%)" }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto" }}>
-          <h1 style={{ fontFamily: "'Literata', serif", fontSize: 36, fontWeight: 700, color: "var(--p)", marginBottom: 8 }}>Planes de cobertura</h1>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: "var(--page-max)", margin: "0 auto" }}>
+          <h1 style={{ fontFamily: "'Literata', serif", fontSize: "clamp(26px,5vw,36px)", fontWeight: 700, color: "var(--p)", marginBottom: 8 }}>Planes de cobertura</h1>
           <p style={{ fontSize: 15, color: "var(--secondary)", maxWidth: 500 }}>Elegí el plan que mejor se adapte a tus necesidades de salud y tu familia.</p>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px 56px" }}>
+      <div style={{ maxWidth: "var(--page-max)", margin: "0 auto", padding: "0 var(--page-px) 56px" }}>
         {error && <Alert type="info" style={{ marginBottom: 20 }}>{error} Mostrando planes de referencia.</Alert>}
         {cargando ? (
           <div style={{ display: "flex", justifyContent: "center", padding: 56 }}><Spinner size={32} /></div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, marginTop: 8 }}>
+          <div className="planes-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 24, marginTop: 16 }}>
             {planes.map((plan, i) => {
               const hl = plan.highlight ?? i === 1;
               return (
-                <div key={plan._id} style={{ position: "relative", borderRadius: 20, padding: 24, border: `2px solid ${hl ? "var(--p)" : "var(--outline-v)"}`, background: hl ? "var(--p-fixed)" : "#fff", boxShadow: hl ? "0 12px 40px rgba(107,29,42,.13)" : "0 4px 16px rgba(107,29,42,.05)", transition: "all .2s" }}>
+                <div key={plan._id} className="plan-card" style={{ position: "relative", borderRadius: 20, padding: 24, border: `2px solid ${hl ? "var(--p)" : "var(--outline-v)"}`, background: hl ? "var(--p-fixed)" : "#fff", boxShadow: hl ? "0 12px 40px rgba(107,29,42,.13)" : "0 4px 16px rgba(107,29,42,.05)", transition: "all .2s" }}>
                   {hl && <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", padding: "4px 16px", background: "var(--p)", color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 999, whiteSpace: "nowrap" }}>Más elegido</div>}
                   <div style={{ fontFamily: "'Literata', serif", fontSize: 22, fontWeight: 700, color: "var(--p)", marginBottom: 4 }}>{plan.nombre}</div>
                   {plan.precio && (
@@ -67,7 +67,7 @@ export default function PlanesPage() {
                       </div>
                     ))}
                   </div>
-                  <Link href="/registro" style={{ display: "block", width: "100%", padding: "11px 0", background: hl ? "var(--p)" : "transparent", color: hl ? "#fff" : "var(--p)", border: "2px solid var(--p)", fontWeight: 700, borderRadius: 13, fontSize: 13, textAlign: "center", textDecoration: "none", transition: "all .2s" }}>
+                  <Link href="/registro" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 44, width: "100%", background: hl ? "var(--p)" : "transparent", color: hl ? "#fff" : "var(--p)", border: "2px solid var(--p)", fontWeight: 700, borderRadius: 13, fontSize: 13, textAlign: "center", textDecoration: "none", transition: "all .2s" }}>
                     Seleccionar plan
                   </Link>
                 </div>
@@ -77,7 +77,7 @@ export default function PlanesPage() {
         )}
 
         {/* CTA */}
-        <div className="glass-rose" style={{ borderRadius: 20, padding: "32px 36px", marginTop: 36, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
+        <div className="glass-rose planes-cta" style={{ borderRadius: 20, padding: "32px 36px", marginTop: 36, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
           <div>
             <div style={{ fontFamily: "'Literata', serif", fontSize: 22, fontWeight: 700, color: "var(--p)", marginBottom: 6 }}>¿Tenés obra social?</div>
             <div style={{ fontSize: 13, color: "var(--secondary)", maxWidth: 400 }}>Podés asociar tu obra social y plan al crear tu cuenta. Accedés a descuentos automáticos en cada turno.</div>
@@ -87,6 +87,41 @@ export default function PlanesPage() {
           </Link>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 1100px) {
+          .planes-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+      
+        @media (max-width: 760px) {
+          .planes-grid {
+            grid-template-columns: 1fr !important;
+            gap: 18px !important;
+          }
+      
+          .plan-card {
+            padding: 22px !important;
+          }
+      
+          .planes-cta {
+            padding: 24px !important;
+            align-items: stretch !important;
+          }
+      
+          .planes-cta a {
+            width: 100%;
+            justify-content: center;
+          }
+      
+          h1 {
+            font-size: 30px !important;
+            line-height: 1.15 !important;
+          }
+        }
+      `}</style>
+
     </div>
   );
 }

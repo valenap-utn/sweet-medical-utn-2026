@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { RolUsuario } from "../domain/enums/RolUsuario.js";
 import {ConflictError, NotFoundError, UnauthorizedError} from "../error/AppError.js";
 
 export class AuthService {
@@ -20,7 +21,8 @@ export class AuthService {
         // Creamos el usuario asociado al paciente
         const usuario = await this.usuarioRepository.create({
             nombreUsuario,
-            password: passwordHasheada
+            password: passwordHasheada,
+            rol: RolUsuario.PACIENTE
         });
 
         const paciente = await this.pacienteRepository.create({
@@ -34,6 +36,7 @@ export class AuthService {
         return {
             usuarioId: usuario._id,
             pacienteId: paciente._id,
+            rol: usuario.rol,
         };
     }
 
@@ -48,6 +51,7 @@ export class AuthService {
         const usuario = await this.usuarioRepository.create({
             nombreUsuario,
             password: passwordHasheada,
+            rol: RolUsuario.MEDICO,
         });
 
         const medico = await this.medicoRepository.create({
@@ -63,25 +67,59 @@ export class AuthService {
         return {
             usuarioId: usuario._id,
             medicoId: medico._id,
+            rol: usuario.rol,
         }
     }
 
     // Login
     async login({nombreUsuario, password}) {
         const usuario = await this.usuarioRepository.findByNombreUsuario(nombreUsuario);
+        let nombre = null;
         if (!usuario) throw new NotFoundError(`El nombre de usuario ${nombreUsuario} no es correcto.`);
 
         const passwordValida = await bcrypt.compare(password, usuario.password);
         if (!passwordValida) throw new UnauthorizedError("La contraseña ingresada no es correcta");
 
-        const paciente = await this.pacienteRepository.findByUsuarioId(usuario._id);
-        const medico = await this.medicoRepository.findByUsuarioId(usuario._id);
+        let pacienteId = null;
+        let medicoId = null;
+
+        if (usuario.rol === RolUsuario.PACIENTE) {
+            const paciente =
+                await this.pacienteRepository.findByUsuarioId(usuario._id);
+
+            if (!paciente) {
+                throw new UnauthorizedError(
+                    "La cuenta de paciente no tiene un perfil asociado."
+                );
+            }
+
+            pacienteId = paciente._id.toString();
+        } else if (usuario.rol === RolUsuario.MEDICO) {
+            const medico =
+                await this.medicoRepository.findByUsuarioId(usuario._id);
+
+            if (!medico) {
+                throw new UnauthorizedError(
+                    "La cuenta médica no tiene un perfil asociado."
+                );
+            }
+
+            medicoId = medico._id.toString();
+            nombre = medico.nombre;
+        } else {
+            throw new UnauthorizedError(
+                `El usuario tiene un rol inválido: ${usuario.rol}.`
+            );
+        }
 
         const payload = {
             usuarioId: usuario._id.toString(),
-            pacienteId: paciente?._id.toString() ?? null,
-            medicoId: medico?._id.toString() ?? null,
-        }
+            nombreUsuario: usuario.nombreUsuario,
+            nombre,
+            rol: usuario.rol,
+            pacienteId,
+            medicoId,
+        };
 
         return {
             accessToken: this.generarAccessToken(payload),
@@ -98,6 +136,9 @@ export class AuthService {
 
         const nuevoPayload = {
             usuarioId: payload.usuarioId,
+            nombreUsuario: payload.nombreUsuario ?? null,
+            nombre: payload.nombre ?? null,
+            rol: payload.rol,
             pacienteId: payload.pacienteId ?? null,
             medicoId: payload.medicoId ?? null,
         }
@@ -115,5 +156,33 @@ export class AuthService {
         return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
             expiresIn: "7d",
         });
+    }
+
+    async obtenerPerfil({ rol, pacienteId, medicoId }) {
+        if (rol === RolUsuario.PACIENTE) {
+            const paciente = await this.pacienteRepository.findById(pacienteId);
+            if (!paciente) throw new NotFoundError("Perfil de paciente no encontrado.");
+
+            return {
+                nombre: paciente.nombre,
+                dni: paciente.dni,
+                obraSocial: paciente.obraSocial?.nombre ?? null,
+                plan: paciente.plan?.nombre       ?? null,
+            };
+        }
+
+        if (rol === RolUsuario.MEDICO) {
+            const medico = await this.medicoRepository.findById(medicoId);
+            if (!medico) throw new NotFoundError("Perfil médico no encontrado.");
+
+            return {
+                nombre: medico.nombre,
+                matricula: medico.matricula,
+                especialidades: medico.especialidades?.map(e => e.nombre) ?? [],
+                sedes: medico.sedes?.map(s => s.nombre) ?? [],
+            };
+        }
+
+        throw new UnauthorizedError("Rol inválido.");
     }
 }
