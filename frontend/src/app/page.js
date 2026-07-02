@@ -25,12 +25,12 @@ export default function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <section style={{ position: "relative", overflow: "hidden", padding: "clamp(48px,8vw,96px) var(--page-px) clamp(60px,8vw,96px)" }}>
+      <section style={{ position: "relative", overflow: "hidden", padding: "clamp(40px,6vw,72px) 0 clamp(32px,4vw,48px)" }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#fdfaf8 0%,#f9eef0 45%,#f5e4e8 70%,#fdfaf8 100%)" }} />
         <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle,rgba(107,29,42,.12) 0%,transparent 70%)", top: -120, right: -80, pointerEvents: "none" }} />
         <div style={{ position: "absolute", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle,rgba(107,29,42,.07) 0%,transparent 70%)", bottom: -80, left: 20, pointerEvents: "none" }} />
 
-        <div className="hero-grid" style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "minmax(0,1fr) min(310px,40%)", gap: "clamp(32px,5vw,64px)", alignItems: "center" }}>
+        <div className="hero-grid" style={{ position: "relative", zIndex: 1, maxWidth: "var(--page-max)", margin: "0 auto", padding:"0 var(--page-px)", display: "grid", gridTemplateColumns: "minmax(0,1fr) min(310px,40%)", gap: "clamp(32px,5vw,64px)", alignItems: "center" }}>
           {/* Left */}
           <div>
             <span className="glass-rose" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", color: "var(--p)", marginBottom: 20 }}>
@@ -107,7 +107,7 @@ export default function HomePage() {
       </section>
 
       {/* DOCTORS */}
-      <section style={{ padding: "clamp(48px,6vw,80px) var(--page-px)", maxWidth: 1200, margin: "0 auto" }}>
+      <section style={{ padding: "clamp(28px,4vw,48px) var(--page-px) clamp(48px,6vw,72px)", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 22 }}>
           <div>
             <h2 style={{ fontFamily: "'Literata', serif", fontSize: 28, fontWeight: 700, color: "var(--p)", margin: 0 }}>Profesionales destacados</h2>
@@ -165,10 +165,10 @@ export default function HomePage() {
           section {
             padding-left: clamp(32px, 5vw, 60px) !important;
             padding-right: clamp(32px, 5vw, 60px) !important;
-            margin-bottom: clamp(56px, 6vw, 80px) !important;
+            margin-bottom: 32px !important;
           }
           section:first-of-type {
-            margin-bottom: clamp(80px, 8vw, 120px) !important;
+            margin-bottom: clamp(20px, 3vw, 32px) !important;
           }
           .hero-grid {
             grid-template-columns: minmax(0, 1fr) min(310px, 40%) !important;
@@ -189,7 +189,7 @@ export default function HomePage() {
             margin-bottom: clamp(40px, 5vw, 56px) !important;
           }
           section:first-of-type {
-            margin-bottom: clamp(56px, 6vw, 80px) !important;
+            margin-bottom: 24px !important;
           }
           .hero-grid {
             grid-template-columns: 1fr !important;
@@ -217,7 +217,7 @@ export default function HomePage() {
             margin-bottom: clamp(24px, 3.5vw, 36px) !important;
           }
           section:first-of-type {
-            margin-bottom: clamp(36px, 5vw, 48px) !important;
+            margin-bottom: 20px !important;
           }
           .hero-grid {
             grid-template-columns: 1fr !important;
