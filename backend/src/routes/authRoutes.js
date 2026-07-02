@@ -18,5 +18,7 @@ export default function authRoutes(getController) {
 
     router.get("/me", authMiddleware, authController.me);
 
+    router.get("/perfil", authMiddleware, authController.obtenerPerfil);
+
     return router;
 }

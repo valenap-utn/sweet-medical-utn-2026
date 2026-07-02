@@ -44,7 +44,6 @@ import {EspecialidadController} from "./src/controllers/servicios/EspecialidadCo
 import {PracticaController} from "./src/controllers/servicios/PracticaController.js";
 import {ObraSocialController} from "./src/controllers/ObraSocialController.js";
 import {SedeController} from "./src/controllers/sedeController.js";
-import {AgendaController} from "./src/controllers/AgendaController.js";
 import {AdminController} from "./src/controllers/interno/AdminController.js";
 
 
@@ -55,7 +54,25 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+
+// CORS: credentials:true es necesario para que el browser envie las cookies
+// httpOnly (accessToken/refreshToken) desde el frontend Next.js.
+const allowedOrigins = [
+    process.env.FRONTEND_URL || "http://localhost:3000",
+    "http://localhost:3001",
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS: origin no permitido: " + origin));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(cookieParser());
 
@@ -101,7 +118,6 @@ const especialidadController = new EspecialidadController(especialidadService);
 const practicaController = new PracticaController(practicaService);
 const obraSocialController = new ObraSocialController(obraSocialService);
 const sedeController = new SedeController(sedeService);
-const agendaController = new AgendaController(agendaService);
 const adminController = new AdminController(turnosBatchService, agendaService);
 
 // Registro de controllers dispo. para las rutas
@@ -116,7 +132,6 @@ server.setController(EspecialidadController, especialidadController);
 server.setController(PracticaController, practicaController);
 server.setController(ObraSocialController, obraSocialController);
 server.setController(SedeController, sedeController);
-server.setController(AgendaController, agendaController);
 server.setController(AdminController, adminController);
 
 // SWAGGER

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { RolUsuario } from "../../domain/enums/RolUsuario.js";
 import {Usuario} from "../../domain/users/Usuario.js";
 import {validarPassword} from "../../utils/auxFunctions.js";
 
@@ -23,6 +24,11 @@ const UsuarioSchema = new mongoose.Schema({
             validator: validarPassword,
             message: 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.'
         }
+    },
+    rol: {
+        type: String,
+        enum: Object.values(RolUsuario),
+        required: true,
     }
 }, {
     // Para trazabilidad ( createdAt , updatedAt )

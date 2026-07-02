@@ -176,4 +176,39 @@ export class TurnoRepository {
             }))
         );
     }
+
+    async buscarAgendaMedico({
+                                 medicoId,
+                                 fechaDesde,
+                                 fechaHasta,
+                                 estado,
+                             }) {
+        const filtros = {
+            medico: medicoId,
+        };
+
+        if (estado) {
+            filtros.estado = estado;
+        }
+
+        if (fechaDesde || fechaHasta) {
+            filtros.fechaHoraInicio = {};
+
+            if (fechaDesde) {
+                filtros.fechaHoraInicio.$gte = fechaDesde;
+            }
+
+            if (fechaHasta) {
+                filtros.fechaHoraInicio.$lte = fechaHasta;
+            }
+        }
+
+        return await this.model
+            .find(filtros)
+            .sort({fechaHoraInicio: 1})
+            .populate("paciente", "nombre dni")
+            .populate("sede")
+            .populate("especialidad")
+            .populate("practica");
+    }
 }
