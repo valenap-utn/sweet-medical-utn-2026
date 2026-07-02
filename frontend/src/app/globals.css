@@ -18,6 +18,9 @@
   --glass-border: rgba(255,255,255,0.82);
   --input-bg:   #FFFFFF;
   --input-bg-focus: #FFFBFC;
+
+  --page-max: 1200px;
+  --page-px: clamp(16px, 4vw, 40px);
 }
 
 @theme inline {
@@ -142,5 +145,25 @@ input:focus, select:focus, textarea:focus {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* A chequear si estos cambios funcionan correctamente */
+html, body {
+  overflow-x: hidden;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+}
+
+button, a, input, select, textarea {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
   }
 }

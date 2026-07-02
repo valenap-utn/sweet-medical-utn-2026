@@ -1,5 +1,5 @@
 "use client";
-import {useState, useEffect, useCallback} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {buscarTurnosDisponibles} from "@/lib/turnosApi";
 import {getEspecialidades, getPracticas, getSedes} from "@/lib/serviciosApi";
 import {getApiErrorMessage} from "@/lib/api";
@@ -58,7 +58,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
     const costo = turno.costo != null ? `$${Number(turno.costo).toLocaleString("es-AR")}` : "–";
 
     return (
-        <div className="wellness-card" style={{
+        <div className="wellness-card turno-card" style={{
             borderRadius: 16,
             padding: "17px 20px",
             display: "flex",
@@ -116,7 +116,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                     ))}
                 </div>
             </div>
-            <div style={{flexShrink: 0, textAlign: "right", minWidth: 80}}>
+            <div className="turno-price" style={{flexShrink: 0, textAlign: "right", minWidth: 80}}>
                 <div style={{fontSize: 10, color: "var(--secondary)", marginBottom: 2}}>Costo estimado</div>
                 <div style={{
                     fontFamily: "'Literata', serif",
@@ -126,6 +126,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                 }}>{costo}</div>
             </div>
             <button
+                className="turno-action"
                 onClick={() => enCarrito ? null : onAgregar(turno)}
                 style={{
                     flexShrink: 0,
@@ -281,7 +282,13 @@ export default function TurnosPage() {
                     pointerEvents: "none"
                 }}/>
                 <div
-                    style={{position: "relative", zIndex: 1, maxWidth: "var(--page-max)", margin: "0 auto", padding: "clamp(20px,4vw,36px) var(--page-px) 0"}}>
+                    style={{
+                        position: "relative",
+                        zIndex: 1,
+                        maxWidth: "var(--page-max)",
+                        margin: "0 auto",
+                        padding: "clamp(20px,4vw,36px) var(--page-px) 0"
+                    }}>
                     <h1 style={{
                         fontFamily: "'Literata', serif",
                         fontSize: 28,
@@ -293,10 +300,13 @@ export default function TurnosPage() {
                         necesitás y reservá en minutos.</p>
 
                     {/* Filter card */}
-                    <div className="glass" style={{borderRadius: "20px 20px 0 0", padding: "20px 24px"}}>
-                        <div style={{
+                    {/*<div className="glass" style={{borderRadius: "20px 20px 0 0", padding: "20px 24px"}}>*/}
+                    <div className="glass"
+                         style={{borderRadius: 20, padding: "20px 24px", marginBottom: 28}}>
+                        <div className="turnos-filtros-grid" style={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr)) auto",
+                            // gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr)) auto",
+                            gridTemplateColumns: "repeat(4, minmax(0, 1fr)) auto",
                             gap: 14,
                             alignItems: "end"
                         }}>
@@ -369,7 +379,8 @@ export default function TurnosPage() {
             </div>
 
             {/* Results */}
-            <div style={{maxWidth: "var(--page-max)", margin: "0 auto", padding: "16px var(--page-px) 48px"}}>
+            {/*<div style={{maxWidth: "var(--page-max)", margin: "0 auto", padding: "16px var(--page-px) 48px"}}>*/}
+            <div style={{maxWidth: "var(--page-max)", margin: "0 auto", padding: "28px var(--page-px) 48px"}}>
                 {!authCargando && !usuario && (
                     <Alert
                         type="info"
@@ -484,6 +495,41 @@ export default function TurnosPage() {
                     </div>
                 )}
             </div>
+
+            <style>{`
+              @media (max-width: 900px) {
+                .turnos-filtros-grid {
+                  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                }
+            
+                .turnos-filtros-grid > div:last-child {
+                  grid-column: 1 / -1;
+                }
+            
+                .turnos-filtros-grid button {
+                  width: 100%;
+                  justify-content: center;
+                }
+              }
+            
+              @media (max-width: 700px) {
+                .turnos-filtros-grid {
+                  grid-template-columns: 1fr !important;
+                }
+            
+                .turnos-filtros-card {
+                  padding: 18px !important;
+                }
+              }
+            
+              @media (max-width: 520px) {
+                h1 {
+                  font-size: 26px !important;
+                  line-height: 1.15 !important;
+                }
+              }
+            `}</style>
+
         </div>
     );
 }

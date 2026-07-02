@@ -78,7 +78,7 @@ export default function CarritoPage() {
           </Link>
         </div>
       ) : items.length > 0 ? (
-        <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(240px,300px)", gap:22, alignItems:"start" }}>
+        <div className="carrito-grid" style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(240px,300px)", gap:22, alignItems:"start" }}>
           {/* Items */}
           <div>
             {items.map(t => {

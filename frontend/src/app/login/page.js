@@ -64,9 +64,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: "calc(100vh - 140px)", display: "flex" }}>
+    <div className="login-layout" style={{ minHeight: "calc(100vh - 140px)", display: "flex" }}>
       {/* Left panel */}
-      <div style={{ width: "clamp(220px,42%,45%)", background: "var(--p)", padding: "clamp(28px,5vw,48px) clamp(24px,5vw,52px)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div className="login-side-panel" style={{ width: "clamp(220px,42%,45%)", background: "var(--p)", padding: "clamp(28px,5vw,48px) clamp(24px,5vw,52px)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div style={{ fontFamily: "'Literata', serif", fontSize: 20, fontWeight: 700, color: "var(--p-fixed)" }}>Sweet Medical</div>
         <div>
           <h2 style={{ fontFamily: "'Literata', serif", fontSize: 36, fontWeight: 700, color: "var(--p-fixed)", lineHeight: 1.15, marginBottom: 14 }}>Tu salud,<br />en buenas manos.</h2>
@@ -124,6 +124,28 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 760px) {
+          .login-layout {
+            display: block !important;
+            min-height: auto !important;
+          }
+      
+          .login-side-panel {
+            width: 100% !important;
+            min-height: auto !important;
+            gap: 24px;
+          }
+        }
+      
+        @media (max-width: 480px) {
+          .login-side-panel h2 {
+            font-size: 28px !important;
+          }
+        }
+    `}</style>
+
     </div>
   );
 }
