@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { obtenerHistorialPaciente } from "@/lib/turnosApi";
+import { obtenerHistorialPaciente, obtenerPerfilCompleto } from "@/lib/turnosApi";
 import { getApiErrorMessage } from "@/lib/api";
 import Spinner from "@/components/ui/Spinner";
 import Alert from "@/components/ui/Alert";
@@ -71,6 +71,28 @@ export default function PerfilPage() {
       activo = false;
     };
   }, [esPaciente, tab]);
+
+  const [perfil, setPerfil] = useState(null);
+  const [cargandoPerfil, setCargandoPerfil] = useState(false);
+  const [errorPerfil, setErrorPerfil] = useState("");
+
+  useEffect(() => {
+    if (tab !== "datos") return;
+    let activo = true;
+    (async () => {
+      setCargandoPerfil(true);
+      setErrorPerfil("");
+      try {
+        const data = await obtenerPerfilCompleto();
+        if (activo) setPerfil(data);
+      } catch (e) {
+        if (activo) setErrorPerfil(getApiErrorMessage(e, "Error al cargar perfil."));
+      } finally {
+        if (activo) setCargandoPerfil(false);
+      }
+    })();
+    return () => { activo = false; };
+  }, [tab]);
 
   if (authCargando) return <div style={{ display: "flex", justifyContent: "center", padding: 80 }}><Spinner size={36} /></div>;
   if (!usuario) return null;
@@ -167,17 +189,58 @@ export default function PerfilPage() {
           )}
 
           {tab === "datos" && (
-            <div className="wellness-card" style={{ borderRadius: 20, padding: 28 }}>
-              <h2 style={{ fontFamily: "'Literata', serif", fontSize: 22, fontWeight: 700, color: "var(--p)", marginBottom: 18 }}>Mis datos</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                {[["Usuario", usuario.nombreUsuario], ["Tipo", esPaciente ? "Paciente" : "Médico"]].map(([k,v]) => (
-                  <div key={k}>
-                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--on-surf-v)", marginBottom: 5 }}>{k}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--on-surf)", padding: "10px 14px", background: "var(--p-fixed)", borderRadius: 11 }}>{v}</div>
-                  </div>
-                ))}
+              <div className="wellness-card" style={{ borderRadius: 20, padding: 28 }}>
+                <h2 style={{ fontFamily: "'Literata', serif", fontSize: 22, fontWeight: 700, color: "var(--p)", marginBottom: 18 }}>
+                  Mis datos
+                </h2>
+
+                {errorPerfil && <Alert type="error" style={{ marginBottom: 16 }}>{errorPerfil}</Alert>}
+
+                {cargandoPerfil && (
+                    <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+                      <Spinner size={28} />
+                    </div>
+                )}
+
+                {!cargandoPerfil && perfil && (() => {
+                  const camposBase = [
+                    ["Usuario",         usuario.nombreUsuario],
+                    ["Nombre completo", perfil.nombre ?? "–"],
+                    ["Tipo de cuenta",  esPaciente ? "Paciente" : "Médico"],
+                  ];
+
+                  const camposRol = esPaciente
+                      ? [
+                        ["DNI",        perfil.dni        ?? "–"],
+                        ["Obra social", perfil.obraSocial ?? "–"],
+                        ["Plan",        perfil.plan       ?? "–"],
+                      ]
+                      : [
+                        ["Matrícula",   perfil.matricula  ?? "–"],
+                      ];
+
+                  return (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                        {[...camposBase, ...camposRol].map(([label, valor]) => (
+                            <div key={label}>
+                              <div style={{
+                                fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+                                letterSpacing: ".06em", color: "var(--on-surf-v)", marginBottom: 5,
+                              }}>
+                                {label}
+                              </div>
+                              <div style={{
+                                fontSize: 14, fontWeight: 600, color: "var(--on-surf)",
+                                padding: "10px 14px", background: "var(--p-fixed)", borderRadius: 11,
+                              }}>
+                                {valor}
+                              </div>
+                            </div>
+                        ))}
+                      </div>
+                  );
+                })()}
               </div>
-            </div>
           )}
 
           {(tab === "cobertura" || tab === "notificaciones") && (

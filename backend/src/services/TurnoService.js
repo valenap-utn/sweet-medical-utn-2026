@@ -225,14 +225,31 @@ export class TurnoService {
 
         this.validarUsuarioPuedeMarcarTurnoRealizado({turno, usuario});
 
-        // El turno se puede marcar como REALIZADO si el estado del mismo es RESERVADO o CONFIRMADO
-        const estadosPermitidos = [EstadoTurno.RESERVADO.nombre, EstadoTurno.CONFIRMADO.nombre];
-        if (!estadosPermitidos.includes(turno.estado)) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
+        // El turno se puede marcar como REALIZADO si el estado del mismo es CONFIRMADO
+        if (!(turno.estado === EstadoTurno.CONFIRMADO.nombre)) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
 
         turno.actualizarEstado({
             nuevoEstado: EstadoTurno.REALIZADO.nombre,
             usuario: usuario.usuarioId,
             motivo: "Turno realizado",
+            turnoId: turno._id,
+        })
+        return await this.turnoRepository.save(turno);
+    }
+
+    async confirmarTurno({turnoId, usuario}) {
+        const turno = await this.turnoRepository.findById(turnoId);
+        if (!turno) throw new NotFoundError(`El turno con id: ${turnoId} no fue encontrado.`);
+
+        this.validarUsuarioPuedeMarcarTurnoRealizado({turno, usuario});
+
+        // El turno se puede marcar como CONFIRMADO si el estado del mismo es RESERVADO
+        if (!(turno.estado === EstadoTurno.RESERVADO.nombre)) throw new ConflictError(`El turno con id: ${turnoId} no puede marcarse como "Realizado" porque su estado actual es ${turno.estado}`);
+
+        turno.actualizarEstado({
+            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
+            usuario: usuario.usuarioId,
+            motivo: "Turno confirmado",
             turnoId: turno._id,
         })
         return await this.turnoRepository.save(turno);

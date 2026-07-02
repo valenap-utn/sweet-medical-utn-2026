@@ -90,49 +90,152 @@
     background: #fff;
 }
 
-.emptyState h2 {
-    color: var(--p);
-}
-
-.emptyState p {
-    color: var(--secondary);
-}
+.emptyState h2 { color: var(--p); }
+.emptyState p  { color: var(--secondary); }
 
 .list {
     display: grid;
     gap: 12px;
 }
 
+/* Card — fila única horizontal */
 .card {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 120px;
-    gap: 16px;
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    padding: 18px;
+    gap: 20px;
+    padding: 14px 18px;
     border-radius: 16px;
     border: 1px solid var(--outline-v);
     background: #fff;
+    width: 100%;
 }
 
-.date {
+.cardField {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.cardLabel {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surf-v);
+}
+
+.date  { color: var(--p); }
+.muted { font-size: 12px; color: var(--secondary); }
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.modal {
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 420px;
+}
+
+.modalTitle {
+    font-family: "Literata", serif;
+    font-size: 18px;
     color: var(--p);
+    margin-bottom: 6px;
 }
 
-.muted {
+.modalSubtitle {
     font-size: 12px;
     color: var(--secondary);
+    margin-bottom: 18px;
 }
 
-.status {
-    justify-self: end;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: var(--p-fixed);
-    color: var(--p);
+.modalLabel {
+    display: block;
     font-size: 11px;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surf-v);
+    margin-bottom: 6px;
 }
 
+.modalTextarea {
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--outline);
+    font-size: 13px;
+    resize: none;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
+
+.modalInput {
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--outline);
+    font-size: 13px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modalBtnSecondary {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--outline);
+    background: transparent;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.modalBtnSecondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modalBtnPrimary {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+}
+
+.modalBtnPrimary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
 @media (max-width: 900px) {
     .page {
         padding: 32px 24px;
@@ -143,11 +246,13 @@
     }
 
     .card {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        flex-wrap: wrap;
     }
 
-    .status {
-        justify-self: start;
+    .cardActions {
+        width: 100%;
+        padding-top: 10px;
+        border-top: 1px solid var(--outline-v);
     }
 }
 
@@ -166,12 +271,19 @@
     }
 
     .card {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 10px;
     }
 
-    .status {
-        justify-self: start;
+    .cardField {
+        width: 100%;
+    }
+
+    .cardActions {
+        width: 100%;
+        padding-top: 10px;
+        border-top: 1px solid var(--outline-v);
     }
 
     .emptyState {
