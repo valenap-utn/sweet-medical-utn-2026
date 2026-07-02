@@ -1,9 +1,28 @@
 import express from "express";
-// import {obtenerEspecialidades, obtenerPracticas} from "../controllers/PlanController.js";
+import {PlanController} from "../controllers/PlanController.js";
 
-const router = express.Router();
+export default function planRoutes(getController) {
+    const router = express.Router();
+    const planController = getController(PlanController);
 
-// router.get('/especialidades', obtenerEspecialidades);
-// router.get('/practicas', obtenerPracticas);
+    router.post("/", planController.crear);
 
-export default router;
+    // GET /api/planes
+    router.get("/", planController.obtenerTodos);
+
+    // GET /api/planes/:id
+    router.get("/:id", planController.obtenerPorId);
+
+    // Coberturas
+    router.patch("/:id/coberturas/especialidades", planController.agregarCoberturaEspecialidad);
+
+    router.patch("/:id/coberturas/practicas", planController.agregarCoberturaPractica);
+
+    router.delete("/:id/coberturas/especialidades/:especialidadId", planController.quitarCoberturaEspecialidad);
+
+    router.delete("/:id/coberturas/practicas/:practicaId", planController.quitarCoberturaPractica);
+
+    router.delete('/:id', planController.eliminar);
+
+    return router;
+}

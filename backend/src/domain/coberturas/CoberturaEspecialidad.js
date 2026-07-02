@@ -17,7 +17,4 @@ export class CoberturaEspecialidad {
         }
     }
 
-    get nivel() {
-        return this.nivel;
-    }
 }
