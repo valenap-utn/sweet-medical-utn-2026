@@ -14,11 +14,28 @@ export class PacienteRepository {
     async findById(id) {
         return await this.model
             .findById(id)
-            .populate("plan")
+            .populate({
+                path: "plan",
+                populate: [
+                    {
+                        path: "coberturasEspecialidad.especialidad"
+                    },
+                    {
+                        path: "coberturasPractica.practica"
+                    }
+                ]
+            })
             .populate("obraSocial");
     }
 
     async findAll() {
         return await this.model.find();
+    }
+
+    // Para encontrar pacientes por ID de Usuario
+    async findByUsuarioId(usuarioId) {
+        return await this.model
+            .findOne({usuario: usuarioId})
+            .populate("usuario");
     }
 }

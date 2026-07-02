@@ -41,19 +41,19 @@ export class TurnoRepository {
     // ** query object: objeto que se va construyendo dinámicamente para consultar Mongo
 
     // Búsqueda de Turnos DISPONIBLES
-    async buscarDisponibles({
-                                medicoId,
-                                sedeId,
-                                tipoServicio,
-                                especialidadId,
-                                practicaId,
-                                fechaDesde,
-                                fechaHasta,
-                                page = 1,
-                                limit = 10,
-                                sortBy = "fechaHoraInicio",
-                                sortOrder = "asc"
-                            }) {
+    async buscarTurnosDisponibles({
+                                      medicoId,
+                                      sedeId,
+                                      tipoServicio,
+                                      especialidadId,
+                                      practicaId,
+                                      fechaDesde,
+                                      fechaHasta,
+                                      page = 1,
+                                      limit = 10,
+                                      sortBy = "fechaHoraInicio",
+                                      sortOrder = "asc"
+                                  }) {
 
         const filtros = { // query object ** o filtro de búsqueda
             estado: EstadoTurno.DISPONIBLE.nombre,
@@ -175,5 +175,40 @@ export class TurnoRepository {
                 historialEstados: turno.historialEstados ?? []
             }))
         );
+    }
+
+    async buscarAgendaMedico({
+                                 medicoId,
+                                 fechaDesde,
+                                 fechaHasta,
+                                 estado,
+                             }) {
+        const filtros = {
+            medico: medicoId,
+        };
+
+        if (estado) {
+            filtros.estado = estado;
+        }
+
+        if (fechaDesde || fechaHasta) {
+            filtros.fechaHoraInicio = {};
+
+            if (fechaDesde) {
+                filtros.fechaHoraInicio.$gte = fechaDesde;
+            }
+
+            if (fechaHasta) {
+                filtros.fechaHoraInicio.$lte = fechaHasta;
+            }
+        }
+
+        return await this.model
+            .find(filtros)
+            .sort({fechaHoraInicio: 1})
+            .populate("paciente", "nombre dni")
+            .populate("sede")
+            .populate("especialidad")
+            .populate("practica");
     }
 }

@@ -30,7 +30,7 @@ describe("Agenda - Pruebas de Dominio", () => {
         Especialidad = {
             nombre: "Cardiología",
             duracionTurnoEnMins: 30,
-            costoConsulta: 5000
+            costo: 5000
         };
     });
 

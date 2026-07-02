@@ -19,7 +19,7 @@
  *           type: number
  *           example: 30
  *
- *         costoConsulta:
+ *         costo:
  *           type: number
  *           example: 15000
  *
@@ -34,5 +34,5 @@
  *       required:
  *         - nombre
  *         - duracionTurnoEnMins
- *         - costoConsulta
+ *         - costo
  */

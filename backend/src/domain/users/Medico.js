@@ -37,7 +37,10 @@ export class Medico {
         const existe = this.disponibilidades.some(d =>
             disponibilidadHoraria.diaSemana === d.diaSemana &&
             disponibilidadHoraria.horaDesde === d.horaDesde &&
-            disponibilidadHoraria.horaHasta === d.horaHasta
+            disponibilidadHoraria.horaHasta === d.horaHasta &&
+            disponibilidadHoraria.sede === d.sede &&
+            disponibilidadHoraria.tipoServicio === d.tipoServicio &&
+            disponibilidadHoraria.servicio === d.servicio
         );
 
         // Si no está en la lista
@@ -63,9 +66,25 @@ export class Medico {
     }
 
     agregarSede(sede) {
-        if (!this.sedes.includes(sede)) {
-            this.sedes.push(sede);
+        const sedeId = sede._id?.toString() ?? sede.id?.toString() ?? sede.toString();
+
+        const existe = this.sedes.some(s => {
+            const id = s._id?.toString() ?? s.id?.toString() ?? s.toString();
+            return id === sedeId;
+        });
+
+        if (!existe) {
+            this.sedes.push(sede._id ?? sede.id ?? sede);
         }
+    }
+
+    quitarSede(sede) {
+        const sedeId = sede._id?.toString() ?? sede.id?.toString() ?? sede.toString();
+
+        this.sedes = this.sedes.filter(s => {
+            const id = s._id?.toString() ?? s.id?.toString() ?? s.toString();
+            return id !== sedeId;
+        });
     }
 
 

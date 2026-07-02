@@ -21,4 +21,15 @@ export class EspecialidadRepository {
         return await this.model.findByIdAndDelete(id);
     }
 
+    async save(especialidad) {
+        return await especialidad.save();
+    }
+
+    async findAll() {
+        return await this.model.find({});
+    }
+
+    async delete(especialidadId) {
+        return this.model.findByIdAndDelete(especialidadId);
+    }
 }

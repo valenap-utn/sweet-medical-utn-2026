@@ -11,7 +11,7 @@ describe("ServiciosMedicoService tests", () => {
         _id: "especialidad-1",
         nombre: "Cardiología",
         duracionTurnoEnMins: 30,
-        costoConsulta: 10000,
+        costo: 10000,
         establecerNuevoNombre: jest.fn(),
         establecerNuevaDuracion: jest.fn(),
         establecerNuevoCosto: jest.fn(),
@@ -64,21 +64,21 @@ describe("ServiciosMedicoService tests", () => {
             await serviciosMedicoService.crearEspecialidad({
                 nombre: especialidad.nombre,
                 duracionTurnoEnMins: especialidad.duracionTurnoEnMins,
-                costoConsulta: especialidad.costoConsulta,
+                costo: especialidad.costo,
             });
 
         expect(especialidadRepository.findOne)
             .toHaveBeenCalledWith(
                 especialidad.nombre,
                 especialidad.duracionTurnoEnMins,
-                especialidad.costoConsulta
+                especialidad.costo
             );
 
         expect(especialidadRepository.create)
             .toHaveBeenCalledWith({
                 nombre: especialidad.nombre,
                 duracionTurnoEnMins: especialidad.duracionTurnoEnMins,
-                costoConsulta: especialidad.costoConsulta,
+                costo: especialidad.costo,
             });
 
         expect(resultado).toBe(especialidad);
@@ -94,10 +94,10 @@ describe("ServiciosMedicoService tests", () => {
             serviciosMedicoService.crearEspecialidad({
                 nombre: especialidad.nombre,
                 duracionTurnoEnMins: especialidad.duracionTurnoEnMins,
-                costoConsulta: especialidad.costoConsulta,
+                costo: especialidad.costo,
             })
         ).rejects.toThrow(
-            "La especialidad ya existe"
+            "Ya existe una especialidad con nombre Cardiología, duración 30 minutos y costo 10000."
         );
     });
 
@@ -133,7 +133,7 @@ describe("ServiciosMedicoService tests", () => {
                 especialidadId: "especialidad-inexistente",
             })
         ).rejects.toThrow(
-            "La especialidad especialidad-inexistente no existe"
+            "La especialidad con id: especialidad-inexistente no fue encontrada."
         );
     });
 
@@ -153,7 +153,7 @@ describe("ServiciosMedicoService tests", () => {
                 {
                     nombre: "Neurología",
                     duracionTurnoEnMins: 45,
-                    costoConsulta: 15000,
+                    costo: 15000,
                 }
             );
 
@@ -182,11 +182,11 @@ describe("ServiciosMedicoService tests", () => {
                 {
                     nombre: "Neurología",
                     duracionTurnoEnMins: 45,
-                    costoConsulta: 15000,
+                    costo: 15000,
                 }
             )
         ).rejects.toThrow(
-            "La especialidad especialidad-inexistente no existe"
+            "La especialidad con id: especialidad-inexistente no fue encontrada."
         );
     });
 
@@ -235,7 +235,7 @@ describe("ServiciosMedicoService tests", () => {
                 costo: practica.costo,
             })
         ).rejects.toThrow(
-            "La practica ya existe"
+            "La practica Radiografía ya existe."
         );
     });
 
@@ -271,7 +271,7 @@ describe("ServiciosMedicoService tests", () => {
                 practicaId: "practica-inexistente",
             })
         ).rejects.toThrow(
-            "La practica practica-inexistente no existe"
+            "La practica con id: practica-inexistente no fue encontrada."
         );
     });
 
@@ -323,7 +323,7 @@ describe("ServiciosMedicoService tests", () => {
                 }
             )
         ).rejects.toThrow(
-            "La practica practica-inexistente no existe"
+            "La practica con id: practica-inexistente no fue encontrada."
         );
     });
 });

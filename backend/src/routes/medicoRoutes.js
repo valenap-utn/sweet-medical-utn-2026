@@ -1,36 +1,50 @@
 import express from "express";
+import { requireRole } from "../middlewares/roleMiddleware.js";
+import { RolUsuario } from "../domain/enums/RolUsuario.js";
 import {MedicoController} from "../controllers/MedicoController.js";
+import {authMiddleware} from "../middlewares/authMiddleware.js";
 
 export default function medicoRoutes(getController) {
     const router = express.Router();
     const medicoController = getController(MedicoController);
 
     // Endpoints
-    router.get('/:medicoId/pacientes/:pacienteId/turnos', medicoController.obtenerHistorial);
+    router.get('/pacientes/:pacienteId/turnos', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerHistorial);
 
-    router.patch('/:medicoId/turnos/:turnoId/cancelar', medicoController.cancelarTurno);
+    // Agenda
+    router.get("/agenda", authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerAgenda);
 
-    router.patch('/:medicoId/turnos/:turnoId/realizado', medicoController.marcarTurnoRealizado);
+    // Sedes
+    router.get('/sedes', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerSedes);
 
-    router.patch('/:medicoId/turnos/:turnoId/proponer-cambio', medicoController.proponerCambioFecha);
+    router.post('/sedes/:sedeId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarSede);
 
-    router.patch('/:medicoId/turnos/:turnoId/confirmacion', medicoController.confirmarCambioFechaSolicitadoPorPaciente);
+    router.delete('/sedes/:sedeId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarSede);
 
-    router.get('/:medicoId/especialidades/:especialidadId/turnos', medicoController.consultarDisponibilidadEspecialidad);
+    // Disponibilidades
+    router.get('/especialidades/:especialidadId/turnos', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.consultarDisponibilidadEspecialidad);
 
-    router.get('/:medicoId/practicas/:practicaId/turnos', medicoController.consultarDisponibilidadPractica);
+    router.get('/practicas/:practicaId/turnos', authMiddleware,requireRole(RolUsuario.MEDICO), medicoController.consultarDisponibilidadPractica);
 
-    router.post('/:medicoId/disponibilidades', medicoController.agregarDisponibilidad);
+    router.get('/disponibilidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerDisponibilidades);
 
-    router.delete('/:medicoId/disponibilidades', medicoController.quitarDisponibilidad);
+    router.post('/disponibilidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarDisponibilidad);
 
-    router.post('/:medicoId/practicas/:practicaId', medicoController.agregarPractica);
+    router.delete('/disponibilidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarDisponibilidad);
 
-    router.delete('/:medicoId/practicas/:practicaId', medicoController.quitarPractica);
+    // Practicas
+    router.get('/practicas', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerPracticas);
 
-    router.post('/:medicoId/especialidades/:especialidadId', medicoController.agregarEspecialidad);
+    router.post('/practicas/:practicaId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarPractica);
 
-    router.delete('/:medicoId/especialidades/:especialidadId', medicoController.quitarEspecialidad);
+    router.delete('/practicas/:practicaId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarPractica);
+
+    // Especialidades
+    router.get('/especialidades', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.obtenerEspecialidades);
+
+    router.post('/especialidades/:especialidadId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.agregarEspecialidad);
+
+    router.delete('/especialidades/:especialidadId', authMiddleware, requireRole(RolUsuario.MEDICO), medicoController.quitarEspecialidad);
 
     return router;
 }

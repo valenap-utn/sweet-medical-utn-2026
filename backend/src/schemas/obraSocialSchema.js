@@ -13,6 +13,10 @@ const ObraSocialSchema = new mongoose.Schema({
             message: 'El nombre de la obra social debe tener al menos 3 caracteres.'
         }
     },
+    planes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Plan"
+    }]
 
 }, {
     // Para trazabilidad ( createdAt , updatedAt )

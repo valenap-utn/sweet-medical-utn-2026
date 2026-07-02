@@ -1,20 +1,19 @@
 import express from "express";
+import { requireRole } from "../middlewares/roleMiddleware.js";
+import { RolUsuario } from "../domain/enums/RolUsuario.js";
 import {PacienteController} from "../controllers/PacienteController.js";
+import {authMiddleware} from "../middlewares/authMiddleware.js";
 
 export default function pacienteRoutes(getController) {
     const router = express.Router();
     const pacienteController = getController(PacienteController);
 
     // Endpoints
-    router.get('/:pacienteId/turnos', pacienteController.obtenerHistorial);
-
-    router.post('/:pacienteId/turnos/:turnoId/reservar', pacienteController.reservarTurno)
-
-    router.patch('/:pacienteId/turnos/:turnoId/cancelar', pacienteController.cancelarTurno);
-
-    router.patch('/:pacienteId/turnos/:turnoId/solicitar-cambio', pacienteController.solicitarCambioFecha);
-
-    router.patch('/pacienteId/turnos/turnoId/confirmacion', pacienteController.confirmarCambioFechaPropuestoPorMedico)
+    router.get(
+        '/turnos',
+        authMiddleware,
+        requireRole(RolUsuario.PACIENTE),
+        pacienteController.obtenerHistorial);
 
     return router;
 }

@@ -1,152 +1,239 @@
-import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 import {TipoServicio} from "../domain/enums/TipoServicio.js";
-import {isAfter, isValid, parseISO, subHours} from "date-fns";
+import {BadRequestError, ConflictError, NotFoundError} from "../error/AppError.js";
+import {endOfDay, isAfter, isValid, parseISO, startOfDay,} from "date-fns";
+import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 
 export class MedicoService {
-    constructor({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService}) {
+    constructor({
+                    medicoRepository,
+                    turnoRepository,
+                    especialidadRepository,
+                    practicaRepository,
+                    agendaService,
+                    sedeRepository
+                }) {
         this.medicoRepository = medicoRepository;
         this.turnoRepository = turnoRepository;
         this.especialidadRepository = especialidadRepository;
         this.practicaRepository = practicaRepository;
         this.agendaService = agendaService;
+        this.sedeRepository = sedeRepository;
     }
 
-    async cancelarTurno({medicoId, turnoId, motivo}) {
-        if (!motivo) throw new Error("Debe indicar un motivo para la cancelación");
-
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
-
-        this.validarTurnoPerteneceAMedico(turno, medicoId);
-
-        const unaHoraAntes = subHours(turno.fechaHoraInicio, 1);
-        if (isAfter(new Date(), unaHoraAntes)) {
-            throw new Error("El turno solo puede cancelarse con al menos 1 hora de anticipación.");
-        }
-        turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.CANCELADO.nombre,
-            usuario: medicoId,
-            motivo: motivo,
-            turnoId: turno._id,
-        })
-        return await this.turnoRepository.save(turno);
-    }
-
-
-
-    async marcarTurnoRealizado({medicoId, turnoId}) {
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
-        this.validarTurnoPerteneceAMedico(turno, medicoId);
-        if (turno.estado !== EstadoTurno.CONFIRMADO.nombre) throw new Error(`El turno ${turnoId} no está confirmado`);
-        turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.REALIZADO.nombre,
-            usuario: medicoId,
-            motivo: "Se realizó el turno",
-            turnoId: turno._id,
-        })
-        return await this.turnoRepository.save(turno);
-    }
-
+    // Para consultar el historial de turnos de un paciente específico
     async obtenerHistorial({pacienteId}) {
         return await this.turnoRepository.findByPacienteId(pacienteId);
     }
 
-    async proponerCambioFecha({medicoId, turnoId, nuevaFechaHora}) {
-        if (!nuevaFechaHora) throw new Error("Debe indicar la nueva fecha y hora propuesta.");
-
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
-
-        this.validarTurnoPerteneceAMedico(turno, medicoId);
-
-        const fechaParseada = parseISO(nuevaFechaHora);
-        if (!isValid(fechaParseada)) throw new Error(`La fecha ${fechaParseada} no es válida.`);
-
-        // Se asigna la fecha propuesta al campo temporal sin sobreescribir la original todavía
-        turno.fechaHoraSolicitada = fechaParseada;
-
-        // Registramos el cambio en el historial manteniendo el estado de espera (RESERVADO)
-        turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.RESERVADO.nombre,
-            usuario: medicoId,
-            motivo: "Nueva fecha propuesta para el turno.",
-            turnoId: turnoId
-        });
-        return await this.turnoRepository.save(turno);
+    // Sedes
+    async obtenerSedes({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new NotFoundError(`No se encontró al médico con id: ${medicoId}`);
+        return medico.sedes;
     }
 
-    async confirmarCambioFechaSolicitadoPorPaciente({medicoId, turnoId}) {
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) throw new Error(`Turno ${turnoId} no encontrado.`);
+    async obtenerEspecialidades({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
 
-        if (!turno.fechaHoraSolicitada) throw new Error(`No existe ninguna propuesta de cambio de fecha pendiente para el turno ${turnoId}`);
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}`
+            );
+        }
 
-        // Efectuamos el cambio real sobreescribiendo la fecha de inicio original
-        turno.fechaHoraInicio = turno.fechaHoraSolicitada;
 
-        // Limpiamos el campo temporal de solicitud
-        turno.fechaHoraSolicitada = null;
-
-        // El turno se consolida pasando a CONFIRMADO
-        turno.actualizarEstado({
-            nuevoEstado: EstadoTurno.CONFIRMADO.nombre,
-            usuario: medicoId,
-            motivo: "Modificación de fecha confirmada.",
-            turnoId: turnoId
-        });
-        return await this.turnoRepository.save(turno);
+        return medico.especialidades;
     }
 
+    async obtenerPracticas({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}`
+            );
+        }
+
+        return medico.practicas;
+    }
+
+    async obtenerAgenda({medicoId, filtros}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+
+        if (!medico) {
+            throw new NotFoundError(
+                `No se encontró al médico con id: ${medicoId}.`
+            );
+        }
+
+        let fechaDesde = filtros.fechaDesde
+            ? parseISO(filtros.fechaDesde)
+            : new Date();
+
+        let fechaHasta = filtros.fechaHasta
+            ? parseISO(filtros.fechaHasta)
+            : undefined;
+
+        if (!isValid(fechaDesde)) {
+            throw new BadRequestError("La fechaDesde no es válida.");
+        }
+
+        if (fechaHasta && !isValid(fechaHasta)) {
+            throw new BadRequestError("La fechaHasta no es válida.");
+        }
+
+        fechaDesde = startOfDay(fechaDesde);
+
+        if (fechaHasta) {
+            fechaHasta = endOfDay(fechaHasta);
+        }
+
+        if (fechaHasta && isAfter(fechaDesde, fechaHasta)) {
+            throw new BadRequestError(
+                "La fechaDesde no puede ser posterior a fechaHasta."
+            );
+        }
+
+        const estadosValidos = Object.values(EstadoTurno)
+            .filter((estado) => estado instanceof EstadoTurno)
+            .map((estado) => estado.nombre);
+
+        if (
+            filtros.estado &&
+            !estadosValidos.includes(filtros.estado)
+        ) {
+            throw new BadRequestError(
+                `Estado inválido: ${filtros.estado}.`
+            );
+        }
+
+        return await this.turnoRepository.buscarAgendaMedico({
+            medicoId,
+            fechaDesde,
+            fechaHasta,
+            estado: filtros.estado,
+        });
+    }
+
+    async agregarSede({medicoId, sedeId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new NotFoundError(`El médico con id: ${medicoId} no fue encontrado.`);
+
+        const sede = await this.sedeRepository.findById(sedeId);
+        if (!sede) throw new NotFoundError(`No se encontró la sede con id: ${sedeId}`);
+
+        medico.agregarSede(sede);
+
+        // console.log(medico.sedes)
+
+        await this.medicoRepository.save(medico);
+
+        return {mensaje: `Sede asociada correctamente al médico ${medico.nombre}.`};
+    }
+
+    async quitarSede({medicoId, sedeId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new NotFoundError(`El médico con id: ${medicoId} no fue encontrado.`);
+
+        const sede = await this.sedeRepository.findById(sedeId);
+        if (!sede) throw new NotFoundError(`No se encontró la sede con id: ${sedeId}`);
+
+        const cantidadOriginal = medico.sedes.length;
+
+        medico.quitarSede(sede);
+
+        if (medico.sedes.length === cantidadOriginal) throw new NotFoundError(`El médico no tiene asociada la sede indicada con id: ${sedeId}.`);
+
+        // Quitamos las disponibilidades que tenía el médico, asociadas a la sede eliminada
+        medico.disponibilidades = medico.disponibilidades.filter(d => {
+            const disponibilidadSedeId = d.sede?.toString() ?? d.sede?.toString();
+            return disponibilidadSedeId !== sedeId.toString();
+        })
+
+        await this.medicoRepository.save(medico);
+
+        await this.agendaService.regenerarAgenda({medicoId});
+
+        return {mensaje: `Sede removida correctamente del médico ${medico.nombre}.`};
+    }
+
+
+    /* ===== Acciones sobre DISPONIBILIDADES ======================================================================== */
     async consultarDisponibilidadEspecialidad({medicoId, especialidadId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.ESPECIALIDAD, especialidadId: especialidadId})
+        console.log({medicoId, especialidadId});
+        return await this.turnoRepository.buscarTurnosDisponibles({
+            medicoId: medicoId,
+            tipoServicio: TipoServicio.ESPECIALIDAD,
+            especialidadId: especialidadId
+        })
     }
 
     async consultarDisponibilidadPractica({medicoId, practicaId}) {
-        return await this.turnoRepository.buscarDisponibles({medicoId: medicoId, tipoServicio: TipoServicio.PRACTICA, practicaId: practicaId})
+        return await this.turnoRepository.buscarTurnosDisponibles({
+            medicoId: medicoId,
+            tipoServicio: TipoServicio.PRACTICA,
+            practicaId: practicaId
+        })
+    }
+
+    // Obtiene todas las disponibilidades del médico (sin importar el tipoServicio)
+    async obtenerDisponibilidades({medicoId}) {
+        const medico = await this.medicoRepository.findById(medicoId);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        return medico.disponibilidades;
     }
 
     async agregarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
-        if (!this.disponibilidadValida(disponibilidad)) throw new Error("Disponibilidad no válida");
+        if (!this.disponibilidadValida(disponibilidad)) throw new BadRequestError("Disponibilidad no válida. Debe indicar diaSemana, horaDesde, horaHasta, sedeId, tipoServicio y servicio.");
 
-        if (medico.disponibilidades.some(d => this.disponibilidadCoincide(d, disponibilidad))) throw new Error("Disponibilidad ya existente");
+        const disponibilidadNormalizada = await this.normalizarDisponibilidad({medico, disponibilidad});
 
-        medico.definirDisponibilidad(disponibilidad);
+        if (this.tieneSolapamientos(medico.disponibilidades, disponibilidadNormalizada)) {
+            throw new ConflictError(`El médico ya tiene una disponibilidad solapada para ese día y horario.`);
+        }
+
+        medico.definirDisponibilidad(disponibilidadNormalizada);
+
         await this.medicoRepository.save(medico);
 
-        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+        await this.agendaService.regenerarAgenda({medicoId}); // <--- NUEVO
 
-        return { mensaje: "Disponibilidad agregada y agenda regenerada." };
+        return {mensaje: "Disponibilidad agregada y agenda regenerada."};
     }
 
     async quitarDisponibilidad({medicoId, disponibilidad}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+
+        if (!this.disponibilidadValida(disponibilidad)) throw new BadRequestError("Disponibilidad no válida.");
+
+        const disponibilidadNormalizada = await this.normalizarDisponibilidad({medico, disponibilidad});
 
         const cantidadOriginal = medico.disponibilidades.length;
 
-        medico.disponibilidades = medico.disponibilidades.filter(d => !(this.disponibilidadCoincide(d, disponibilidad)));
-        if (cantidadOriginal === medico.disponibilidades.length) throw new Error("Disponibilidad no encontrada");
+        medico.disponibilidades = medico.disponibilidades.filter(d => !(this.disponibilidadCoincide(d, disponibilidadNormalizada)));
+        if (cantidadOriginal === medico.disponibilidades.length) throw new NotFoundError("Disponibilidad no encontrada");
 
         await this.medicoRepository.save(medico);
 
-        await this.agendaService.regenerarAgenda({ medicoId }); // <--- NUEVO
+        await this.agendaService.regenerarAgenda({medicoId}); // <--- NUEVO
 
-        return { mensaje: "Disponibilidad eliminada y agenda regenerada." };
+        return {mensaje: "Disponibilidad eliminada y agenda regenerada."};
 
     }
 
+    /* ===== Acciones sobre ESPECIALIDADES ======================================================================== */
     async agregarEspecialidad({medicoId, especialidadId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new Error(`Especialidad ${especialidadId} no existe, créela antes de agregar`);
+        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
 
-        if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new Error(`El medico ${medicoId} ya tiene la especialidad ${especialidadId}`);
+        if (medico.especialidades.some(e => this.servicioCoincide(e, especialidad))) throw new ConflictError(`El medico ${medicoId} ya tiene la especialidad ${especialidadId}`);
 
         medico.agregarEspecialidad(especialidad);
 
@@ -156,70 +243,184 @@ export class MedicoService {
 
     async quitarEspecialidad({medicoId, especialidadId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const especialidad = await this.especialidadRepository.findById(especialidadId);
-        if (!especialidad) throw new Error(`Especialidad ${especialidadId} no existe`);
+        if (!especialidad) throw new NotFoundError(`No se encontró la especialidad con id: ${especialidadId} .`);
 
         const cantidadOriginal = medico.especialidades.length;
 
         medico.especialidades = medico.especialidades.filter(e => !(this.servicioCoincide(e, especialidad)));
-        if (cantidadOriginal === medico.especialidades.length) throw new Error(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
+        if (cantidadOriginal === medico.especialidades.length) throw new NotFoundError(`El medico ${medicoId} no tiene la especialidad ${especialidadId}`);
 
-        return await this.medicoRepository.save(medico);
+        medico.disponibilidades = (medico.disponibilidades || []).filter(d =>
+            !(
+                d.tipoServicio === TipoServicio.ESPECIALIDAD &&
+                d.servicio?.toString() === especialidadId.toString()
+            )
+        );
+
+        await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId });
+        return { mensaje: "Especialidad quitada y agenda regenerada." };
 
     }
 
+    /* ===== Acciones sobre PRACTICAS ======================================================================== */
     async agregarPractica({medicoId, practicaId}) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
 
         const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new Error(`Práctica ${practicaId} no existe, créela antes de agregar`);
+        if (!practica) throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
 
-        if (medico.practicas.some(p => this.servicioCoincide(p, practica))) throw new Error(`El medico ${medicoId} ya tiene la práctica ${practicaId}`);
+        if (medico.practicas.some(p => this.servicioCoincide(p, practica))) throw new ConflictError(`El medico ${medicoId} ya tiene la práctica ${practicaId}`);
 
         medico.agregarPractica(practica);
 
         return await this.medicoRepository.save(medico);
     }
 
-    async quitarPractica({medicoId, practicaId}) {
+    async quitarPractica({ medicoId, practicaId }) {
         const medico = await this.medicoRepository.findById(medicoId);
-        if (!medico) throw new Error(`Medico ${medicoId} no encontrado.`);
+        if (!medico) {
+            throw new NotFoundError(`No se encontró el médico con id: ${medicoId} .`);
+        }
 
         const practica = await this.practicaRepository.findById(practicaId);
-        if (!practica) throw new Error(`Práctica ${practicaId} no existe`);
+        if (!practica) {
+            throw new NotFoundError(`No se encontró la práctica con id: ${practicaId} .`);
+        }
 
         const cantidadOriginal = medico.practicas.length;
 
-        medico.practicas = medico.practicas.filter(p => !(this.servicioCoincide(p, practica)));
-        if (cantidadOriginal === medico.practicas.length) throw new Error(`El medico ${medicoId} no tiene la práctica ${practicaId}`);
+        medico.practicas = medico.practicas.filter(p =>
+            !this.servicioCoincide(p, practica)
+        );
 
-        return await this.medicoRepository.save(medico);
+        if (cantidadOriginal === medico.practicas.length) {
+            throw new NotFoundError(`El médico ${medicoId} no tiene la práctica ${practicaId}`);
+        }
+
+        medico.disponibilidades = (medico.disponibilidades || []).filter(d =>
+            !(
+                d.tipoServicio === TipoServicio.PRACTICA &&
+                d.servicio?.toString() === practicaId.toString()
+            )
+        );
+
+        await this.medicoRepository.save(medico);
+        await this.agendaService.regenerarAgenda({ medicoId });
+
+        return { mensaje: "Práctica quitada y agenda regenerada." };
     }
 
 
     // -------------------------------------------- FUNCIONES AUXILIARES -----------------------------------------------------------------
 
     disponibilidadValida(disponibilidad) {
+        if (!disponibilidad) return false;
+
         const formatoHora = /^([01]\d|2[0-3]):([0-5]\d)$/; // Verifica que el formato ingresado de horario sea de forma "HH:mm" Ejemplo: "08:00"
-        return formatoHora.test(disponibilidad.horaDesde) && formatoHora.test(disponibilidad.horaHasta) && disponibilidad.horaHasta > disponibilidad.horaDesde;
+
+        return Boolean(disponibilidad.diaSemana &&
+            formatoHora.test(disponibilidad.horaDesde) &&
+            formatoHora.test(disponibilidad.horaHasta) &&
+            disponibilidad.horaHasta > disponibilidad.horaDesde &&
+            disponibilidad.sedeId &&
+            disponibilidad.tipoServicio &&
+            disponibilidad.servicio &&
+            Object.values(TipoServicio).includes(disponibilidad.tipoServicio)
+        );
+    }
+
+    async normalizarDisponibilidad({medico, disponibilidad}) {
+        /*const sedeExisteEnMedico = medico.sedes.some(s => {
+            const id = s._id?.toString() ?? s.id?.toString() ?? s.toString();
+            return id === disponibilidad.sedeId.toString();
+        });*/
+
+        const sedeIdRecibida = disponibilidad.sedeId.toString();
+        const sedeExisteEnMedico = medico.sedes.some(s => {
+            const sedeIdDelMedico = s._id?.toString() || s.id?.toString() || s.toString();
+            return sedeIdRecibida === sedeIdDelMedico;
+        })
+
+        /*console.log("medicoId encontrado:", medico._id.toString());
+        console.log("sedeId recibida:", disponibilidad.sedeId);
+
+        console.log("sedes del medico:", medico.sedes.map(s => ({
+            raw: s,
+            _id: s._id?.toString(),
+            id: s.id?.toString(),
+            toString: s.toString()
+        })));*/
+
+        if (!sedeExisteEnMedico) throw new BadRequestError("El médico no atiende en la sede indicada.");
+
+        let servicio;
+
+        if (disponibilidad.tipoServicio === TipoServicio.ESPECIALIDAD) {
+            servicio = await this.especialidadRepository.findById(disponibilidad.servicio);
+            if (!servicio) throw new NotFoundError(`No se encontró la especialidad con id: ${disponibilidad.servicio}`);
+
+            const medicoTieneEspecialidad = medico.especialidades.some(e =>
+                e._id?.toString() === disponibilidad.servicio.toString()
+            );
+
+            if (!medicoTieneEspecialidad) throw new BadRequestError(`El médico no tiene asociada esa especialidad.`);
+        }
+
+        if (disponibilidad.tipoServicio === TipoServicio.PRACTICA) {
+            servicio = await this.practicaRepository.findById(disponibilidad.servicio);
+            if (!servicio) throw new NotFoundError(`No se encontró la practica con id: ${disponibilidad.servicio}`);
+
+            const medicoTienePractica = medico.practicas.some(p =>
+                p._id?.toString() === disponibilidad.servicio.toString()
+            );
+
+            if (!medicoTienePractica) throw new BadRequestError(`El médico no tiene asociada esa práctica.`);
+        }
+
+        return {
+            diaSemana: disponibilidad.diaSemana,
+            horaDesde: disponibilidad.horaDesde,
+            horaHasta: disponibilidad.horaHasta,
+            sede: disponibilidad.sedeId,
+            tipoServicio: disponibilidad.tipoServicio,
+            servicio: disponibilidad.servicio
+        }
     }
 
     disponibilidadCoincide(d, disponibilidad) {
-        return d.diaSemana === disponibilidad.diaSemana && d.horaDesde === disponibilidad.horaDesde && d.horaHasta === disponibilidad.horaHasta;
+        return d.diaSemana === disponibilidad.diaSemana &&
+            d.horaDesde === disponibilidad.horaDesde &&
+            d.horaHasta === disponibilidad.horaHasta &&
+            d.sede?.toString() === disponibilidad.sede?.toString() &&
+            d.tipoServicio === disponibilidad.tipoServicio &&
+            d.servicio?.toString() === disponibilidad.servicio?.toString();
+    }
+
+    tieneSolapamientos(disponibilidades, nuevaDisponibilidad) {
+        return disponibilidades.some(d =>
+            d.diaSemana === nuevaDisponibilidad.diaSemana &&
+            this.horariosSeSolapan(
+                d.horaDesde,
+                d.horaHasta,
+                nuevaDisponibilidad.horaDesde,
+                nuevaDisponibilidad.horaHasta,
+            )
+        );
+    }
+
+    horariosSeSolapan(desdeA, hastaA, desdeB, hastaB) {
+        return desdeA < hastaB && desdeB < hastaA;
     }
 
     servicioCoincide(s, servicio) {
-        return s.nombre === servicio.nombre && s.costo === servicio.costo;
-    }
-
-    validarTurnoPerteneceAMedico(turno, medicoId) {
-        const medicoDelTurno = turno.medico._id;
-        if (String(medicoDelTurno) !== String(medicoId)) {
-            throw new Error(`El turno ${turno._id} no pertenece al médico ${medicoId}.`)
-        }
+        const idA = s._id?.toString() ?? s.id?.toString() ?? s.toString();
+        const idB = servicio._id?.toString() ?? servicio.id?.toString() ?? servicio.toString();
+        return idA === idB;
     }
 
 }
