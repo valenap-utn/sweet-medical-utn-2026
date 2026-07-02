@@ -76,6 +76,15 @@ export class AuthController {
         }
     };
 
+    obtenerPerfil = async (req, res, next) => {
+        try {
+            const perfil = await this.authService.obtenerPerfil(req.user);
+            res.status(200).json(perfil);
+        } catch (err) {
+            next(err);
+        }
+    };
+
     setAuthCookies(res, {accessToken, refreshToken}) {
         res.cookie("accessToken", accessToken, this.accessCookieOptions());
         res.cookie("refreshToken", refreshToken, {

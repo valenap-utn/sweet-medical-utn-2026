@@ -8,7 +8,7 @@ export class PracticaService {
     /*async crear(data) {
         return await this.practicaRepository.create(data);
     }*/
-    async crear({nombre, duracionTurnoEnMins, costo}) {
+    async crear({nombre, duracionTurnoEnMins, codigo, costo}) {
         if (!nombre || !duracionTurnoEnMins || costo == null) throw new BadRequestError("Debe indicar nombre, duración del turno y costo para crear la práctica.");
         if (duracionTurnoEnMins <= 0) throw new BadRequestError("La duración del turno debe ser mayor a 0.");
         if (costo < 0) throw new BadRequestError("El costo no puede ser negativo.");
@@ -17,7 +17,7 @@ export class PracticaService {
         if (await this.practicaRepository.findOne(nombre, duracionTurnoEnMins, costo)) throw new ConflictError(`La practica ${nombre} ya existe.`);
 
         // Sino => 201
-        return await this.practicaRepository.create({nombre, duracionTurnoEnMins, costo});
+        return await this.practicaRepository.create({nombre, codigo, duracionTurnoEnMins, costo});
     }
 
     async obtenerTodas() {

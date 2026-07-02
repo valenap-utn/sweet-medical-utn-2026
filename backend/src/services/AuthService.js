@@ -157,4 +157,32 @@ export class AuthService {
             expiresIn: "7d",
         });
     }
+
+    async obtenerPerfil({ rol, pacienteId, medicoId }) {
+        if (rol === RolUsuario.PACIENTE) {
+            const paciente = await this.pacienteRepository.findById(pacienteId);
+            if (!paciente) throw new NotFoundError("Perfil de paciente no encontrado.");
+
+            return {
+                nombre: paciente.nombre,
+                dni: paciente.dni,
+                obraSocial: paciente.obraSocial?.nombre ?? null,
+                plan: paciente.plan?.nombre       ?? null,
+            };
+        }
+
+        if (rol === RolUsuario.MEDICO) {
+            const medico = await this.medicoRepository.findById(medicoId);
+            if (!medico) throw new NotFoundError("Perfil médico no encontrado.");
+
+            return {
+                nombre: medico.nombre,
+                matricula: medico.matricula,
+                especialidades: medico.especialidades?.map(e => e.nombre) ?? [],
+                sedes: medico.sedes?.map(s => s.nombre) ?? [],
+            };
+        }
+
+        throw new UnauthorizedError("Rol inválido.");
+    }
 }
