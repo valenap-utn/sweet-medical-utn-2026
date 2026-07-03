@@ -11,9 +11,10 @@ import {RolUsuario} from "@/lib/roles";
 import {obtenerAgendaMedico} from "@/lib/medicoApi";
 import {cancelarTurno, confirmarTurno, marcarTurnoRealizado, proponerCambioFecha,} from "@/lib/turnosApi";
 import {getApiErrorMessage} from "@/lib/api";
-import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
+import { notify } from "@/lib/toast";
+import Alert from "@/components/ui/Alert";
 
 const ESTADOS = ["", "Disponible", "Reservado", "Confirmado", "Cancelado"];
 
@@ -210,8 +211,6 @@ export default function AgendaMedicoPage() {
     const [motivoCancelacion, setMotivo] = useState("");
     const [modalTipo, setModalTipo] = useState(null);
     const [accionCargando, setAccionCargando] = useState(false);
-    const [accionError, setAccionError] = useState("");
-    const [accionExito, setAccionExito] = useState("");
 
     useEffect(() => {
         if (cargando) return;
@@ -266,17 +265,15 @@ export default function AgendaMedicoPage() {
 
     const handleMarcarRealizado = async (turnoId) => {
         setAccionCargando(true);
-        setAccionError("");
-        setAccionExito("");
 
         try {
             await marcarTurnoRealizado(turnoId);
-            setAccionExito("Turno marcado como realizado.");
+            notify.success("Turno marcado como realizado.");
             setTurnos((ts) =>
                 ts.map((t) => (t._id === turnoId ? {...t, estado: "Realizado"} : t))
             );
         } catch (err) {
-            setAccionError(getApiErrorMessage(err, "No se pudo marcar el turno como realizado."));
+            notify.error(getApiErrorMessage(err, "No se pudo marcar el turno como realizado."));
         } finally {
             setAccionCargando(false);
         }
@@ -284,17 +281,15 @@ export default function AgendaMedicoPage() {
 
     const handleConfirmar = async (turnoId) => {
         setAccionCargando(true);
-        setAccionError("");
-        setAccionExito("");
 
         try {
             await confirmarTurno(turnoId);
-            setAccionExito("Turno confirmado.");
+            notify.success("Turno confirmado.");
             setTurnos((ts) =>
                 ts.map((t) => (t._id === turnoId ? {...t, estado: "Confirmado"} : t))
             );
         } catch (err) {
-            setAccionError(getApiErrorMessage(err, "No se pudo confirmar el turno."));
+            notify.error(getApiErrorMessage(err, "No se pudo confirmar el turno."));
         } finally {
             setAccionCargando(false);
         }
@@ -302,17 +297,14 @@ export default function AgendaMedicoPage() {
 
     const handleCancelar = async () => {
         if (!motivoCancelacion.trim()) {
-            setAccionError("Ingresá un motivo para cancelar.");
+            notify.error("Ingresá un motivo para cancelar.");
             return;
         }
-
         setAccionCargando(true);
-        setAccionError("");
-        setAccionExito("");
 
         try {
             await cancelarTurno(modalTurno._id, motivoCancelacion);
-            setAccionExito("Turno cancelado correctamente.");
+            notify.success("Turno cancelado correctamente.");
             setTurnos((ts) =>
                 ts.map((t) =>
                     t._id === modalTurno._id ? {...t, estado: "Disponible"} : t
@@ -320,7 +312,7 @@ export default function AgendaMedicoPage() {
             );
             cerrarModal();
         } catch (err) {
-            setAccionError(getApiErrorMessage(err, "No se pudo cancelar el turno."));
+            notify.error(getApiErrorMessage(err, "No se pudo cancelar el turno."));
         } finally {
             setAccionCargando(false);
         }
@@ -328,21 +320,19 @@ export default function AgendaMedicoPage() {
 
     const handleProponerCambio = async () => {
         if (!nuevaFecha) {
-            setAccionError("Seleccioná una nueva fecha y hora.");
+            notify.error("Seleccioná una nueva fecha y hora.");
             return;
         }
 
         setAccionCargando(true);
-        setAccionError("");
-        setAccionExito("");
 
         try {
             await proponerCambioFecha(modalTurno._id, nuevaFecha);
-            setAccionExito("Propuesta de cambio enviada.");
+            notify.success("Propuesta de cambio enviada.");
             cerrarModal();
             await buscarAgenda();
         } catch (err) {
-            setAccionError(getApiErrorMessage(err, "No se pudo proponer el cambio de fecha."));
+            notify.error(getApiErrorMessage(err, "No se pudo proponer el cambio de fecha."));
         } finally {
             setAccionCargando(false);
         }
@@ -353,8 +343,6 @@ export default function AgendaMedicoPage() {
         setModalTipo(tipo);
         setNuevaFecha("");
         setMotivo("");
-        setAccionError("");
-        setAccionExito("");
     };
 
     const cerrarModal = () => {
@@ -362,7 +350,6 @@ export default function AgendaMedicoPage() {
         setModalTipo(null);
         setNuevaFecha("");
         setMotivo("");
-        setAccionError("");
     };
 
     if (cargando || !usuario || !esMedico) {
@@ -382,12 +369,6 @@ export default function AgendaMedicoPage() {
                     Consultá tus turnos y gestioná cancelaciones, realizaciones y cambios de fecha.
                 </p>
             </div>
-
-            {accionExito && (
-                <Alert type="success" style={{marginBottom: 16}}>
-                    {accionExito}
-                </Alert>
-            )}
 
             <section className={`glass ${styles.filters}`}>
                 <div className={styles.field}>
@@ -571,12 +552,6 @@ export default function AgendaMedicoPage() {
                                     onChange={(e) => setNuevaFecha(e.target.value)}
                                 />
                             </div>
-                        )}
-
-                        {accionError && (
-                            <Alert type="error" style={{marginBottom: 12}}>
-                                {accionError}
-                            </Alert>
                         )}
 
                         <div className={styles.modalActions}>
