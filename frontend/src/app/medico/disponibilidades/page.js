@@ -303,9 +303,9 @@ export default function DisponibilidadesMedicoPage() {
 
     return (
         <div className={styles.page}>
-            <Link href="/medico" className={styles.backLink}>
+            {/*<Link href="/medico" className={styles.backLink}>
                 ← Volver al panel médico
-            </Link>
+            </Link>*/}
 
             <div className={styles.header}>
                 <h1 className={styles.title}>Disponibilidades</h1>

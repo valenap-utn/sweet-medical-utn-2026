@@ -219,7 +219,7 @@ export default function AgendaMedicoPage() {
 
     return (
         <div className={styles.page}>
-            <Link href="/medico" className={styles.backLink}>← Volver al panel médico</Link>
+            {/*<Link href="/medico" className={styles.backLink}>← Volver al panel médico</Link>*/}
 
             <div className={styles.header}>
                 <h1 className={styles.title}>Agenda médica</h1>
