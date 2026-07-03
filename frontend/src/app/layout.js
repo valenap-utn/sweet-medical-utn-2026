@@ -4,6 +4,8 @@ import { CarritoProvider } from "@/context/CarritoContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumb from "../components/layout/Breadcrumb";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata = {
   title: "Sweet Medical",
@@ -22,6 +24,19 @@ export default function RootLayout({ children }) {
             <Footer />
           </CarritoProvider>
         </AuthProvider>
+
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            draggable
+            theme="light"
+            icon={false}
+        />
+
       </body>
     </html>
   );

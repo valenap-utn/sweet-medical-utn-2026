@@ -182,3 +182,65 @@ input:not([type="checkbox"]):not([type="radio"]) {
     display: none !important;
   }
 }
+
+/* Estilos para Toasts */
+.Toastify__toast-container {
+  width: auto;
+  min-width: 320px;
+  max-width: 420px;
+}
+
+.Toastify__toast {
+  min-height: 52px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--outline-v);
+  background: #fff;
+  color: var(--on-surf);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 14px 34px rgba(107, 29, 42, 0.14);
+}
+
+.Toastify__toast-body {
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+}
+
+.Toastify__toast-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+}
+
+.Toastify__close-button {
+  color: var(--p);
+  opacity: 0.55;
+  align-self: center;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+.Toastify__progress-bar {
+  height: 3px;
+}
+
+.Toastify__progress-bar--success {
+  background: var(--p);
+}
+
+.Toastify__progress-bar--error {
+  background: #b42318;
+}
+
+.Toastify__progress-bar--warning {
+  background: #b7791f;
+}
+
+.Toastify__progress-bar--info {
+  background: var(--p-mid);
+}
