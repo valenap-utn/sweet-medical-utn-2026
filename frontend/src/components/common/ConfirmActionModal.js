@@ -1,7 +1,21 @@
 "use client";
 
-export default function ConfirmLogoutModal({open, onCancel, onConfirm}) {
+export default function ConfirmActionModal({
+                                               open,
+                                               title,
+                                               message,
+                                               confirmText = "Confirmar",
+                                               cancelText = "Cancelar",
+                                               onConfirm,
+                                               onCancel,
+                                               variant = "primary", // primary | danger
+                                           }) {
     if (!open) return null;
+
+    const confirmColor =
+        variant === "danger"
+            ? "#b42318"
+            : "var(--secondary)";
 
     return (
         <div
@@ -40,7 +54,7 @@ export default function ConfirmLogoutModal({open, onCancel, onConfirm}) {
                         fontFamily: "var(--font-serif)",
                     }}
                 >
-                    ¿Cerrar sesión?
+                    {title}
                 </h2>
 
                 <p
@@ -52,7 +66,7 @@ export default function ConfirmLogoutModal({open, onCancel, onConfirm}) {
                         lineHeight: 1.7,
                     }}
                 >
-                    Vas a salir de tu cuenta actual. ¿Querés continuar?
+                    {message}
                 </p>
 
                 <div
@@ -74,7 +88,7 @@ export default function ConfirmLogoutModal({open, onCancel, onConfirm}) {
                             e.currentTarget.style.borderColor = "var(--outline-v)";
                         }}
                     >
-                        Cancelar
+                        {cancelText}
                     </button>
 
                     <button
@@ -87,7 +101,7 @@ export default function ConfirmLogoutModal({open, onCancel, onConfirm}) {
                             e.currentTarget.style.opacity = "1";
                         }}
                     >
-                        Sí, cerrar sesión
+                        {confirmText}
                     </button>
                 </div>
             </div>
@@ -104,6 +118,7 @@ const btnSecundario = {
     fontWeight: 700,
     cursor: "pointer",
     fontFamily: "inherit",
+    transition: "all .2s ease",
 };
 
 const btnPrimario = {
@@ -115,4 +130,5 @@ const btnPrimario = {
     fontWeight: 700,
     cursor: "pointer",
     fontFamily: "inherit",
+    transition: "opacity .2s ease",
 };
