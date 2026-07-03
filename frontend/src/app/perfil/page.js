@@ -12,15 +12,19 @@ import ConfirmLogoutModal from "@/components/common/ConfirmLogout";
 import {
     FaBell,
     FaCalendarAlt,
+    FaClock,
     FaDoorOpen,
     FaExchangeAlt,
     FaFlask,
+    FaMapMarkerAlt,
+    FaMoneyBillWave,
     FaShieldAlt,
     FaStethoscope,
     FaTools,
     FaUser,
     FaUserCircle,
 } from "react-icons/fa";
+import {notify} from "@/lib/toast";
 
 const MENU = [
     {id: "turnos", label: "Mis turnos", icon: FaCalendarAlt},
@@ -42,10 +46,19 @@ const fmtFecha = (d) =>
 const fmtCorta = (d) =>
     d ? new Date(d).toLocaleString("es-AR", {dateStyle: "medium", timeStyle: "short"}) : "–";
 
+function obtenerDuracionServicio(turno) {
+    if (turno.tipoServicio === "PRACTICA") {
+        return turno.practica?.duracionTurnoEnMins;
+    }
+    return turno.especialidad?.duracionTurnoEnMins;
+}
+
 function TurnoDetalle({turno, onClose, onSolicitarCambio}) {
     const es = turno.tipoServicio === "ESPECIALIDAD";
     const nombre = es ? turno.especialidad?.nombre : turno.practica?.nombre;
     const ss = STATUS_STYLE[turno.estado] ?? STATUS_STYLE.Disponible;
+
+    const duracion = obtenerDuracionServicio(turno);
 
     return (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -104,29 +117,65 @@ function TurnoDetalle({turno, onClose, onSolicitarCambio}) {
                     marginBottom: 18
                 }}>
                     {[
-                        ["🩺 Médico", turno.medico?.nombre ?? "–"],
-                        ["📍 Sede", turno.sede?.nombre ?? "–"],
-                        ["📅 Fecha", fmtFecha(turno.fechaHoraInicio)],
-                        ["⏱ Duración", turno.duracionEnMins ? `${turno.duracionEnMins} min` : "–"],
-                        ["💰 Costo", turno.costo ? `$${Number(turno.costo).toLocaleString("es-AR")}` : "–"],
-                    ].map(([label, val]) => (
-                        <div key={label} style={{
-                            background: "#fdfaf8",
-                            borderRadius: 10,
-                            padding: "10px 12px",
-                            border: "1px solid var(--outline-v)"
-                        }}>
-                            <div style={{
-                                fontSize: 10,
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                letterSpacing: ".06em",
-                                color: "var(--on-surf-v)",
-                                marginBottom: 3
-                            }}>{label}</div>
-                            <div style={{fontSize: 13, fontWeight: 600, color: "var(--on-surf)"}}>{val}</div>
-                        </div>
-                    ))}
+                        [{icon: FaStethoscope, label: "Médico"}, turno.medico?.nombre ?? "–"],
+                        [
+                            { icon: FaMapMarkerAlt, label: "Sede" },
+                            (
+                                <>
+                                    <div>{turno.sede?.nombre ?? "–"}</div>
+                                    {turno.sede?.direccion && (
+                                        <div style={{
+                                            marginTop: 3,
+                                            fontSize: 12,
+                                            fontWeight: 500,
+                                            color: "var(--secondary)"
+                                        }}>
+                                            {turno.sede.direccion}
+                                        </div>
+                                    )}
+                                </>
+                            )
+                        ],
+                        [{icon: FaCalendarAlt, label: "Fecha"}, fmtFecha(turno.fechaHoraInicio)],
+                        [{icon: FaClock, label: "Duración"}, duracion ? `${duracion} min` : "–"],
+                        [
+                            { icon: FaMoneyBillWave, label: "Costo" },
+                            turno.costo !== null && turno.costo !== undefined
+                                ? `$${Number(turno.costo).toLocaleString("es-AR")}`
+                                : turno.precio !== null && turno.precio !== undefined
+                                    ? `$${Number(turno.precio).toLocaleString("es-AR")}`
+                                    : turno.monto !== null && turno.monto !== undefined
+                                        ? `$${Number(turno.monto).toLocaleString("es-AR")}`
+                                        : "–",
+                        ],
+                    ].map(([item, val]) => {
+                        const Icon = item.icon;
+
+                        return (
+                            <div key={item.label} style={{
+                                background: "#fdfaf8",
+                                borderRadius: 10,
+                                padding: "10px 12px",
+                                border: "1px solid var(--outline-v)"
+                            }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    textTransform: "uppercase",
+                                    letterSpacing: ".06em",
+                                    color: "var(--on-surf-v)",
+                                    marginBottom: 3
+                                }}>
+                                    <Icon size={11}/>
+                                    {item.label}
+                                </div>
+                                <div style={{fontSize: 13, fontWeight: 600, color: "var(--on-surf)"}}>{val}</div>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {turno.estado === "Reservado" && (
@@ -188,7 +237,6 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
     const buscar = async () => {
         if (!nuevaFecha) return;
         setCargando(true);
-        setError("");
         setBuscado(false);
         setTurnoElegido(null);
         try {
@@ -204,7 +252,7 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
             setTurnosDisp(res.turnos ?? []);
             setBuscado(true);
         } catch (e) {
-            setError(getApiErrorMessage(e, "No se pudieron cargar los turnos."));
+            notify.error(getApiErrorMessage(e, "No se pudieron cargar los turnos."));
         } finally {
             setCargando(false);
         }
@@ -217,7 +265,7 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
             await onConfirm(turno._id, turnoElegido._id);
             onClose();
         } catch (e) {
-            setError(getApiErrorMessage(e, "No se pudo realizar el cambio."));
+            notify.error(getApiErrorMessage(e, "No se pudo realizar el cambio."));
             setConfirmando(false);
         }
     };
@@ -256,8 +304,6 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
                 }}>
                     <strong>{nombre}</strong> · {fmtCorta(turno.fechaHoraInicio)}
                 </div>
-
-                {error && <Alert type="error" style={{marginBottom: 12}}>{error}</Alert>}
 
                 <div style={{marginBottom: 14}}>
                     <label style={{
@@ -332,32 +378,38 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
                         gap: 8,
                         marginBottom: 14
                     }}>
-                        {turnosDisp.map(t => (
-                            <div key={t._id} onClick={() => setTurnoElegido(t)}
-                                 style={{
-                                     padding: "10px 14px",
-                                     borderRadius: 11,
-                                     border: `2px solid ${turnoElegido?._id === t._id ? "var(--p)" : "var(--outline-v)"}`,
-                                     background: turnoElegido?._id === t._id ? "var(--p-fixed)" : "#fff",
-                                     cursor: "pointer",
-                                     fontSize: 13,
-                                     display: "flex",
-                                     justifyContent: "space-between",
-                                     alignItems: "center",
-                                     transition: "all .15s"
-                                 }}>
-                                <div>
-                                    <div
-                                        style={{fontWeight: 700, color: "var(--p)"}}>{fmtFecha(t.fechaHoraInicio)}</div>
-                                    <div style={{fontSize: 11, color: "var(--secondary)", marginTop: 2}}>
-                                        {t.sede?.nombre ?? "–"} · {t.duracionEnMins ?? "?"} min
+                        {turnosDisp.map(t => {
+                            const duracion = obtenerDuracionServicio(t);
+
+                            return (
+                                <div key={t._id} onClick={() => setTurnoElegido(t)}
+                                     style={{
+                                         padding: "10px 14px",
+                                         borderRadius: 11,
+                                         border: `2px solid ${turnoElegido?._id === t._id ? "var(--p)" : "var(--outline-v)"}`,
+                                         background: turnoElegido?._id === t._id ? "var(--p-fixed)" : "#fff",
+                                         cursor: "pointer",
+                                         fontSize: 13,
+                                         display: "flex",
+                                         justifyContent: "space-between",
+                                         alignItems: "center",
+                                         transition: "all .15s"
+                                     }}>
+                                    <div>
+                                        <div
+                                            style={{
+                                                fontWeight: 700,
+                                                color: "var(--p)"
+                                            }}>{fmtFecha(t.fechaHoraInicio)}</div>
+                                        <div style={{fontSize: 11, color: "var(--secondary)", marginTop: 2}}>
+                                            {t.sede?.nombre ?? "–"} · {duracion ? `${duracion} min` : "Duración no disponible"}                                    </div>
                                     </div>
+                                    {turnoElegido?._id === t._id && (
+                                        <span style={{color: "var(--p)", fontWeight: 700, fontSize: 16}}>✓</span>
+                                    )}
                                 </div>
-                                {turnoElegido?._id === t._id && (
-                                    <span style={{color: "var(--p)", fontWeight: 700, fontSize: 16}}>✓</span>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
 
@@ -424,17 +476,17 @@ export default function PerfilPage() {
     const [tab, setTab] = useState("turnos");
     const [historial, setHistorial] = useState([]);
     const [cargando, setCargando] = useState(false);
-    const [error, setError] = useState("");
 
     const [turnoDetalle, setTurnoDetalle] = useState(null);
     const [turnoCambio, setTurnoCambio] = useState(null);
-    const [exitoCambio, setExitoCambio] = useState(false);
 
     const esPaciente = usuario?.rol === RolUsuario.PACIENTE;
 
     const [perfil, setPerfil] = useState(null);
     const [cargandoPerfil, setCargandoPerfil] = useState(false);
     const [errorPerfil, setErrorPerfil] = useState("");
+
+    const [error, setError] = useState("");
 
     // Logout
     const [open, setOpen] = useState(false);
@@ -464,7 +516,6 @@ export default function PerfilPage() {
 
         const cargarHistorial = async () => {
             setCargando(true);
-            setError("");
 
             try {
                 const data = await obtenerHistorialPaciente();
@@ -514,8 +565,7 @@ export default function PerfilPage() {
         await reservarTurno(nuevoId);
         const data = await obtenerHistorialPaciente();
         setHistorial(Array.isArray(data) ? data : []);
-        setExitoCambio(true);
-        setTimeout(() => setExitoCambio(false), 4000);
+        notify.success("Cambio de turno realizado correctamente.");
     };
 
     if (authCargando) return (
@@ -534,12 +584,6 @@ export default function PerfilPage() {
                 margin: "0 auto",
                 padding: "clamp(20px,3vw,36px) var(--page-px) 56px"
             }}>
-
-                {exitoCambio && (
-                    <Alert type="success" style={{marginBottom: 16}}>
-                        ✅ Cambio de turno realizado correctamente.
-                    </Alert>
-                )}
 
                 <div style={{
                     display: "grid",
