@@ -15,9 +15,10 @@ import {
 } from "@/lib/medicoApi";
 import { getEspecialidades, getPracticas } from "@/lib/serviciosApi";
 import { getApiErrorMessage } from "@/lib/api";
-import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
+import ConfirmActionModal from "@/components/common/ConfirmActionModal";
+import { notify } from "@/lib/toast";
 
 function obtenerId(valor) {
     return String(valor?._id ?? valor?.id ?? valor);
@@ -126,7 +127,10 @@ export default function ServiciosMedicoPage() {
     const [cargandoDatos, setCargandoDatos] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
-    const [mensaje, setMensaje] = useState("");
+
+    // Para ConfirmActionModal
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [accionPendiente, setAccionPendiente] = useState(null);
 
     const cargarDatos = useCallback(async () => {
         try {
@@ -147,9 +151,13 @@ export default function ServiciosMedicoPage() {
             setTodasEspecialidades(todasEspecialidadesData);
             setTodasPracticas(todasPracticasData);
         } catch (err) {
-            setError(
-                getApiErrorMessage(err, "No pudimos cargar los servicios.")
+            const mensaje = getApiErrorMessage(
+                err,
+                "No pudimos cargar los servicios."
             );
+
+            setError(mensaje);
+            notify.error(mensaje);
         } finally {
             setCargandoDatos(false);
         }
@@ -196,12 +204,13 @@ export default function ServiciosMedicoPage() {
             } catch (err) {
                 if (cancelado) return;
 
-                setError(
-                    getApiErrorMessage(
-                        err,
-                        "No pudimos cargar los servicios."
-                    )
+                const mensaje = getApiErrorMessage(
+                    err,
+                    "No pudimos cargar los servicios."
                 );
+
+                setError(mensaje);
+                notify.error(mensaje);
             } finally {
                 if (!cancelado) {
                     setCargandoDatos(false);
@@ -233,21 +242,21 @@ export default function ServiciosMedicoPage() {
 
         setGuardando(true);
         setError("");
-        setMensaje("");
 
         try {
             await agregarEspecialidadMedico(especialidadSeleccionada);
-            setMensaje("Especialidad asociada correctamente.");
+            notify.success("Especialidad asociada correctamente.");
             setEspecialidadSeleccionada("");
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "No pudimos asociar la especialidad."
-                )
+            const mensaje = getApiErrorMessage(
+                err,
+                "No pudimos asociar la especialidad."
             );
+
+            setError(mensaje);
+            notify.error(mensaje);
         } finally {
             setGuardando(false);
         }
@@ -260,56 +269,74 @@ export default function ServiciosMedicoPage() {
 
         setGuardando(true);
         setError("");
-        setMensaje("");
 
         try {
             await agregarPracticaMedico(practicaSeleccionada);
-            setMensaje("Práctica asociada correctamente.");
+            notify.success("Práctica asociada correctamente.");
             setPracticaSeleccionada("");
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(
-                getApiErrorMessage(err, "No pudimos asociar la práctica.")
+            const mensaje = getApiErrorMessage(
+                err,
+                "No pudimos asociar la práctica."
             );
+
+            setError(mensaje);
+            notify.error(mensaje);
         } finally {
             setGuardando(false);
         }
     };
 
-    const quitarEspecialidad = async (especialidadId) => {
-        setGuardando(true);
-        setError("");
-        setMensaje("");
+    const quitarEspecialidad = (especialidadId) => {
+        setAccionPendiente({
+            tipo: "especialidad",
+            id: especialidadId,
+        });
 
-        try {
-            await quitarEspecialidadMedico(especialidadId);
-            setMensaje("Especialidad quitada correctamente.");
-            setCargandoDatos(true);
-            await cargarDatos();
-        } catch (err) {
-            setError(
-                getApiErrorMessage(err, "No pudimos quitar la especialidad.")
-            );
-        } finally {
-            setGuardando(false);
-        }
+        setConfirmOpen(true);
     };
 
-    const quitarPractica = async (practicaId) => {
+    const quitarPractica = (practicaId) => {
+        setAccionPendiente({
+            tipo: "practica",
+            id: practicaId,
+        });
+
+        setConfirmOpen(true);
+    };
+
+    const confirmarEliminar = async () => {
+        if (!accionPendiente) return;
+
         setGuardando(true);
         setError("");
-        setMensaje("");
 
         try {
-            await quitarPracticaMedico(practicaId);
-            setMensaje("Práctica quitada correctamente.");
+            if (accionPendiente.tipo === "especialidad") {
+                await quitarEspecialidadMedico(accionPendiente.id);
+                notify.success("Especialidad quitada correctamente.");
+            } else {
+                await quitarPracticaMedico(accionPendiente.id);
+                notify.success("Práctica quitada correctamente.");
+            }
+
+            setConfirmOpen(false);
+            setAccionPendiente(null);
+
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(
-                getApiErrorMessage(err, "No pudimos quitar la práctica.")
+            const mensaje = getApiErrorMessage(
+                err,
+                accionPendiente.tipo === "especialidad"
+                    ? "No pudimos quitar la especialidad."
+                    : "No pudimos quitar la práctica."
             );
+
+            setError(mensaje);
+            notify.error(mensaje);
         } finally {
             setGuardando(false);
         }
@@ -341,12 +368,6 @@ export default function ServiciosMedicoPage() {
             {error && (
                 <Alert type="error" style={{ marginBottom: 16 }}>
                     {error}
-                </Alert>
-            )}
-
-            {mensaje && (
-                <Alert type="success" style={{ marginBottom: 16 }}>
-                    {mensaje}
                 </Alert>
             )}
 
@@ -383,6 +404,29 @@ export default function ServiciosMedicoPage() {
                     />
                 </div>
             )}
+
+            <ConfirmActionModal
+                open={confirmOpen}
+                title={
+                    accionPendiente?.tipo === "especialidad"
+                        ? "Quitar especialidad"
+                        : "Quitar práctica"
+                }
+                message={
+                    accionPendiente?.tipo === "especialidad"
+                        ? "¿Querés quitar esta especialidad de tus servicios? Los turnos futuros asociados podrían verse afectados."
+                        : "¿Querés quitar esta práctica de tus servicios? Los turnos futuros asociados podrían verse afectados."
+                }
+                confirmText="Quitar"
+                cancelText="Cancelar"
+                variant="danger"
+                onCancel={() => {
+                    setConfirmOpen(false);
+                    setAccionPendiente(null);
+                }}
+                onConfirm={confirmarEliminar}
+            />
+
         </div>
     );
 }
