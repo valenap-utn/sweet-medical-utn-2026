@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCarrito } from "@/context/CarritoContext";
 import { RolUsuario } from "@/lib/roles";
+import UserMenu from "@/components/layout/UserMenu";
 
 const NAV_PUBLICO = [
   { href: "/",       label: "Inicio" },
@@ -78,12 +79,13 @@ export default function Header() {
 
           {cargando ? null : usuario ? (
             <>
-              <Link href="/perfil" style={{ display: "inline-flex", alignItems: "center", minHeight: 44, padding: "8px 14px", borderRadius: 999, background: "var(--p-fixed)", color: "var(--p)", fontWeight: 700, fontSize: 12, textDecoration: "none", border: "2px solid var(--p-fixed-dim)" }}>
+              {/*<Link href="/perfil" style={{ display: "inline-flex", alignItems: "center", minHeight: 44, padding: "8px 14px", borderRadius: 999, background: "var(--p-fixed)", color: "var(--p)", fontWeight: 700, fontSize: 12, textDecoration: "none", border: "2px solid var(--p-fixed-dim)" }}>
                 {usuario.nombreUsuario ?? (esMedico ? "Panel médico" : "Mi cuenta")}
-              </Link>
-              <button onClick={handleLogout} style={{ padding: "8px 14px", borderRadius: 999, background: "transparent", color: "var(--on-surf-v)", fontWeight: 600, fontSize: 12, border: "2px solid var(--outline-v)", cursor: "pointer", fontFamily: "inherit" }}>
+              </Link>*/}
+              {/*<button onClick={handleLogout} style={{ padding: "8px 14px", borderRadius: 999, background: "transparent", color: "var(--on-surf-v)", fontWeight: 600, fontSize: 12, border: "2px solid var(--outline-v)", cursor: "pointer", fontFamily: "inherit" }}>
                 Salir
-              </button>
+              </button>*/}
+              <UserMenu username={usuario.nombreUsuario} onLogout={handleLogout} />
             </>
           ) : (
             <>
