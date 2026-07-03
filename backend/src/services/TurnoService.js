@@ -69,9 +69,19 @@ export class TurnoService {
         }
 
         // Convertimos las fechas recibidas como texto.
-        const fechaDesde = filtros.fechaDesde
-            ? parseISO(filtros.fechaDesde)
-            : undefined;
+        let fechaDesde;
+
+        if (filtros.fechaDesde) {
+            fechaDesde = parseISO(filtros.fechaDesde);
+
+            // Si el usuario eligió el día de hoy, buscamos desde este instante
+            // para no devolver turnos que ya pasaron.
+            const ahora = new Date();
+
+            if (fechaDesde.toDateString() === ahora.toDateString()) {
+                fechaDesde = ahora;
+            }
+        }
 
         const fechaHasta = filtros.fechaHasta
             ? parseISO(filtros.fechaHasta)

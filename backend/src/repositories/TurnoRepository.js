@@ -67,13 +67,14 @@ export class TurnoRepository {
         if (tipoServicio === TipoServicio.PRACTICA && practicaId) filtros.practica = practicaId;
 
 
-        if (fechaDesde || fechaHasta) {
-            filtros.fechaHoraInicio = {};
+        const ahora = new Date();
 
-            // $gte: mayor igual que
-            // $lte: menor o igual que
-            if (fechaDesde) filtros.fechaHoraInicio.$gte = fechaDesde;
-            if (fechaHasta) filtros.fechaHoraInicio.$lte = fechaHasta;
+        filtros.fechaHoraInicio = {
+            $gte: fechaDesde ?? ahora,
+        };
+
+        if (fechaHasta) {
+            filtros.fechaHoraInicio.$lte = fechaHasta;
         }
 
         // Manejo para paginación - se calcula cuantos turnos debe saltear según la página donde se encuentre
