@@ -7,6 +7,7 @@ import { getApiErrorMessage } from "@/lib/api";
 import { validarNombreUsuario, validarPassword, PASSWORD_HELP } from "@/lib/validation";
 import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const IS = { width: "100%", padding: "11px 13px", borderRadius: 11, border: "1.5px solid var(--outline-v)", background: "#ffffff", color: "var(--on-surf)", fontSize: 14, fontFamily: "'Hanken Grotesk',system-ui,sans-serif", outline: "none" };
 const LB = { fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--on-surf-v)", display: "block", marginBottom: 6 };
@@ -23,25 +24,51 @@ function Field({
                  value,
                  onChange,
                  error,
+                 showPassword = false,
+                 onTogglePassword,
                }) {
   return (
       <div>
         <span style={LB}>{label} *</span>
 
-        <input
-            name={name}
-            type={type}
-            autoComplete={autoComplete}
-            placeholder={placeholder}
-            value={value}
-            onChange={onChange}
-            style={{
-              ...IS,
-              borderColor: error
-                  ? "#991b1b"
-                  : "var(--outline-v)",
-            }}
-        />
+          <div style={{position: "relative"}}>
+              <input
+                  name={name}
+                  type={showPassword ? "text" : type}
+                  autoComplete={autoComplete}
+                  placeholder={placeholder}
+                  value={value}
+                  onChange={onChange}
+                  style={{
+                      ...IS,
+                      paddingRight: type === "password" ? 42 : 13,
+                      borderColor: error ? "#991b1b" : "var(--outline-v)",
+                  }}
+              />
+
+              {type === "password" && (
+                  <button
+                      type="button"
+                      onClick={onTogglePassword}
+                      style={{
+                          position: "absolute",
+                          right: 10,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          color: "var(--secondary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 4,
+                      }}
+                  >
+                      {showPassword ? <FaEyeSlash size={15} /> : <FaEye size={15} />}
+                  </button>
+              )}
+          </div>
 
         {helper && !error && (
             <p
@@ -81,6 +108,9 @@ export default function RegistroPacientePage() {
   const [planes, setPlanes]       = useState([]);
   const [cargandoOS, setCargOS]   = useState(true);
   const [cargandoP, setCargP]     = useState(false);
+
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
 
   useEffect(() => {
     let a = true;
@@ -192,6 +222,8 @@ export default function RegistroPacientePage() {
                   value={form.password}
                   onChange={handleChange}
                   error={errors.password}
+                  showPassword={mostrarPassword}
+                  onTogglePassword={() => setMostrarPassword((v) => !v)}
               />
 
               <Field
@@ -203,6 +235,8 @@ export default function RegistroPacientePage() {
                   value={form.confirmarPassword}
                   onChange={handleChange}
                   error={errors.confirmarPassword}
+                  showPassword={mostrarConfirmacion}
+                  onTogglePassword={() => setMostrarConfirmacion((v) => !v)}
               />
 
               <div>
