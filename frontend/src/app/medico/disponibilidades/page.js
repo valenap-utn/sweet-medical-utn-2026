@@ -14,9 +14,10 @@ import {
     obtenerSedesMedico,
 } from "@/lib/medicoApi";
 import { getApiErrorMessage } from "@/lib/api";
-import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
+import { notify } from "@/lib/toast";
+import ConfirmActionModal from "@/components/common/ConfirmActionModal";
 
 const DIAS = [
     "Lunes",
@@ -94,8 +95,9 @@ export default function DisponibilidadesMedicoPage() {
 
     const [cargandoDatos, setCargandoDatos] = useState(true);
     const [guardando, setGuardando] = useState(false);
-    const [error, setError] = useState("");
-    const [mensaje, setMensaje] = useState("");
+
+    // Para modal
+    const [disponibilidadAEliminar, setDisponibilidadAEliminar] = useState(null);
 
     const cargarDatos = useCallback(async () => {
         try {
@@ -123,7 +125,7 @@ export default function DisponibilidadesMedicoPage() {
             setEspecialidades(especialidadesData);
             setPracticas(practicasData);
         } catch (err) {
-            setError(
+            notify.error(
                 getApiErrorMessage(
                     err,
                     "No pudimos cargar las disponibilidades."
@@ -182,7 +184,7 @@ export default function DisponibilidadesMedicoPage() {
             } catch (err) {
                 if (cancelado) return;
 
-                setError(
+                notify.error(
                     getApiErrorMessage(
                         err,
                         "No pudimos cargar las disponibilidades."
@@ -228,13 +230,10 @@ export default function DisponibilidadesMedicoPage() {
     const crearDisponibilidad = async (e) => {
         e.preventDefault();
 
-        setError("");
-        setMensaje("");
-
         const errorValidacion = validarForm();
 
         if (errorValidacion) {
-            setError(errorValidacion);
+            notify.error(errorValidacion);
             return;
         }
 
@@ -243,14 +242,12 @@ export default function DisponibilidadesMedicoPage() {
         try {
             await crearDisponibilidadMedico(form);
 
-            setMensaje(
-                "Disponibilidad creada correctamente. La agenda fue regenerada."
-            );
+            notify.success("Disponibilidad creada correctamente. La agenda fue regenerada.");
             setForm(estadoInicial);
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(
+            notify.error(
                 getApiErrorMessage(
                     err,
                     "No pudimos crear la disponibilidad."
@@ -262,8 +259,6 @@ export default function DisponibilidadesMedicoPage() {
     };
 
     const eliminarDisponibilidad = async (disponibilidad) => {
-        setError("");
-        setMensaje("");
 
         const disponibilidadParaEliminar = {
             diaSemana: disponibilidad.diaSemana,
@@ -277,13 +272,11 @@ export default function DisponibilidadesMedicoPage() {
         try {
             await eliminarDisponibilidadMedico(disponibilidadParaEliminar);
 
-            setMensaje(
-                "Disponibilidad eliminada correctamente. La agenda fue regenerada."
-            );
+            notify.success("Disponibilidad eliminada correctamente. La agenda fue regenerada.");
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(
+            notify.error(
                 getApiErrorMessage(
                     err,
                     "No pudimos eliminar la disponibilidad."
@@ -315,18 +308,6 @@ export default function DisponibilidadesMedicoPage() {
                     atendés.
                 </p>
             </div>
-
-            {error && (
-                <Alert type="error" style={{ marginBottom: 16 }}>
-                    {error}
-                </Alert>
-            )}
-
-            {mensaje && (
-                <Alert type="success" style={{ marginBottom: 16 }}>
-                    {mensaje}
-                </Alert>
-            )}
 
             <section className={`glass ${styles.formCard}`}>
                 <form onSubmit={crearDisponibilidad} className={styles.formGrid}>
@@ -470,7 +451,7 @@ export default function DisponibilidadesMedicoPage() {
 
                             <button
                                 onClick={() =>
-                                    eliminarDisponibilidad(disponibilidad)
+                                    setDisponibilidadAEliminar(disponibilidad)
                                 }
                                 className={styles.deleteButton}
                             >
@@ -480,6 +461,21 @@ export default function DisponibilidadesMedicoPage() {
                     ))}
                 </div>
             )}
+
+            <ConfirmActionModal
+                open={!!disponibilidadAEliminar}
+                title="Eliminar disponibilidad"
+                message="¿Querés eliminar esta disponibilidad? La agenda se regenerará automáticamente."
+                confirmText="Eliminar"
+                cancelText="Cancelar"
+                variant="danger"
+                onCancel={() => setDisponibilidadAEliminar(null)}
+                onConfirm={async () => {
+                    await eliminarDisponibilidad(disponibilidadAEliminar);
+                    setDisponibilidadAEliminar(null);
+                }}
+            />
+
         </div>
     );
 }
