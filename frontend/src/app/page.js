@@ -1,6 +1,16 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import {
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaClipboardList,
+  FaSearch,
+  FaStar,
+  FaStethoscope,
+  FaUserCircle,
+  FaClock,
+} from "react-icons/fa";
 
 const DOCTORS = [
   { name: "Dr. Alejandro Sosa", spec: "Cardiología Clínica", rating: "4.9", avail: "Disponible hoy",    tags: ["Ecografía","Chequeo"] },
@@ -9,9 +19,9 @@ const DOCTORS = [
 ];
 
 const FEATS = [
-  { icon: "🕐", title: "Sin esperas",        desc: "Reservas instantáneas con confirmación por email y SMS." },
-  { icon: "📋", title: "Atención integral",  desc: "Historial clínico, resultados y cobertura en un solo lugar." },
-  { icon: "✅", title: "Médicos verificados",desc: "Todos los profesionales certificados y evaluados por pacientes." },
+  { icon: FaClock, title: "Sin esperas",        desc: "Reservas instantáneas con confirmación por email y SMS." },
+  { icon: FaClipboardList, title: "Atención integral",  desc: "Historial clínico, resultados y cobertura en un solo lugar." },
+  { icon: FaCheckCircle, title: "Médicos verificados",desc: "Todos los profesionales certificados y evaluados por pacientes." },
 ];
 
 export default function HomePage() {
@@ -44,7 +54,8 @@ export default function HomePage() {
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <Link href="/turnos" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 32px", background: "var(--p)", color: "#fff", fontWeight: 700, borderRadius: 999, fontSize: 15, textDecoration: "none", border: "2px solid var(--p)", boxShadow: "0 8px 28px rgba(107,29,42,.25)", transition: "all .2s" }}>
-                🔍 Buscar turnos
+                <FaSearch size={14} />
+                Buscar turnos
               </Link>
               <Link href="/registro" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 32px", background: "transparent", color: "var(--p)", fontWeight: 700, borderRadius: 999, fontSize: 15, textDecoration: "none", border: "2px solid var(--p)", transition: "all .2s" }}>
                 Crear cuenta
@@ -64,7 +75,9 @@ export default function HomePage() {
 
             <div className="glass" style={{ borderRadius: 24, padding: 22, boxShadow: "0 20px 60px rgba(107,29,42,.13)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--p-fixed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🩺</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--p-fixed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
+                  <FaStethoscope size={22} color="var(--p)" />
+                </div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "var(--p)" }}>Dr. Alejandro Sosa</div>
                   <div style={{ fontSize: 11, color: "var(--secondary)" }}>Cardiología · Sede Centro</div>
@@ -89,7 +102,22 @@ export default function HomePage() {
       <section style={{ padding: "clamp(32px,5vw,64px) var(--page-px)", maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "clamp(12px,2vw,24px)" }}>
         {FEATS.map((f) => (
           <div key={f.title} className="glass wellness-card" style={{ borderRadius: 18, padding: 22 }}>
-            <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
+            {/*<div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>*/}
+            <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: "var(--p-fixed)",
+                  color: "var(--p)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}
+            >
+              <f.icon size={20} />
+            </div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--p)", marginBottom: 4 }}>{f.title}</div>
             <div style={{ fontSize: 13, color: "var(--secondary)", lineHeight: 1.55 }}>{f.desc}</div>
           </div>
@@ -121,7 +149,9 @@ export default function HomePage() {
           {DOCTORS.map((d, i) => (
             <div key={d.name} className="wellness-card" style={{ borderRadius: 20, overflow: "hidden" }}>
               <div style={{ height: 130, background: `linear-gradient(135deg,${["#f9eef0","#f5e4e8","#f0d4d9"][i]},${["#f0d4d9","#f9eef0","#e8c4cb"][i]})`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                <span style={{ fontSize: 60, opacity: .25 }}>👤</span>
+                <span style={{ fontSize: 60, opacity: .25 }}>
+                  <FaUserCircle size={58} color="var(--p)" style={{ opacity: 0.25 }} />
+                </span>
                 <span style={{ position: "absolute", top: 10, right: 10, padding: "4px 10px", background: "rgba(255,255,255,.88)", backdropFilter: "blur(8px)", color: "var(--p)", fontSize: 10, fontWeight: 700, borderRadius: 999, border: "1px solid var(--p-fixed-dim)" }}>{d.avail}</span>
               </div>
               <div className="doctor-info" style={{ padding: 16 }}>
@@ -130,7 +160,9 @@ export default function HomePage() {
                     <div style={{ fontSize: 13, fontWeight: 700, color: "var(--p)" }}>{d.name}</div>
                     <div style={{ fontSize: 11, color: "var(--secondary)" }}>{d.spec}</div>
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--p)", display: "flex", alignItems: "center", gap: 2 }}>⭐ {d.rating}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--p)", display: "flex", alignItems: "center", gap: 2 }}>
+                    <FaStar size={12} /> {d.rating}
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
                   {d.tags.map(t => <span key={t} style={{ padding: "3px 9px", background: "var(--p-fixed)", color: "var(--p)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", borderRadius: 999 }}>{t}</span>)}
