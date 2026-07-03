@@ -9,12 +9,24 @@ import Spinner from "@/components/ui/Spinner";
 import Alert from "@/components/ui/Alert";
 import {obtenerPerfilCompleto} from "../../lib/turnosApi";
 import ConfirmLogoutModal from "@/components/common/ConfirmLogout";
+import {
+    FaBell,
+    FaCalendarAlt,
+    FaDoorOpen,
+    FaExchangeAlt,
+    FaFlask,
+    FaShieldAlt,
+    FaStethoscope,
+    FaTools,
+    FaUser,
+    FaUserCircle,
+} from "react-icons/fa";
 
 const MENU = [
-    {id: "turnos", label: "Mis turnos", icon: "📅"},
-    {id: "datos", label: "Mis datos", icon: "👤"},
-    {id: "cobertura", label: "Cobertura", icon: "🛡"},
-    {id: "notificaciones", label: "Notificaciones", icon: "🔔"},
+    {id: "turnos", label: "Mis turnos", icon: FaCalendarAlt},
+    {id: "datos", label: "Mis datos", icon: FaUser},
+    {id: "cobertura", label: "Cobertura", icon: FaShieldAlt},
+    {id: "notificaciones", label: "Notificaciones", icon: FaBell},
 ];
 
 const STATUS_STYLE = {
@@ -131,9 +143,14 @@ function TurnoDetalle({turno, onClose, onSolicitarCambio}) {
                             border: "none",
                             cursor: "pointer",
                             fontFamily: "inherit",
-                            marginBottom: 10
+                            marginBottom: 10,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
                         }}>
-                        🔄 Solicitar cambio de fecha
+                        <FaExchangeAlt size={14}/>
+                        Solicitar cambio de fecha
                     </button>
                 )}
                 <button onClick={onClose}
@@ -216,7 +233,8 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
                         color: "var(--p)",
                         margin: 0
                     }}>
-                        🔄 Cambio de fecha
+                        <FaExchangeAlt size={16} style={{marginRight: 8}}/>
+                        Cambio de fecha
                     </h2>
                     <button onClick={onClose} style={{
                         background: "transparent",
@@ -375,7 +393,9 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
                             gap: 8,
                             marginBottom: 8
                         }}>
-                    {confirmando ? <Spinner size={14}/> : "🔄"} {confirmando ? "Procesando..." : "Confirmar cambio"}
+                    {/*{confirmando ? <Spinner size={14}/> : "🔄"} {confirmando ? "Procesando..." : "Confirmar cambio"}*/}
+                    {confirmando ? <Spinner size={14}/> : <FaExchangeAlt size={14}/>}
+                    {confirmando ? "Procesando..." : "Confirmar cambio"}
                 </button>
                 <button onClick={onClose}
                         style={{
@@ -540,7 +560,8 @@ export default function PerfilPage() {
                             justifyContent: "center",
                             fontSize: 28,
                             marginBottom: 12
-                        }}>👤
+                        }}>
+                            <FaUserCircle size={30} color="var(--p)"/>
                         </div>
                         <div style={{
                             fontSize: 15,
@@ -566,7 +587,9 @@ export default function PerfilPage() {
                                      marginBottom: 3,
                                      transition: "all .15s"
                                  }}>
-                                <span>{m.icon}</span> {m.label}
+                                {/*<span>{m.icon}</span> {m.label}*/}
+                                <m.icon size={14}/>
+                                {m.label}
                             </div>
                         ))}
                         <div>
@@ -588,7 +611,7 @@ export default function PerfilPage() {
                                     setConfirmLogout(true);
                                 }}
                             >
-                                🚪 Cerrar sesión
+                                <FaDoorOpen size={14}/> Cerrar sesión
                             </button>
                         </div>
                     </div>
@@ -614,7 +637,15 @@ export default function PerfilPage() {
                                 )}
                                 {!cargando && historial.length === 0 && !error && (
                                     <div style={{textAlign: "center", padding: "48px 20px"}}>
-                                        <div style={{fontSize: 48, marginBottom: 14}}>📅</div>
+                                        <div style={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            marginBottom: 14,
+                                            color: "var(--p)",
+                                        }}>
+                                            <FaCalendarAlt size={42}/>
+                                        </div>
                                         <div style={{
                                             fontFamily: "'Literata',serif",
                                             fontSize: 18,
@@ -658,7 +689,8 @@ export default function PerfilPage() {
                                                 flexShrink: 0,
                                                 fontSize: 18
                                             }}>
-                                                {es ? "🩺" : "🔬"}
+                                                {/*{es ? "🩺" : "🔬"}*/}
+                                                {es ? <FaStethoscope size={18}/> : <FaFlask size={18}/>}
                                             </div>
                                             <div style={{flex: 1, minWidth: 150}}>
                                                 <div style={{fontSize: 13, fontWeight: 700, color: "var(--p)"}}>
@@ -766,7 +798,16 @@ export default function PerfilPage() {
 
                         {(tab === "cobertura" || tab === "notificaciones") && (
                             <div style={{textAlign: "center", padding: "56px 20px"}}>
-                                <div style={{fontSize: 48, marginBottom: 14}}>🚧</div>
+                                {/*<div style={{fontSize: 48, marginBottom: 14}}>🚧</div>*/}
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    marginBottom: 14,
+                                    color: "var(--p)",
+                                }}>
+                                    <FaTools size={42}/>
+                                </div>
                                 <div style={{
                                     fontFamily: "'Literata',serif",
                                     fontSize: 20,
