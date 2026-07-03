@@ -92,6 +92,8 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [mostrarPassword, setMostrarPassword] = useState(false);
 
+    const currentYear = new Date().getFullYear();
+
     const handleChange = (e) => {
         const {name, value} = e.target;
         setForm((f) => ({...f, [name]: value}));
@@ -187,7 +189,7 @@ export default function LoginPage() {
                         </div>
                     ))}
                 </div>
-                <div style={{fontSize: 11, color: "rgba(249,238,240,.35)"}}>© 2024 Sweet Medical · UTN FRBA</div>
+                <div style={{fontSize: 11, color: "rgba(249,238,240,.35)"}}>© {currentYear} Sweet Medical · UTN FRBA</div>
             </div>
 
             {/* Right panel */}

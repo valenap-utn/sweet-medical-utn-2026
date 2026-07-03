@@ -11,6 +11,7 @@ import {
   FaUserCircle,
   FaClock,
 } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
 
 const DOCTORS = [
   { name: "Dr. Alejandro Sosa", spec: "Cardiología Clínica", rating: "4.9", avail: "Disponible hoy",    tags: ["Ecografía","Chequeo"] },
@@ -26,6 +27,9 @@ const FEATS = [
 
 export default function HomePage() {
   const [count, setCount] = useState(0);
+
+  const { usuario } = useAuth();
+
   useEffect(() => {
     let n = 0;
     const t = setInterval(() => { n += 3; setCount(n); if (n >= 47) clearInterval(t); }, 30);
@@ -53,13 +57,49 @@ export default function HomePage() {
               Buscá especialidades y prácticas, elegí el horario que más te convenga y confirmá tu turno sin llamadas ni esperas.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <Link href="/turnos" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 32px", background: "var(--p)", color: "#fff", fontWeight: 700, borderRadius: 999, fontSize: 15, textDecoration: "none", border: "2px solid var(--p)", boxShadow: "0 8px 28px rgba(107,29,42,.25)", transition: "all .2s" }}>
-                <FaSearch size={14} />
+              <Link
+                  href="/turnos"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "14px 32px",
+                    background: "var(--p)",
+                    color: "#fff",
+                    fontWeight: 700,
+                    borderRadius: 999,
+                    fontSize: 15,
+                    textDecoration: "none",
+                    border: "2px solid var(--p)",
+                    boxShadow: "0 8px 28px rgba(107,29,42,.25)",
+                    transition: "all .2s"
+                  }}
+              >
+                <FaSearch size={14}/>
                 Buscar turnos
               </Link>
-              <Link href="/registro" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 32px", background: "transparent", color: "var(--p)", fontWeight: 700, borderRadius: 999, fontSize: 15, textDecoration: "none", border: "2px solid var(--p)", transition: "all .2s" }}>
-                Crear cuenta
-              </Link>
+
+              {!usuario && (
+                  <Link
+                      href="/registro"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "14px 32px",
+                        background: "transparent",
+                        color: "var(--p)",
+                        fontWeight: 700,
+                        borderRadius: 999,
+                        fontSize: 15,
+                        textDecoration: "none",
+                        border: "2px solid var(--p)",
+                        transition: "all .2s"
+                      }}
+                  >
+                    Crear cuenta
+                  </Link>
+              )}
             </div>
           </div>
 
