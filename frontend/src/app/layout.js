@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CarritoProvider } from "@/context/CarritoContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Breadcrumb from "../components/layout/Breadcrumb";
 
 export const metadata = {
   title: "Sweet Medical",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <CarritoProvider>
             <Header />
+            <Breadcrumb />
             <main className="flex-1">{children}</main>
             <Footer />
           </CarritoProvider>

@@ -13,7 +13,7 @@ const NAV_PUBLICO = [
 ];
 const NAV_MEDICO = [
   { href: "/",       label: "Inicio" },
-  { href: "/medico", label: "Mi panel" },
+  { href: "/medico", label: "Panel" },
 ];
 
 export default function Header() {
