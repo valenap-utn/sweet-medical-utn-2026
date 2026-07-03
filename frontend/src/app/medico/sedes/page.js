@@ -15,6 +15,7 @@ import { getApiErrorMessage } from "@/lib/api";
 import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
 import {notify} from "@/lib/toast";
+import ConfirmActionModal from "@/components/common/ConfirmActionModal";
 
 function obtenerId(valor) {
     return String(valor?._id ?? valor?.id ?? valor);
@@ -46,6 +47,7 @@ export default function SedesMedicoPage() {
     const [cargandoDatos, setCargandoDatos] = useState(true);
     const [guardando, setGuardando] = useState(false);
 
+    const [sedeAQuitar, setSedeAQuitar] = useState(null);
 
     const cargarDatos = useCallback(async () => {
         try {
@@ -252,7 +254,10 @@ export default function SedesMedicoPage() {
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    quitarSede(sedeId)
+                                                    setSedeAQuitar({
+                                                        id: sedeId,
+                                                        nombre: sede?.nombre ?? "esta sede",
+                                                    })
                                                 }
                                                 disabled={guardando}
                                                 className={
@@ -269,6 +274,21 @@ export default function SedesMedicoPage() {
                     </section>
                 </>
             )}
+
+            <ConfirmActionModal
+                open={!!sedeAQuitar}
+                title="Quitar sede"
+                message={`¿Querés quitar "${sedeAQuitar?.nombre}" de tus sedes? También se eliminarán las disponibilidades asociadas a esa sede.`}
+                confirmText="Quitar"
+                cancelText="Cancelar"
+                variant="danger"
+                onCancel={() => setSedeAQuitar(null)}
+                onConfirm={async () => {
+                    await quitarSede(sedeAQuitar.id);
+                    setSedeAQuitar(null);
+                }}
+            />
+
         </div>
     );
 }
