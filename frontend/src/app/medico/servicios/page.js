@@ -19,6 +19,7 @@ import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
 import ConfirmActionModal from "@/components/common/ConfirmActionModal";
 import { notify } from "@/lib/toast";
+import Alert from "@/components/ui/Alert";
 
 function obtenerId(valor) {
     return String(valor?._id ?? valor?.id ?? valor);
@@ -172,7 +173,8 @@ export default function ServiciosMedicoPage() {
         }
 
         if (!esMedico) {
-            router.replace("/perfil");
+            // router.replace("/perfil");
+            router.replace("/forbidden");
         }
     }, [cargando, usuario, esMedico, router]);
 

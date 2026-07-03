@@ -64,7 +64,8 @@ export default function PanelMedicoPage() {
     }
 
     if (!esMedico) {
-      router.replace("/perfil");
+      // router.replace("/perfil");
+      router.replace("/forbidden");
     }
   }, [cargando, usuario, esMedico, router]);
 

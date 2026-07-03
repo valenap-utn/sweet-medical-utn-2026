@@ -74,7 +74,8 @@ export default function SedesMedicoPage() {
         }
 
         if (!esMedico) {
-            router.replace("/perfil");
+            // router.replace("/perfil");
+            router.replace("/forbidden");
         }
     }, [cargando, usuario, esMedico, router]);
 
