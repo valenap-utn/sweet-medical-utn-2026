@@ -9,6 +9,16 @@ import Spinner from "@/components/ui/Spinner";
 import Link from "next/link";
 import {useAuth} from "@/context/AuthContext";
 import {RolUsuario} from "@/lib/roles";
+import {
+    FaCalendarAlt,
+    FaCheck, FaChevronLeft, FaChevronRight,
+    FaClock,
+    FaFlask,
+    FaMapMarkerAlt,
+    FaPlus,
+    FaSearch,
+    FaStethoscope,
+} from "react-icons/fa";
 
 const S = {
     label: {
@@ -77,7 +87,8 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                 flexShrink: 0,
                 fontSize: 24
             }}>
-                {es ? "🩺" : "🔬"}
+                {/*{es ? "🩺" : "🔬"}*/}
+                {es ? <FaStethoscope size={22} color="var(--p)"/> : <FaFlask size={22} color="var(--p)"/>}
             </div>
             <div style={{flex: 1, minWidth: 0}}>
         <span style={{
@@ -105,14 +116,31 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                     Cobertura: {cobertura}
                 </div>
                 <div style={{display: "flex", gap: 14, flexWrap: "wrap"}}>
-                    {[["📅", fecha], ["📍", sede], ["⏱", `${turno.duracionEnMins ?? "?"} min`]].map(([icon, val]) => (
-                        <span key={val} style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                            fontSize: 12,
-                            color: "var(--on-surf-v)"
-                        }}>{icon} {val}</span>
+                    {[
+                        [FaCalendarAlt, fecha],
+                        [FaMapMarkerAlt, sede],
+                        [
+                            FaClock,
+                            `${
+                                es
+                                    ? turno.especialidad?.duracionTurnoEnMins
+                                    : turno.practica?.duracionTurnoEnMins
+                            } min`,
+                        ],
+                    ].map(([Icon, val]) => (
+                        <span
+                            key={String(val)}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                fontSize: 12,
+                                color: "var(--on-surf-v)",
+                            }}
+                        >
+                            <Icon size={12}/>
+                            {val}
+                        </span>
                     ))}
                 </div>
             </div>
@@ -146,7 +174,20 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                     transition: "all .15s"
                 }}
             >
-                {enCarrito ? "✓ Agregado" : "+ Agregar"}
+                {/*{enCarrito ? "✓ Agregado" : "+ Agregar"}*/}
+                <>
+                    {enCarrito ? (
+                        <>
+                            <FaCheck size={12}/>
+                            Agregado
+                        </>
+                    ) : (
+                        <>
+                            <FaPlus size={12}/>
+                            Agregar
+                        </>
+                    )}
+                </>
             </button>
         </div>
     );
@@ -262,6 +303,29 @@ export default function TurnosPage() {
 
     const totalPages = Math.ceil(total / LIMIT);
 
+    const getPaginasVisibles = () => {
+        if (totalPages <= 7) {
+            return Array.from({length: totalPages}, (_, i) => i + 1);
+        }
+
+        const paginas = [1];
+
+        if (page > 4) paginas.push("...");
+
+        const inicio = Math.max(2, page - 2);
+        const fin = Math.min(totalPages - 1, page + 2);
+
+        for (let i = inicio; i <= fin; i++) {
+            paginas.push(i);
+        }
+
+        if (page < totalPages - 3) paginas.push("...");
+
+        paginas.push(totalPages);
+
+        return paginas;
+    };
+
     return (
         <div>
             {/* Header buscador */}
@@ -370,7 +434,11 @@ export default function TurnosPage() {
                                     whiteSpace: "nowrap",
                                     opacity: busquedaDeshabilitada ? .7 : 1
                                 }}>
-                                    {cargando ? <Spinner size={14}/> : "🔍"} Buscar
+                                    {/*{cargando ? <Spinner size={14}/> : "🔍"} Buscar*/}
+                                    <>
+                                        {cargando ? <Spinner size={14}/> : <FaSearch size={13}/>}
+                                        Buscar
+                                    </>
                                 </button>
                             </div>
                         </div>
@@ -438,7 +506,22 @@ export default function TurnosPage() {
 
                 {!cargando && buscado && turnos.length === 0 && !error && (
                     <div style={{textAlign: "center", padding: "56px 20px"}}>
-                        <div style={{fontSize: 48, marginBottom: 14}}>📅</div>
+                        {/*<div style={{fontSize: 48, marginBottom: 14}}>📅</div>*/}
+                        <div
+                            style={{
+                                width: 64,
+                                height: 64,
+                                margin: "0 auto 14px",
+                                borderRadius: 18,
+                                background: "var(--p-fixed)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "var(--p)",
+                            }}
+                        >
+                            <FaCalendarAlt size={28}/>
+                        </div>
                         <div style={{
                             fontFamily: "'Literata', serif",
                             fontSize: "clamp(17px,3vw,20px)",
@@ -452,7 +535,22 @@ export default function TurnosPage() {
 
                 {!cargando && !buscado && (
                     <div style={{textAlign: "center", padding: "56px 20px"}}>
-                        <div style={{fontSize: 48, marginBottom: 14}}>🔍</div>
+                        {/*<div style={{fontSize: 48, marginBottom: 14}}>🔍</div>*/}
+                        <div
+                            style={{
+                                width: 64,
+                                height: 64,
+                                margin: "0 auto 14px",
+                                borderRadius: 18,
+                                background: "var(--p-fixed)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "var(--p)",
+                            }}
+                        >
+                            <FaSearch size={26}/>
+                        </div>
                         <div style={{
                             fontFamily: "'Literata', serif",
                             fontSize: "clamp(17px,3vw,20px)",
@@ -473,25 +571,92 @@ export default function TurnosPage() {
                 </div>
 
                 {totalPages > 1 && (
-                    <div style={{display: "flex", gap: 8, justifyContent: "center", marginTop: 24}}>
-                        {Array.from({length: totalPages}, (_, i) => i + 1).map(n => (
-                            <button key={n} onClick={() => buscar(n)} style={{
-                                width: 34,
-                                height: 34,
+                    <div style={{
+                        display: "flex",
+                        gap: 8,
+                        justifyContent: "center",
+                        marginTop: 24,
+                        alignItems: "center",
+                        flexWrap: "wrap"
+                    }}>
+                        <button
+                            onClick={() => buscar(page - 1)}
+                            disabled={page === 1}
+                            style={{
+                                width: 36,
+                                height: 36,
                                 borderRadius: "50%",
-                                border: "1.5px solid",
-                                borderColor: n === page ? "var(--p)" : "var(--outline-v)",
-                                background: n === page ? "var(--p)" : "#fff",
-                                color: n === page ? "#fff" : "var(--on-surf-v)",
-                                fontSize: 13,
-                                fontWeight: 700,
-                                cursor: "pointer",
-                                fontFamily: "inherit",
-                                transition: "all .15s"
-                            }}>
-                                {n}
-                            </button>
-                        ))}
+                                border: "1.5px solid var(--outline-v)",
+                                background: "#fff",
+                                color: page === 1 ? "var(--secondary)" : "var(--p)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: page === 1 ? "not-allowed" : "pointer",
+                                opacity: page === 1 ? 0.45 : 1,
+                                transition: "all .15s ease",
+                            }}
+                        >
+                            <FaChevronLeft size={12} />
+                        </button>
+
+                        {getPaginasVisibles().map((n, index) =>
+                                n === "..." ? (
+                                    <span
+                                        key={`dots-${index}`}
+                                        style={{
+                                            color: "var(--secondary)",
+                                            fontWeight: 700,
+                                            padding: "0 4px",
+                                        }}
+                                    >
+                                      ...
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={n}
+                                        onClick={() => buscar(n)}
+                                        style={{
+                                            minWidth: 34,
+                                            height: 34,
+                                            padding: "0 10px",
+                                            borderRadius: 999,
+                                            border: "1.5px solid",
+                                            borderColor: n === page ? "var(--p)" : "var(--outline-v)",
+                                            background: n === page ? "var(--p)" : "#fff",
+                                            color: n === page ? "#fff" : "var(--on-surf-v)",
+                                            fontSize: 13,
+                                            fontWeight: 700,
+                                            cursor: "pointer",
+                                            fontFamily: "inherit",
+                                            transition: "all .15s",
+                                        }}
+                                    >
+                                        {n}
+                                    </button>
+                                )
+                        )}
+
+                        <button
+                            onClick={() => buscar(page + 1)}
+                            disabled={page === totalPages}
+                            style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: "50%",
+                                border: "1.5px solid var(--outline-v)",
+                                background: "#fff",
+                                color: page === totalPages ? "var(--secondary)" : "var(--p)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: page === totalPages ? "not-allowed" : "pointer",
+                                opacity: page === totalPages ? 0.45 : 1,
+                                transition: "all .15s ease",
+                            }}
+                        >
+                            <FaChevronRight size={12} />
+                        </button>
                     </div>
                 )}
             </div>
