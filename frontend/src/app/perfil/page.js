@@ -809,9 +809,10 @@ export default function PerfilPage() {
             <ConfirmLogoutModal
                 open={confirmLogout}
                 onCancel={() => setConfirmLogout(false)}
-                onConfirm={() => {
+                onConfirm={async () => {
                     setConfirmLogout(false);
-                    onLogout();
+                    await logout();
+                    router.push("/");
                 }}
             />
         </>
