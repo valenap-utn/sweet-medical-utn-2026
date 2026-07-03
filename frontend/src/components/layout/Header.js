@@ -18,7 +18,7 @@ const NAV_PUBLICO = [
     {href: "/planes", label: "Planes"},
 ];
 const NAV_MEDICO = [
-    {href: "/", label: "Inicio"},
+    // {href: "/", label: "Inicio"},
     {href: "/medico", label: "Panel"},
 ];
 
@@ -72,7 +72,7 @@ export default function Header() {
 
                 display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
             }}>
-                <Link href="/" style={{
+                <Link href={esMedico ? "/medico" : "/"} style={{
                     fontFamily: "'Literata',serif",
                     fontSize: "clamp(17px,3vw,22px)",
                     fontWeight: 700,

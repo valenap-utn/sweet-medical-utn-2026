@@ -2,6 +2,8 @@
 
 import {usePathname} from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { RolUsuario } from "@/lib/roles";
 
 const LABELS = {
     medico: "Panel médico",
@@ -18,18 +20,32 @@ const LABELS = {
 export default function Breadcrumb() {
     const pathname = usePathname();
 
+    const { usuario } = useAuth();
+    const esMedico = usuario?.rol === RolUsuario.MEDICO;
+
     if (pathname === "/" || pathname === "/login" || pathname.startsWith("/registro")) {
         return null;
     }
 
     const partes = pathname.split("/").filter(Boolean);
 
-    const crumbs = partes.map((parte, index) => {
-        const href = "/" + partes.slice(0, index + 1).join("/");
+    const partesBreadcrumb =
+        esMedico && partes[0] === "medico"
+            ? partes.slice(1)
+            : partes;
+
+    const crumbs = partesBreadcrumb.map((parte, index) => {
+        const href =
+            "/" +
+            (esMedico
+                    ? ["medico", ...partesBreadcrumb.slice(0, index + 1)]
+                    : partes.slice(0, index + 1)
+            ).join("/");
+
         return {
             label: LABELS[parte] ?? parte,
             href,
-            actual: index === partes.length - 1,
+            actual: index === partesBreadcrumb.length - 1,
         };
     });
 
@@ -52,14 +68,15 @@ export default function Breadcrumb() {
                      gap: 8,
                  }}
             >
-                <Link href="/"
-                      style={{
-                          color: "var(--p)",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                      }}
+                <Link
+                    href={esMedico ? "/medico" : "/"}
+                    style={{
+                        color: "var(--p)",
+                        textDecoration: "none",
+                        fontWeight: 600,
+                    }}
                 >
-                    Inicio
+                    {esMedico ? "Panel médico" : "Inicio"}
                 </Link>
 
                 {crumbs.map((crumb) => (
