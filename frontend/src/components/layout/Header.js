@@ -7,7 +7,10 @@ import {useCarrito} from "@/context/CarritoContext";
 import {RolUsuario} from "@/lib/roles";
 import UserMenu from "@/components/layout/UserMenu";
 import ConfirmLogoutModal from "@/components/common/ConfirmLogout";
-import {FaChevronDown} from "react-icons/fa";
+import {FaBars, FaChevronDown} from "react-icons/fa";
+import {FaCalendarAlt} from "@/lib/icons";
+import {FaXmark} from "react-icons/fa6";
+
 
 const NAV_PUBLICO = [
     {href: "/", label: "Inicio"},
@@ -104,7 +107,7 @@ export default function Header() {
                                 fontSize: 12,
                                 textDecoration: "none"
                             }}>
-                                📅 Turno
+                                <FaCalendarAlt size={16} /> Turno
                             </Link>
                             {items.length > 0 && (
                                 <span style={{
@@ -192,7 +195,7 @@ export default function Header() {
                     aria-label="Menú"
                     aria-expanded={menuOpen}
                 >
-                    {menuOpen ? "✕" : "☰"}
+                    {menuOpen ? <FaXmark size={22} /> : <FaBars size={20} />}
                 </button>
 
             </div>
@@ -231,16 +234,17 @@ export default function Header() {
                                   textDecoration: "none",
                                   borderBottom: "1px solid var(--outline-v)"
                               }}>
-                            📅 Turno {items.length > 0 && (
-                            <span style={{
-                                padding: "1px 7px",
-                                background: "var(--p)",
-                                color: "#fff",
-                                borderRadius: 999,
-                                fontSize: 10,
-                                fontWeight: 700
-                            }}>{items.length}</span>
-                        )}
+                            <FaCalendarAlt size={12} /> Turno
+                            {items.length > 0 && (
+                                <span style={{
+                                    padding: "1px 7px",
+                                    background: "var(--p)",
+                                    color: "#fff",
+                                    borderRadius: 999,
+                                    fontSize: 10,
+                                    fontWeight: 700
+                                }}>{items.length}</span>
+                            )}
                         </Link>
                     )}
                     <div style={{marginTop: 12, display: "flex", flexDirection: "column", gap: 8}}>
