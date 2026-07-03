@@ -12,9 +12,9 @@ import {
 } from "@/lib/medicoApi";
 import { getSedes } from "@/lib/serviciosApi";
 import { getApiErrorMessage } from "@/lib/api";
-import Alert from "@/components/ui/Alert";
 import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
+import {notify} from "@/lib/toast";
 
 function obtenerId(valor) {
     return String(valor?._id ?? valor?.id ?? valor);
@@ -45,8 +45,7 @@ export default function SedesMedicoPage() {
 
     const [cargandoDatos, setCargandoDatos] = useState(true);
     const [guardando, setGuardando] = useState(false);
-    const [error, setError] = useState("");
-    const [mensaje, setMensaje] = useState("");
+
 
     const cargarDatos = useCallback(async () => {
         try {
@@ -58,7 +57,7 @@ export default function SedesMedicoPage() {
             setSedesMedico(sedesMedicoData);
             setTodasSedes(todasSedesData);
         } catch (err) {
-            setError(getApiErrorMessage(err, "No pudimos cargar las sedes."));
+            notify.error(getApiErrorMessage(err, "No pudimos cargar las sedes."));
         } finally {
             setCargandoDatos(false);
         }
@@ -121,17 +120,15 @@ export default function SedesMedicoPage() {
         if (!sedeSeleccionada) return;
 
         setGuardando(true);
-        setError("");
-        setMensaje("");
 
         try {
             await agregarSedeMedico(sedeSeleccionada);
-            setMensaje("Sede asociada correctamente.");
+            notify.success("Sede asociada correctamente.");
             setSedeSeleccionada("");
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(getApiErrorMessage(err, "No pudimos asociar la sede."));
+            notify.error(getApiErrorMessage(err, "No pudimos asociar la sede."));
         } finally {
             setGuardando(false);
         }
@@ -139,16 +136,14 @@ export default function SedesMedicoPage() {
 
     const quitarSede = async (sedeId) => {
         setGuardando(true);
-        setError("");
-        setMensaje("");
 
         try {
             await quitarSedeMedico(sedeId);
-            setMensaje("Sede quitada correctamente.");
+            notify.success("Sede quitada correctamente.");
             setCargandoDatos(true);
             await cargarDatos();
         } catch (err) {
-            setError(getApiErrorMessage(err, "No pudimos quitar la sede."));
+            notify.error(getApiErrorMessage(err, "No pudimos quitar la sede."));
         } finally {
             setGuardando(false);
         }
@@ -175,18 +170,6 @@ export default function SedesMedicoPage() {
                     Asociá los centros de atención donde trabajás.
                 </p>
             </div>
-
-            {error && (
-                <Alert type="error" style={{ marginBottom: 16 }}>
-                    {error}
-                </Alert>
-            )}
-
-            {mensaje && (
-                <Alert type="success" style={{ marginBottom: 16 }}>
-                    {mensaje}
-                </Alert>
-            )}
 
             {cargandoDatos ? (
                 <div className={styles.centered}>
