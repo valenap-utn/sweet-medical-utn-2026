@@ -581,6 +581,18 @@ export default function TurnosPage() {
                     }}>
                         <button
                             onClick={() => buscar(page - 1)}
+                            onMouseEnter={(e) => {
+                                if (page !== 1) {
+                                    e.currentTarget.style.background = "var(--p-fixed)";
+                                    e.currentTarget.style.borderColor = "var(--p)";
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (page !== 1) {
+                                    e.currentTarget.style.background = "#fff";
+                                    e.currentTarget.style.borderColor = "var(--outline-v)";
+                                }
+                            }}
                             disabled={page === 1}
                             style={{
                                 width: 36,
@@ -616,6 +628,18 @@ export default function TurnosPage() {
                                     <button
                                         key={n}
                                         onClick={() => buscar(n)}
+                                        onMouseEnter={(e) => {
+                                            if (n !== page) {
+                                                e.currentTarget.style.background = "var(--p-fixed)";
+                                                e.currentTarget.style.borderColor = "var(--p)";
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (n !== page) {
+                                                e.currentTarget.style.background = "#fff";
+                                                e.currentTarget.style.borderColor = "var(--outline-v)";
+                                            }
+                                        }}
                                         style={{
                                             minWidth: 34,
                                             height: 34,
@@ -639,6 +663,18 @@ export default function TurnosPage() {
 
                         <button
                             onClick={() => buscar(page + 1)}
+                            onMouseEnter={(e) => {
+                                if (page !== totalPages) {
+                                    e.currentTarget.style.background = "var(--p-fixed)";
+                                    e.currentTarget.style.borderColor = "var(--p)";
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (page !== totalPages) {
+                                    e.currentTarget.style.background = "#fff";
+                                    e.currentTarget.style.borderColor = "var(--outline-v)";
+                                }
+                            }}
                             disabled={page === totalPages}
                             style={{
                                 width: 36,
