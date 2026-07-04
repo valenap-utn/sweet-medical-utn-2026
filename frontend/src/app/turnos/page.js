@@ -155,6 +155,7 @@ function TurnoCard({turno, onAgregar, onQuitar, enCarrito}) {
                 }}>{costo}</div>
             </div>
             <button
+                data-cy={`agregar-turno-${turno._id}`}
                 className="turno-action"
                 onClick={() => enCarrito ? onQuitar(turno) : onAgregar(turno)}
                 style={{

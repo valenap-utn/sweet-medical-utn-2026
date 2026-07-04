@@ -93,7 +93,7 @@ export default function Header() {
                 <div style={{display: "flex", gap: 8, alignItems: "center"}} className="sm-desktop-nav">
                     {!esMedico && (
                         <div style={{position: "relative"}}>
-                            <Link href="/carrito" style={{
+                            <Link href="/carrito" data-cy="abrir-carrito" style={{
                                 display: "inline-flex",
                                 alignItems: "center",
                                 justifyContent: "center",
@@ -110,7 +110,8 @@ export default function Header() {
                                 <FaCalendarAlt size={16} /> Turno
                             </Link>
                             {items.length > 0 && (
-                                <span style={{
+                                <span data-cy="contador-carrito"
+                                    style={{
                                     position: "absolute",
                                     top: -5,
                                     right: -5,
