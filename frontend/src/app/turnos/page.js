@@ -19,6 +19,7 @@ import {
     FaSearch,
     FaStethoscope,
 } from "react-icons/fa";
+import { notify } from "@/lib/toast";
 
 const S = {
     label: {
@@ -54,7 +55,7 @@ const S = {
     },
 };
 
-function TurnoCard({turno, onAgregar, enCarrito}) {
+function TurnoCard({turno, onAgregar, onQuitar, enCarrito}) {
     const cobertura = turno.cobertura ?? "NO_CUBIERTA";
     const es = turno.tipoServicio === "ESPECIALIDAD";
     const nombre = es ? turno.especialidad?.nombre : turno.practica?.nombre;
@@ -155,7 +156,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
             </div>
             <button
                 className="turno-action"
-                onClick={() => enCarrito ? null : onAgregar(turno)}
+                onClick={() => enCarrito ? onQuitar(turno) : onAgregar(turno)}
                 style={{
                     flexShrink: 0,
                     padding: "10px 18px",
@@ -165,7 +166,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                     borderRadius: 12,
                     fontSize: 13,
                     border: enCarrito ? "2px solid var(--p)" : "2px solid var(--p)",
-                    cursor: enCarrito ? "default" : "pointer",
+                    cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
@@ -179,7 +180,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
                     {enCarrito ? (
                         <>
                             <FaCheck size={12}/>
-                            Agregado
+                            Quitar
                         </>
                     ) : (
                         <>
@@ -194,7 +195,7 @@ function TurnoCard({turno, onAgregar, enCarrito}) {
 }
 
 export default function TurnosPage() {
-    const {agregar, estaEnCarrito} = useCarrito();
+    const {agregar, quitar, estaEnCarrito} = useCarrito();
 
     const {
         usuario,
@@ -324,6 +325,17 @@ export default function TurnosPage() {
         paginas.push(totalPages);
 
         return paginas;
+    };
+
+    // Toasts
+    const handleAgregarTurno = (turno) => {
+        agregar(turno);
+        notify.success("Turno agregado a seleccionados.");
+    };
+
+    const handleQuitarTurno = (turno) => {
+        quitar(turno._id);
+        notify.info("Turno quitado de seleccionados.");
     };
 
     return (
@@ -566,7 +578,13 @@ export default function TurnosPage() {
 
                 <div style={{display: "flex", flexDirection: "column", gap: 12}}>
                     {turnos.map(t => (
-                        <TurnoCard key={t._id} turno={t} onAgregar={agregar} enCarrito={estaEnCarrito(t._id)}/>
+                        <TurnoCard
+                            key={t._id}
+                            turno={t}
+                            onAgregar={handleAgregarTurno}
+                            onQuitar={handleQuitarTurno}
+                            enCarrito={estaEnCarrito(t._id)}
+                        />
                     ))}
                 </div>
 
