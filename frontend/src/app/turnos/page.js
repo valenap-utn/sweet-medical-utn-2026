@@ -230,7 +230,7 @@ export default function TurnosPage() {
         Boolean(filtros.practicaId) ||
         Boolean(filtros.sedeId) ||
         Boolean(filtros.fechaDesde);
-    const busquedaDeshabilitada = cargando || authCargando || !esPaciente;
+    const busquedaDeshabilitada = cargando || authCargando || !esPaciente || !hayFiltroSeleccionado;
 
     const [especialidades, setEspecialidades] = useState([]);
     const [practicas, setPracticas] = useState([]);
