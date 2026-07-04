@@ -47,8 +47,12 @@ function obtenerId(valor) {
     return String(valor?._id ?? valor?.id ?? valor);
 }
 
+function buscarPorId(items, id) {
+    return items.find((i) => obtenerId(i) === obtenerId(id));
+}
+
 function buscarNombrePorId(items, id, fallback) {
-    const item = items.find((i) => obtenerId(i) === obtenerId(id));
+    const item = buscarPorId(items, id);
     return item?.nombre ?? fallback;
 }
 
@@ -64,13 +68,12 @@ function armarDisponibilidadesParaMostrar(
                 ? practicas
                 : especialidades;
 
+        const sede = buscarPorId(sedes, disponibilidad.sede);
+
         return {
             ...disponibilidad,
-            sedeNombre: buscarNombrePorId(
-                sedes,
-                disponibilidad.sede,
-                "Sede"
-            ),
+            sedeNombre: sede?.nombre ?? "Sede",
+            sedeDireccion: sede?.direccion ?? "",
             servicioNombre: buscarNombrePorId(
                 servicios,
                 disponibilidad.servicio,
@@ -78,6 +81,19 @@ function armarDisponibilidadesParaMostrar(
             ),
         };
     });
+}
+
+// Usa DIAS para respetar el orden Lunes → Domingo
+// Filtra días sin disponibilidades
+// Ordena por horaDesde ascendente dentro de cada día
+function agruparPorDia(disponibilidades) {
+    const grupos = DIAS.map((dia) => ({
+        dia,
+        items: disponibilidades
+            .filter((d) => d.diaSemana === dia)
+            .sort((a, b) => a.horaDesde.localeCompare(b.horaDesde)),
+    }));
+    return grupos.filter((g) => g.items.length > 0);
 }
 
 export default function DisponibilidadesMedicoPage() {
@@ -424,41 +440,44 @@ export default function DisponibilidadesMedicoPage() {
                 </div>
             ) : (
                 <div className={styles.list}>
-                    {disponibilidades.map((disponibilidad, index) => (
-                        <article
-                            key={`${disponibilidad.diaSemana}-${disponibilidad.horaDesde}-${disponibilidad.horaHasta}-${index}`}
-                            className={styles.card}
-                        >
-                            <div>
-                                <strong className={styles.day}>
-                                    {disponibilidad.diaSemana}
-                                </strong>
-                                <div className={styles.muted}>
-                                    {disponibilidad.horaDesde} a{" "}
-                                    {disponibilidad.horaHasta}
-                                </div>
+                    {agruparPorDia(disponibilidades).map((grupo) => (
+                        <div key={grupo.dia} className={styles.dayGroup}>
+                            <h3 className={styles.dayGroupTitle}>{grupo.dia}</h3>
+                            <div className={styles.dayGroupList}>
+                                {grupo.items.map((disponibilidad) => (
+                                    <article
+                                        key={`${disponibilidad.diaSemana}-${disponibilidad.horaDesde}-${disponibilidad.horaHasta}-${obtenerId(disponibilidad.sede)}-${obtenerId(disponibilidad.servicio)}`}
+                                        className={styles.card}
+                                    >
+                                        <div>
+                                            <div className={styles.muted}>
+                                                {disponibilidad.horaDesde} a {disponibilidad.horaHasta}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <strong>{disponibilidad.sedeNombre}</strong>
+                                            {disponibilidad.sedeDireccion && (
+                                                <div className={styles.muted}>
+                                                    {disponibilidad.sedeDireccion}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <strong>{disponibilidad.servicioNombre}</strong>
+                                            <div className={styles.muted}>
+                                                {disponibilidad.tipoServicio}
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setDisponibilidadAEliminar(disponibilidad)}
+                                            className={styles.deleteButton}
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </article>
+                                ))}
                             </div>
-
-                            <div>
-                                <strong>{disponibilidad.sedeNombre}</strong>
-                            </div>
-
-                            <div>
-                                <strong>{disponibilidad.servicioNombre}</strong>
-                                <div className={styles.muted}>
-                                    {disponibilidad.tipoServicio}
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() =>
-                                    setDisponibilidadAEliminar(disponibilidad)
-                                }
-                                className={styles.deleteButton}
-                            >
-                                Eliminar
-                            </button>
-                        </article>
+                        </div>
                     ))}
                 </div>
             )}
