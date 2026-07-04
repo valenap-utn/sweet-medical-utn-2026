@@ -90,6 +90,80 @@ Donde `archivo.test.js` corresponde al archivo específico que se desea probar.
 
 ---
 
+## 🧪 Tests E2E (Cypress)
+
+El proyecto incluye un test End-to-End desarrollado con **Cypress**, el cual verifica el siguiente flujo de usuario:
+
+1. Inicio de sesión como paciente.
+2. Búsqueda de turnos disponibles.
+3. Agregado de un turno al carrito.
+4. Verificación de que el turno fue agregado correctamente.
+
+### Requisitos
+
+- Backend ejecutándose.
+- Frontend ejecutándose.
+- Base de datos inicializada con datos de prueba.
+
+### Instalación
+
+Desde la carpeta `frontend` instalar Cypress (solo la primera vez):
+
+```bash
+npm install --save-dev cypress
+```
+
+## Ejecutar el entorno de desarrollo
+
+Desde la raíz del proyecto:
+
+```bash
+npm run dev
+```
+
+## Ejecutar Cypress
+
+Desde la carpeta `frontend`:
+
+```bash
+npx cypress open
+```
+
+Se abrirá la interfaz de Cypress. Luego:
+
+1. Seleccionar **E2E Testing**.
+2. Elegir el navegador deseado.
+3. Ejecutar el archivo:
+
+```text
+cypress/e2e/carrito.cy.js
+```
+
+También es posible ejecutar el test desde la terminal:
+
+```bash
+npx cypress run
+```
+
+## Usuario de prueba
+
+El test utiliza el siguiente usuario:
+
+- Usuario: `lisa`
+- Contraseña: `Password_123`
+
+## Escenario probado
+
+El test valida el siguiente flujo:
+
+- Inicio de sesión del paciente.
+- Acceso a la búsqueda de turnos.
+- Búsqueda de turnos disponibles.
+- Agregado de un turno al carrito.
+- Verificación de que el carrito contiene el turno seleccionado.
+
+---
+
 ## GitFlow del proyecto
 
 Para el desarrollo del proyecto, el equipo adoptó un flujo de trabajo basado en GitHub Flow, adaptado a la organización por entregas del trabajo práctico
