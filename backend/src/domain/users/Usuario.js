@@ -1,15 +1,21 @@
-import {UsuarioInvalido} from "../../exceptions/UsuarioInvalido";
+import {UsuarioInvalido} from "../../exceptions/UsuarioInvalido.js";
+import {validarPassword} from "../../utils/auxFunctions.js";
+import { RolUsuario } from "../enums/RolUsuario.js";
 
 export class Usuario {
     id;
     nombreUsuario;
     password;
+    rol;
 
-    constructor(id, nombreUsuario, password ) {
+    constructor(id, nombreUsuario, password, rol) {
         this.validarDatosIngresados(nombreUsuario,password);
+        this.validarRol(rol);
+
         this.id = id;
         this.nombreUsuario = nombreUsuario;
-        this.password  = password;
+        this.password = password;
+        this.rol = rol;
     }
 
     validarPassword(password) {
@@ -23,6 +29,20 @@ export class Usuario {
         }
         if(!this.validarPassword(password)){
             throw new UsuarioInvalido(`La contraseña ingresada tiene un formato inválido, debe contener al menos 8 caracteres, una letra mayúscula y una minúscula.`)
+        }
+    }
+
+    validarRol(rol) {
+        if (!rol) {
+            throw new UsuarioInvalido(
+                "El rol del usuario es obligatorio."
+            );
+        }
+
+        if (!Object.values(RolUsuario).includes(rol)) {
+            throw new UsuarioInvalido(
+                `El rol "${rol}" no es válido. Roles permitidos: ${Object.values(RolUsuario).join(", ")}.`
+            );
         }
     }
     

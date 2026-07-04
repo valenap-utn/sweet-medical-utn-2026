@@ -1,13 +1,13 @@
-import {Turno} from "../src/domain/Turno.js";
-import {Medico} from "../src/domain/users/Medico.js";
-import {Usuario} from "../src/domain/users/Usuario.js";
-import {Paciente} from "../src/domain/users/Paciente.js";
-import {ObraSocial} from "../src/domain/ObraSocial.js";
-import {Plan} from "../src/domain/coberturas/Plan.js";
+import {Turno} from "../../src/domain/Turno.js";
+import {Medico} from "../../src/domain/users/Medico.js";
+import {Usuario} from "../../src/domain/users/Usuario.js";
+import {Paciente} from "../../src/domain/users/Paciente.js";
+import {ObraSocial} from "../../src/domain/ObraSocial.js";
+import {Plan} from "../../src/domain/coberturas/Plan.js";
 import {LocalDateTime} from "@js-joda/core";
-import {Sede} from "../src/domain/Sede.js";
-import {Practica} from "../src/domain/coberturas/Practica.js";
-import {EstadoTurno} from "../src/domain/enums/EstadoTurno.js";
+import {Sede} from "../../src/domain/Sede.js";
+import {Practica} from "../../src/domain/coberturas/Practica.js";
+import {EstadoTurno} from "../../src/domain/enums/EstadoTurno.js";
 
 describe('Turnos', () => {
 

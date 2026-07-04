@@ -7,6 +7,13 @@ export class EstadoTurno {
         return this.nombre.toUpperCase();
     }
 
+    // Convierte un string proveniente de Mongo en una instancia de NivelCobertura
+    static fromString(valor){
+        return Object.values(EstadoTurno)
+            .filter(v => v instanceof EstadoTurno)
+            .find(v => v.nombre === valor);
+    }
+
 }
 
 EstadoTurno.DISPONIBLE = new EstadoTurno("Disponible");

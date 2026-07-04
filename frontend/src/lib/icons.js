@@ -1,0 +1,18 @@
+export {
+    FaCalendarAlt,
+    FaClock,
+    FaHospital,
+    FaMapMarkerAlt,
+    FaPlus,
+    FaTrash,
+    FaUser,
+    FaUserCircle,
+    FaUserMd,
+    FaUserFriends,
+    FaChevronDown,
+    FaSignOutAlt,
+    FaBars,
+    FaTimes,
+    FaStethoscope,
+    FaNotesMedical,
+} from "react-icons/fa";
