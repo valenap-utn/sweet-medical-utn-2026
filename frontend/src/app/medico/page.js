@@ -11,6 +11,22 @@ import styles from "./page.module.css";
 const MODULOS = [
   {
     numero: "01",
+    titulo: "Servicios",
+    descripcion:
+        "Administrá las especialidades y prácticas que ofrecés a pacientes.",
+    detalle: "Asociar o quitar servicios existentes.",
+    href: "/medico/servicios",
+  },
+  {
+    numero: "02",
+    titulo: "Sedes",
+    descripcion:
+        "Indicá en qué centros de atención brindás cada servicio.",
+    detalle: "Asociar o quitar sedes disponibles.",
+    href: "/medico/sedes",
+  },
+  {
+    numero: "03",
     titulo: "Disponibilidades",
     descripcion:
       "Definí los días, horarios, sedes y servicios en los que atendés.",
@@ -18,28 +34,12 @@ const MODULOS = [
     href: "/medico/disponibilidades",
   },
   {
-    numero: "02",
+    numero: "04",
     titulo: "Agenda",
     descripcion:
       "Consultá los turnos generados a partir de tus disponibilidades.",
     detalle: "Visualizar horarios disponibles y turnos reservados.",
     href: "/medico/agenda",
-  },
-  {
-    numero: "03",
-    titulo: "Servicios",
-    descripcion:
-      "Administrá las especialidades y prácticas que ofrecés a pacientes.",
-    detalle: "Asociar o quitar servicios existentes.",
-    href: "/medico/servicios",
-  },
-  {
-    numero: "04",
-    titulo: "Sedes",
-    descripcion:
-      "Indicá en qué centros de atención brindás cada servicio.",
-    detalle: "Asociar o quitar sedes disponibles.",
-    href: "/medico/sedes",
   },
   {
     numero: "05",
