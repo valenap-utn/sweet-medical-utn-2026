@@ -22,6 +22,7 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import ConfirmActionModal from "@/components/common/ConfirmActionModal";
+import { notify } from "@/lib/toast";
 
 export default function CarritoPage() {
   const { items, quitar, total } = useCarrito();
@@ -30,7 +31,7 @@ export default function CarritoPage() {
   const esPaciente = usuario?.rol === RolUsuario.PACIENTE;
 
   const [confirmando, setConfirmando] = useState(false);
-  const [error, setError]             = useState("");
+  // const [error, setError]             = useState("");
   const [exito, setExito]             = useState(false);
   const [resultados, setResultados]   = useState(null);
 
@@ -41,8 +42,11 @@ export default function CarritoPage() {
 
   const handleConfirmar = async () => {
     if (!usuario)  { router.push("/login"); return; }
-    if (!esPaciente) { setError("Solo los pacientes pueden reservar turnos."); return; }
-    setConfirmando(true); setError("");
+    if (!esPaciente) {
+      notify.error("Solo los pacientes pueden reservar turnos.");
+      return;
+    }
+    setConfirmando(true);
     const res = await Promise.allSettled(items.map(t => reservarTurno(t._id)));
     const exitosos = res.filter(r => r.status === "fulfilled").length;
     const fallidos = res.map((r,i)=>({...r,turno:items[i]})).filter(r=>r.status==="rejected");
@@ -50,13 +54,17 @@ export default function CarritoPage() {
     if (exitosos > 0) {
       res.forEach((r,i) => { if(r.status==="fulfilled") quitar(items[i]._id); });
       setExito(true);
+      notify.success(`${exitosos} turno(s) reservado(s) correctamente.`);
     }
     if (fallidos.length > 0) {
-      setError(`${fallidos.length} turno(s) no pudieron reservarse: ` +
-        fallidos.map(f => {
-          const nombre = f.turno.tipoServicio==="ESPECIALIDAD" ? f.turno.especialidad?.nombre : f.turno.practica?.nombre;
-          return `${nombre} — ${getApiErrorMessage(f.reason,"error")}`;
-        }).join(". "));
+      notify.error(`${fallidos.length} turno(s) no pudieron reservarse: ` +
+          fallidos.map(f => {
+            const nombre = f.turno.tipoServicio === "ESPECIALIDAD"
+                ? f.turno.especialidad?.nombre
+                : f.turno.practica?.nombre;
+
+            return `${nombre} — ${getApiErrorMessage(f.reason, "error")}`;
+          }).join(". "));
     }
     setConfirmando(false);
   };
@@ -81,16 +89,13 @@ export default function CarritoPage() {
       </div>
 
       {exito && (
-        <Alert type="success" style={{ marginBottom:20 }}>
-          <FaCheck
-              size={14}
-              style={{ marginRight: 4 }}
-          />
-          {resultados?.exitosos} turno(s) reservado(s) correctamente.{" "}
-          <Link href="/perfil" style={{ fontWeight:700, color:"inherit" }}>Ver en mi perfil →</Link>
-        </Alert>
+          <Alert type="success" style={{ marginBottom: 20 }}>
+            <strong>¡Perfecto! Tus turnos fueron reservados.</strong>{" "}
+            <Link href="/perfil" style={{ fontWeight: 700, color: "inherit" }}>
+              Ver mis turnos →
+            </Link>
+          </Alert>
       )}
-      {error && <Alert type="error" style={{ marginBottom:20 }}>{error}</Alert>}
 
       {items.length === 0 && !exito ? (
         <div style={{ textAlign:"center", padding:"clamp(32px,8vw,64px) 20px" }}>
