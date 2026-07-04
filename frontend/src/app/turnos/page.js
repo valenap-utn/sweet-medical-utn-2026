@@ -224,6 +224,12 @@ export default function TurnosPage() {
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
     const [buscado, setBuscado] = useState(false);
+    const hayFiltroSeleccionado =
+        Boolean(filtros.tipoServicio) ||
+        Boolean(filtros.especialidadId) ||
+        Boolean(filtros.practicaId) ||
+        Boolean(filtros.sedeId) ||
+        Boolean(filtros.fechaDesde);
     const busquedaDeshabilitada = cargando || authCargando || !esPaciente;
 
     const [especialidades, setEspecialidades] = useState([]);
@@ -257,6 +263,14 @@ export default function TurnosPage() {
             setError(
                 "Solo los pacientes pueden buscar turnos."
             );
+            return;
+        }
+
+        if (!hayFiltroSeleccionado) {
+            setBuscado(false);
+            setTurnos([]);
+            setTotal(0);
+            setError("Seleccioná al menos un filtro para buscar turnos disponibles.");
             return;
         }
 
@@ -300,6 +314,7 @@ export default function TurnosPage() {
         usuario,
         esPaciente,
         authCargando,
+        hayFiltroSeleccionado,
     ]);
 
     const totalPages = Math.ceil(total / LIMIT);
@@ -568,7 +583,7 @@ export default function TurnosPage() {
                             fontSize: "clamp(17px,3vw,20px)",
                             color: "var(--p)",
                             marginBottom: 8
-                        }}>Usá los filtros para buscar turnos
+                        }}>Seleccioná al menos un filtro para buscar turnos
                         </div>
                         <div style={{fontSize: 13, color: "var(--secondary)"}}>Podés filtrar por especialidad, sede y
                             fecha.
