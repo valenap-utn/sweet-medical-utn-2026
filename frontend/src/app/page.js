@@ -4,6 +4,7 @@ import Link from "next/link";
 import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {
+    FaArrowRight,
     FaCalendarAlt,
     FaCheckCircle,
     FaClipboardList,
@@ -330,7 +331,7 @@ function InicioPublico() {
 
                         <div style={{display: "flex", gap: 12, flexWrap: "wrap"}}>
                             <Link
-                                href="/turnos"
+                                href="/login"
                                 style={{
                                     display: "inline-flex",
                                     alignItems: "center",
@@ -347,8 +348,8 @@ function InicioPublico() {
                                     transition: "all .2s"
                                 }}
                             >
-                                <FaSearch size={14}/>
-                                Buscar turnos
+                                <FaArrowRight size={14}/>
+                                Comenzar
                             </Link>
                         </div>
                     </div>
@@ -392,19 +393,11 @@ function InicioPublico() {
                             gridTemplateColumns: "1fr",
                             gap: 10
                         }}>
-                            <Link href="/turnos" className="quick-action">
-                                <FaSearch size={16}/>
-                                <div>
-                                    <strong>Buscar turnos</strong>
-                                    <span>Especialidades, prácticas y sedes</span>
-                                </div>
-                            </Link>
-
-                            <Link href="/login" className="quick-action">
+                            <Link href="/registro" className="quick-action">
                                 <FaUserCircle size={16}/>
                                 <div>
-                                    <strong>Ingresar</strong>
-                                    <span>Accedé a tu cuenta</span>
+                                    <strong>Crear cuenta</strong>
+                                    <span>Comenzá a usar Sweet Medical</span>
                                 </div>
                             </Link>
                         </div>
