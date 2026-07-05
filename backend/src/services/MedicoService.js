@@ -21,8 +21,8 @@ export class MedicoService {
     }
 
     // Para consultar el historial de turnos de un paciente específico
-    async obtenerHistorial({pacienteId}) {
-        return await this.turnoRepository.findByPacienteId(pacienteId);
+    async obtenerHistorial({pacienteId, medicoId}) {
+        return await this.turnoRepository.findByMedicoAndPacienteId({pacienteId, medicoId});
     }
 
     // Sedes

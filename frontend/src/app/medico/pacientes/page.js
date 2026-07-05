@@ -16,7 +16,7 @@ import Alert from "@/components/ui/Alert";
 import { notify } from "@/lib/toast";
 import styles from "./page.module.css";
 
-// ─── Utilidades ────────────────────────────────────────────────────────────────
+// Utilidades
 
 function formatearFecha(fecha) {
     if (!fecha) return "–";
@@ -61,7 +61,7 @@ function extraerPacientes(turnos) {
     return Array.from(mapa.values());
 }
 
-// ─── Menú de acciones (igual que AgendaMedicoPage) ─────────────────────────────
+// Menú de acciones
 
 const itemStyle = {
     width: "100%",

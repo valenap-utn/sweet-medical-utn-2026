@@ -9,7 +9,8 @@ export class MedicoController {
             const {pacienteId} = req.params;
 
             const turnos = await this.medicoService.obtenerHistorial({
-                pacienteId
+                pacienteId,
+                medicoId: req.user.medicoId
             });
 
             res.status(200).json(turnos);
