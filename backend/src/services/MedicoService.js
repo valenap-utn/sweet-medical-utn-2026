@@ -107,11 +107,17 @@ export class MedicoService {
             );
         }
 
+        const page = Number(filtros.page) || 1;
+        const limit = Number(filtros.limit) || 10;
+
         return await this.turnoRepository.buscarAgendaMedico({
             medicoId,
             fechaDesde,
             fechaHasta,
             estado: filtros.estado,
+            page,
+            limit,
+            sortOrder: filtros.sortOrder,
         });
     }
 
