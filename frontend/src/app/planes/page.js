@@ -7,6 +7,7 @@ import Spinner from "@/components/ui/Spinner";
 import Alert from "@/components/ui/Alert";
 import Link from "next/link";
 import "./planes.css";
+import {LuCircleCheck, LuCircleDashed, LuCircleX,} from "react-icons/lu";
 
 const FALLBACK_PLANES = [
     {
@@ -87,6 +88,20 @@ function claseNivel(nivel) {
     if (n === "TOTAL") return "total";
     if (n === "PARCIAL") return "partial";
     return "none";
+}
+
+function IconoNivel({nivel}) {
+    const n = normalizarNivel(nivel);
+
+    if (n === "TOTAL") {
+        return <LuCircleCheck className="coverage-icon total"/>;
+    }
+
+    if (n === "PARCIAL") {
+        return <LuCircleDashed className="coverage-icon partial"/>;
+    }
+
+    return <LuCircleX className="coverage-icon none"/>;
 }
 
 function obtenerCoberturas(plan) {
@@ -252,9 +267,10 @@ export default function PlanesPage() {
 
                                                 return (
                                                     <td key={plan._id}>
-                              <span className={`coverage-badge ${claseNivel(nivel)}`}>
-                                {textoNivel(nivel)}
-                              </span>
+                                                        <span className={`coverage-badge ${claseNivel(nivel)}`}>
+                                                            <IconoNivel nivel={nivel}/>
+                                                            {textoNivel(nivel)}
+                                                        </span>
                                                     </td>
                                                 );
                                             })}
@@ -263,6 +279,24 @@ export default function PlanesPage() {
                                     </tbody>
                                 </table>
                             </div>
+
+                            <div className="coverage-legend">
+                                <span className="coverage-legend-item">
+                                    <LuCircleCheck className="coverage-icon total"/>
+                                    Cobertura total
+                                </span>
+
+                                <span className="coverage-legend-item">
+                                    <LuCircleDashed className="coverage-icon partial"/>
+                                    Cobertura parcial
+                                </span>
+
+                                <span className="coverage-legend-item">
+                                    <LuCircleX className="coverage-icon none"/>
+                                    No cubierta
+                                </span>
+                            </div>
+
                         </section>
                     </>
                 )}
