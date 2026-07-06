@@ -369,12 +369,73 @@
 }
 
 .plan-card.highlight .plan-button-info {
-    background: rgba(255,255,255,.15);
+    background: rgba(255, 255, 255, .15);
     color: #fff;
-    border-color: rgba(255,255,255,.4);
+    border-color: rgba(255, 255, 255, .4);
 }
 
 .plan-card.highlight .plan-button-info:hover {
-    background: rgba(255,255,255,.25);
+    background: rgba(255, 255, 255, .25);
 }
+
 /* ─────────────────────────────────────────────────────────── */
+
+.plan-card.highlight .plan-button {
+    background: #7a1830;
+    color: #fff;
+    border: 1px solid #7a1830;
+    box-shadow: 0 12px 24px rgba(122, 24, 48, 0.22);
+}
+
+.plan-card.highlight .plan-button:hover {
+    background: #641326;
+    border-color: #641326;
+    transform: translateY(-1px);
+}
+
+.plan-card.highlight .plan-button:focus-visible {
+    outline: 3px solid rgba(122, 24, 48, 0.25);
+    outline-offset: 3px;
+}
+
+.coverage-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.coverage-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.coverage-icon.total {
+    color: #177245;
+}
+
+.coverage-icon.partial {
+    color: #9a6a00;
+}
+
+.coverage-icon.none {
+    color: #a52828;
+}
+
+.coverage-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--secondary);
+}
+
+.coverage-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
