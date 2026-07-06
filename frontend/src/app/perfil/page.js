@@ -15,7 +15,6 @@ import {
     FaClock,
     FaDoorOpen,
     FaExchangeAlt,
-    FaFlask,
     FaMapMarkerAlt,
     FaMoneyBillWave,
     FaShieldAlt,
@@ -470,7 +469,7 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
 }
 
 // Card de turnos
-function TurnoSection({ titulo, vacio, turnos, total, onVerDetalle }) {
+function TurnoSection({titulo, vacio, turnos, total, onVerDetalle}) {
     return (
         <section className="turno-section">
             <div className="turno-section-header">
@@ -489,8 +488,8 @@ function TurnoSection({ titulo, vacio, turnos, total, onVerDetalle }) {
                 const clickeable = ["Reservado", "Confirmado"].includes(t.estado);
 
                 const fecha = new Date(t.fechaHoraInicio);
-                const dia = fecha.toLocaleDateString("es-AR", { day: "2-digit" });
-                const mes = fecha.toLocaleDateString("es-AR", { month: "short" });
+                const dia = fecha.toLocaleDateString("es-AR", {day: "2-digit"});
+                const mes = fecha.toLocaleDateString("es-AR", {month: "short"});
                 const hora = fecha.toLocaleTimeString("es-AR", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -527,7 +526,7 @@ function TurnoSection({ titulo, vacio, turnos, total, onVerDetalle }) {
                         <div className="turno-acciones">
                             <span
                                 className="turno-estado"
-                                style={{ background: ss.bg, color: ss.color }}
+                                style={{background: ss.bg, color: ss.color}}
                             >
                                 {t.estado}
                             </span>
@@ -541,6 +540,47 @@ function TurnoSection({ titulo, vacio, turnos, total, onVerDetalle }) {
             })}
         </section>
     );
+}
+
+// Para visualizar coberturas
+function CoberturaLista({ titulo, items }) {
+    return (
+        <div className="cobertura-lista">
+
+            <div className="cobertura-lista-header">
+                <h3>{titulo}</h3>
+
+                <span>{items.length}</span>
+            </div>
+
+            <div className="cobertura-lista-contenido">
+                {items.length === 0 ? (
+                    <p>No hay coberturas cargadas.</p>
+                ) : (
+                    items.map((item, index) => (
+                        <div key={index} className="cobertura-item">
+                            <span>{item.nombre ?? "Prestación sin nombre"}</span>
+
+                            <strong className={`nivel-${item.nivel}`}>
+                                {formatearNivelCobertura(item.nivel)}
+                            </strong>
+                        </div>
+                    ))
+                )}
+            </div>
+
+        </div>
+    );
+}
+
+function formatearNivelCobertura(nivel) {
+    const niveles = {
+        TOTAL: "Cobertura total",
+        PARCIAL: "Cobertura parcial",
+        NO_CUBIERTA: "Sin cobertura",
+    };
+
+    return niveles[nivel] ?? "Sin definir";
 }
 
 export default function PerfilPage() {
@@ -619,7 +659,7 @@ export default function PerfilPage() {
     }, [esPaciente, tab]);
 
     useEffect(() => {
-        if (tab !== "datos") return;
+        if (tab !== "datos" && tab !== "cobertura") return;
         let activo = true;
         (async () => {
             setCargandoPerfil(true);
@@ -920,9 +960,54 @@ export default function PerfilPage() {
                             </div>
                         )}
 
-                        {(tab === "cobertura" || tab === "notificaciones") && (
+                        {tab === "cobertura" && (
+                            <div className="wellness-card cobertura-card">
+                                <h2 className="cobertura-title">Mi cobertura</h2>
+
+                                {errorPerfil && <Alert type="error" style={{marginBottom: 16}}>{errorPerfil}</Alert>}
+
+                                {cargandoPerfil && (
+                                    <div style={{display: "flex", justifyContent: "center", padding: 48}}>
+                                        <Spinner size={28}/>
+                                    </div>
+                                )}
+
+                                {!cargandoPerfil && perfil && (
+                                    <>
+                                        <div className="cobertura-main">
+                                            <div>
+                                                <span>Obra social</span>
+                                                <strong>{perfil.obraSocial ?? "Sin obra social registrada"}</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>Plan</span>
+                                                <strong>{perfil.plan ?? "Sin plan registrado"}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div className="cobertura-note">
+                                            La cobertura puede impactar en el costo final de tus turnos según la especialidad o práctica seleccionada.
+                                        </div>
+
+                                        <div className="cobertura-listas">
+                                            <CoberturaLista
+                                                titulo="Especialidades"
+                                                items={perfil.coberturasEspecialidad ?? []}
+                                            />
+
+                                            <CoberturaLista
+                                                titulo="Prácticas"
+                                                items={perfil.coberturasPractica ?? []}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {tab === "notificaciones" && (
                             <div style={{textAlign: "center", padding: "56px 20px"}}>
-                                {/*<div style={{fontSize: 48, marginBottom: 14}}>🚧</div>*/}
                                 <div style={{
                                     display: "flex",
                                     justifyContent: "center",
@@ -937,13 +1022,15 @@ export default function PerfilPage() {
                                     fontSize: 20,
                                     color: "var(--p)",
                                     marginBottom: 8
-                                }}>Próximamente
+                                }}>
+                                    Próximamente
                                 </div>
-                                <div style={{fontSize: 13, color: "var(--secondary)"}}>Esta sección está en
-                                    desarrollo.
+                                <div style={{fontSize: 13, color: "var(--secondary)"}}>
+                                    Esta sección está en desarrollo.
                                 </div>
                             </div>
                         )}
+
                     </div>
                 </div>
 
@@ -1161,6 +1248,184 @@ export default function PerfilPage() {
                       font-weight: 700;
                       color: var(--secondary);
                     }
+                    
+                    .cobertura-card {
+                      border-radius: 20px;
+                      padding: 28px;
+                    }
+                    
+                    .cobertura-title {
+                      font-family: 'Literata', serif;
+                      font-size: 22px;
+                      font-weight: 700;
+                      color: var(--p);
+                      margin: 0 0 18px;
+                    }
+                    
+                    .cobertura-main {
+                      display: grid;
+                      grid-template-columns: repeat(2, minmax(0, 1fr));
+                      gap: 16px;
+                      margin-bottom: 16px;
+                    }
+                    
+                    .cobertura-main div {
+                      background: var(--p-fixed);
+                      border-radius: 16px;
+                      padding: 18px;
+                    }
+                    
+                    .cobertura-main span {
+                      display: block;
+                      font-size: 11px;
+                      font-weight: 800;
+                      text-transform: uppercase;
+                      letter-spacing: .07em;
+                      color: var(--on-surf-v);
+                      margin-bottom: 8px;
+                    }
+                    
+                    .cobertura-main strong {
+                      display: block;
+                      font-size: 18px;
+                      color: var(--p);
+                    }
+                    
+                    .cobertura-note {
+                      margin-top: 4px;
+                      padding: 14px 16px;
+                      border-radius: 14px;
+                      background: #fdfaf8;
+                      border: 1px solid var(--outline-v);
+                      color: var(--secondary);
+                      font-size: 13px;
+                      line-height: 1.5;
+                    }
+                    
+                    .cobertura-listas {
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 16px;
+                      margin-top: 18px;
+                    }
+                    
+                    .cobertura-lista {
+                      border: 1px solid var(--outline-v);
+                      border-radius: 18px;
+                      padding: 18px;
+                      background: #fff;
+                      
+                      display: flex;
+                      flex-direction: column;
+                    }
+                    
+                    .cobertura-lista-contenido {
+                      max-height: 300px;
+                      overflow-y: auto;
+                      padding-right: 6px;
+                    }
+                    
+                    .cobertura-lista h3 {
+                      margin: 0 0 14px;
+                      color: var(--p);
+                      font-size: 15px;
+                      font-weight: 800;
+                    }
+                    
+                    .cobertura-lista p {
+                      margin: 0;
+                      color: var(--secondary);
+                      font-size: 13px;
+                    }
+                    
+                    .cobertura-item {
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      gap: 12px;
+                      padding: 12px 0;
+                      border-top: 1px solid var(--outline-v);
+                      font-size: 13px;
+                    }
+                    
+                    .cobertura-item span {
+                      color: var(--on-surf);
+                      font-weight: 700;
+                    }
+                    
+                    .cobertura-item strong {
+                      font-size: 11px;
+                      font-weight: 800;
+                      padding: 5px 10px;
+                      border-radius: 999px;
+                      white-space: nowrap;
+                    }
+                    
+                    .nivel-TOTAL {
+                      background: #e6f4eb;
+                      color: #166534;
+                    }
+                    
+                    .nivel-PARCIAL {
+                      background: #fff4d6;
+                      color: #92400e;
+                    }
+                    
+                    .nivel-NO_CUBIERTA {
+                      background: #fce8e8;
+                      color: #991b1b;
+                    }
+                    
+                    @media (max-width: 900px) {
+                      .cobertura-listas {
+                        grid-template-columns: 1fr;
+                      }
+                    
+                      .cobertura-main {
+                        grid-template-columns: 1fr;
+                      }
+                    }
+                    
+                    .cobertura-lista-contenido::-webkit-scrollbar {
+                      width: 8px;
+                    }
+                    
+                    .cobertura-lista-contenido::-webkit-scrollbar-track {
+                      background: transparent;
+                    }
+                    
+                    .cobertura-lista-contenido::-webkit-scrollbar-thumb {
+                      background: rgba(107, 29, 42, .25);
+                      border-radius: 999px;
+                    }
+                    
+                    .cobertura-lista-contenido::-webkit-scrollbar-thumb:hover {
+                      background: rgba(107, 29, 42, .45);
+                    }
+                    
+                    .cobertura-lista-header {
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 14px;
+                    }
+                    
+                    .cobertura-lista-header h3 {
+                      margin: 0;
+                      color: var(--p);
+                      font-size: 16px;
+                      font-weight: 800;
+                    }
+                    
+                    .cobertura-lista-header span {
+                      background: var(--p-fixed);
+                      color: var(--p);
+                      border-radius: 999px;
+                      padding: 4px 9px;
+                      font-size: 11px;
+                      font-weight: 800;
+                    }
+                    
                 `}</style>
             </div>
 
