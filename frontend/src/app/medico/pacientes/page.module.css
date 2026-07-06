@@ -5,19 +5,13 @@
     justify-content: center;
     flex-direction: column;
     gap: 12px;
+    color: var(--on-surf-v);
 }
 
 .page {
     max-width: 1120px;
     margin: 0 auto;
     padding: 40px;
-}
-
-.backLink {
-    color: var(--p);
-    font-weight: 700;
-    font-size: 13px;
-    text-decoration: none;
 }
 
 .header {
@@ -38,17 +32,21 @@
     font-size: 14px;
 }
 
+/* Sección de filtros / selectores */
 .filters {
     border-radius: 18px;
     padding: 22px;
     margin-bottom: 24px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    display: flex;
     gap: 14px;
-    align-items: end;
     background: #fff;
     border: 1px solid var(--outline-v);
     box-shadow: 0 8px 22px rgba(107, 29, 42, 0.06);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
 }
 
 .field label {
@@ -56,42 +54,43 @@
     font-size: 11px;
     font-weight: 700;
     margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surf-v);
 }
 
-.field input,
 .field select {
     width: 100%;
-    padding: 10px;
+    padding: 11px;
     border-radius: 10px;
     border: 1px solid var(--outline-v);
-}
-
-.searchButton {
-    padding: 11px 18px;
-    border-radius: 11px;
-    border: 2px solid var(--p);
-    background: var(--p);
-    color: #fff;
-    font-weight: 700;
+    font-size: 14px;
+    background-color: #fff;
+    color: var(--on-surf);
+    outline: none;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.searchButton:hover:not(:disabled) {
-    background: #fff;
-    color: var(--p);
-    border-color: var(--p);
-}
-
-.searchButton:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
+/* Spinner indicador dentro del select */
+.selectLoading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    font-size: 13px;
+    color: var(--secondary);
 }
 
 .centered {
     display: flex;
     justify-content: center;
-    padding: 40px;
+    padding: 60px 40px;
+}
+
+.resultCount {
+    font-size: 14px;
+    color: var(--on-surf);
+    margin-bottom: 16px;
 }
 
 .emptyState {
@@ -102,15 +101,23 @@
     background: #fff;
 }
 
-.emptyState h2 { color: var(--p); }
-.emptyState p  { color: var(--secondary); }
+.emptyState h2 {
+    color: var(--p);
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.emptyState p {
+    color: var(--secondary);
+    font-size: 13px;
+}
 
 .list {
     display: grid;
     gap: 12px;
 }
 
-/* Card — fila única horizontal */
+/* Card — Fila única horizontal */
 .card {
     display: flex;
     flex-direction: row;
@@ -139,14 +146,13 @@
     color: var(--on-surf-v);
 }
 
-.date  { color: var(--p); }
-.muted { font-size: 12px; color: var(--secondary); }
+.date {
+    color: var(--p);
+}
 
-.cardActions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+.muted {
+    font-size: 12px;
+    color: var(--secondary);
 }
 
 /* Modal */
@@ -166,6 +172,7 @@
     padding: 28px;
     width: 100%;
     max-width: 420px;
+    background: #fff;
 }
 
 .modalTitle {
@@ -195,21 +202,23 @@
     width: 100%;
     border-radius: 10px;
     padding: 10px 12px;
-    border: 1px solid var(--outline);
+    border: 1px solid var(--outline-v);
     font-size: 13px;
     resize: none;
     margin-bottom: 16px;
     box-sizing: border-box;
+    font-family: inherit;
 }
 
 .modalInput {
     width: 100%;
     border-radius: 10px;
     padding: 10px 12px;
-    border: 1px solid var(--outline);
+    border: 1px solid var(--outline-v);
     font-size: 13px;
     margin-bottom: 16px;
     box-sizing: border-box;
+    font-family: inherit;
 }
 
 .modalActions {
@@ -221,10 +230,11 @@
 .modalBtnSecondary {
     padding: 8px 18px;
     border-radius: 10px;
-    border: 1px solid var(--outline);
+    border: 1px solid var(--outline-v);
     background: transparent;
     font-size: 13px;
     cursor: pointer;
+    font-weight: 600;
 }
 
 .modalBtnSecondary:disabled {
@@ -247,7 +257,7 @@
     cursor: not-allowed;
 }
 
-/* Responsive */
+/* ── Responsive ── */
 @media (max-width: 900px) {
     .page {
         padding: 32px 24px;
@@ -255,12 +265,7 @@
 
     .card {
         flex-wrap: wrap;
-    }
-
-    .cardActions {
-        width: 100%;
-        padding-top: 10px;
-        border-top: 1px solid var(--outline-v);
+        padding-right: 48px; /* Espacio de sobra para las acciones absolute */
     }
 }
 
@@ -273,24 +278,15 @@
         padding: 18px;
     }
 
-    .searchButton {
-        width: 100%;
-    }
-
     .card {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: 12px;
+        padding-right: 18px;
     }
 
     .cardField {
         width: 100%;
-    }
-
-    .cardActions {
-        width: 100%;
-        padding-top: 10px;
-        border-top: 1px solid var(--outline-v);
     }
 
     .emptyState {

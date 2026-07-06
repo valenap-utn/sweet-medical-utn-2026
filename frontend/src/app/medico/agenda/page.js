@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import {FaBan, FaCalendarAlt, FaStethoscope, FaUserCheck} from "react-icons/fa";
+import {FaBan, FaCalendarAlt, FaChevronLeft, FaChevronRight, FaStethoscope, FaUserCheck} from "react-icons/fa";
 import {FaEllipsisVertical} from "react-icons/fa6";
 
 import {useAuth} from "@/context/AuthContext";
@@ -13,10 +13,10 @@ import {cancelarTurno, confirmarTurno, marcarTurnoRealizado, proponerCambioFecha
 import {getApiErrorMessage} from "@/lib/api";
 import Spinner from "@/components/ui/Spinner";
 import styles from "./page.module.css";
-import { notify } from "@/lib/toast";
+import {notify} from "@/lib/toast";
 import Alert from "@/components/ui/Alert";
 
-const ESTADOS = ["", "Disponible", "Reservado", "Confirmado", "Cancelado"];
+const ESTADOS = ["", "Disponible", "Reservado", "Confirmado", "Realizado", "Cancelado"];
 
 const STATUS_STYLE = {
     Disponible: {bg: "#f0eded", color: "var(--on-surf-v)"},
@@ -109,7 +109,7 @@ function AccionesTurnoMenu({
                         e.currentTarget.style.color = "var(--on-surf-v)";
                     }}
                 >
-                    <FaEllipsisVertical size={16} />
+                    <FaEllipsisVertical size={16}/>
                 </button>
             </DropdownMenu.Trigger>
 
@@ -179,7 +179,7 @@ function AccionesTurnoMenu({
                                     }}
                                     onClick={() => onCancelar(turno)}
                                 >
-                                    <FaBan size={14} />
+                                    <FaBan size={14}/>
                                     Cancelar turno
                                 </button>
                             </DropdownMenu.Item>
@@ -200,9 +200,14 @@ export default function AgendaMedicoPage() {
         fechaDesde: "",
         fechaHasta: "",
         estado: "",
+        sortOrder: "asc",
     });
 
     const [turnos, setTurnos] = useState([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const limit = 10;
+
     const [cargandoAgenda, setCargandoAgenda] = useState(true);
     const [error, setError] = useState("");
 
@@ -232,9 +237,15 @@ export default function AgendaMedicoPage() {
                     fechaDesde: "",
                     fechaHasta: "",
                     estado: "",
+                    page: 1,
+                    limit,
                 });
 
-                if (!cancelado) setTurnos(data);
+                if (!cancelado) {
+                    setTurnos(data.turnos ?? []);
+                    setTotalPages(data.totalPages ?? 1);
+                }
+
             } catch (err) {
                 if (!cancelado) {
                     setError(getApiErrorMessage(err, "No pudimos cargar la agenda médica."));
@@ -249,19 +260,49 @@ export default function AgendaMedicoPage() {
         };
     }, [cargando, usuario, esMedico]);
 
-    const buscarAgenda = useCallback(async () => {
+    const buscarAgenda = useCallback(async (pagina = page) => {
         setCargandoAgenda(true);
         setError("");
 
         try {
-            const data = await obtenerAgendaMedico(filtros);
-            setTurnos(data);
+            const data = await obtenerAgendaMedico({
+                ...filtros,
+                page: pagina,
+                limit,
+            });
+
+            setTurnos(data.turnos ?? []);
+            setTotalPages(data.totalPages ?? 1);
+            setPage(pagina);
         } catch (err) {
             setError(getApiErrorMessage(err, "No pudimos cargar la agenda médica."));
         } finally {
             setCargandoAgenda(false);
         }
-    }, [filtros]);
+    }, [filtros, page, limit]);
+
+    const getPaginasVisibles = () => {
+        if (totalPages <= 7) {
+            return Array.from({length: totalPages}, (_, i) => i + 1);
+        }
+
+        const paginas = [1];
+
+        if (page > 4) paginas.push("...");
+
+        const inicio = Math.max(2, page - 2);
+        const fin = Math.min(totalPages - 1, page + 2);
+
+        for (let i = inicio; i <= fin; i++) {
+            paginas.push(i);
+        }
+
+        if (page < totalPages - 3) paginas.push("...");
+
+        paginas.push(totalPages);
+
+        return paginas;
+    };
 
     const handleMarcarRealizado = async (turnoId) => {
         setAccionCargando(true);
@@ -410,7 +451,7 @@ export default function AgendaMedicoPage() {
                 </div>
 
                 <button
-                    onClick={buscarAgenda}
+                    onClick={() => void buscarAgenda(1)}
                     disabled={cargandoAgenda}
                     className={styles.searchButton}
                 >
@@ -424,6 +465,39 @@ export default function AgendaMedicoPage() {
                 </Alert>
             )}
 
+            {!cargandoAgenda && turnos.length > 0 && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        marginBottom: 16,
+                    }}
+                >
+                    <select
+                        value={filtros.sortOrder}
+                        onChange={(e) => {
+                            setFiltros((f) => ({...f, sortOrder: e.target.value}));
+                            setPage(1);
+                        }}
+                        style={{
+                            width: "auto",
+                            padding: "10px 12px",
+                            borderRadius: 11,
+                            border: "1.5px solid var(--outline-v)",
+                            background: "#fff",
+                            color: "var(--on-surf)",
+                            fontSize: 13,
+                            fontFamily: "'Hanken Grotesk',system-ui,sans-serif",
+                            outline: "none",
+                        }}
+                    >
+                        <option value="asc">Fecha más cercana</option>
+                        <option value="desc">Fecha más lejana</option>
+                    </select>
+                </div>
+            )}
+
             {cargandoAgenda ? (
                 <div className={styles.centered}>
                     <Spinner size={32}/>
@@ -434,88 +508,180 @@ export default function AgendaMedicoPage() {
                     <p>Probá cambiando los filtros o generando nuevas disponibilidades.</p>
                 </div>
             ) : (
-                <div className={styles.list}>
-                    {turnos.map((turno) => {
-                        const {
-                            puedeMarcarRealizado,
-                            puedeCancelar,
-                            puedeProponer,
-                            puedeConfirmar,
-                        } = accionesDisponibles(turno.estado);
+                <>
+                    <div className={styles.list}>
+                        {turnos.map((turno) => {
+                            const {
+                                puedeMarcarRealizado,
+                                puedeCancelar,
+                                puedeProponer,
+                                puedeConfirmar,
+                            } = accionesDisponibles(turno.estado);
 
-                        const statusStyle = STATUS_STYLE[turno.estado] ?? STATUS_STYLE.Disponible;
+                            const statusStyle = STATUS_STYLE[turno.estado] ?? STATUS_STYLE.Disponible;
 
-                        return (
-                            <article key={turno._id} className={styles.card}
-                                     style={{
-                                position: "relative",
-                            }}>
-                <span
-                    style={{
-                        padding: "3px 11px",
-                        borderRadius: 999,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        background: statusStyle.bg,
-                        color: statusStyle.color,
-                        whiteSpace: "nowrap",
-                        alignSelf: "center",
-                        flexShrink: 0,
-                    }}
-                >
-                  {turno.estado}
-                </span>
+                            return (
+                                <article key={turno._id} className={styles.card}
+                                         style={{
+                                             position: "relative",
+                                         }}>
+                        <span
+                            style={{
+                                padding: "3px 11px",
+                                borderRadius: 999,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                background: statusStyle.bg,
+                                color: statusStyle.color,
+                                whiteSpace: "nowrap",
+                                alignSelf: "center",
+                                flexShrink: 0,
+                            }}
+                        >
+                          {turno.estado}
+                        </span>
 
-                                <div className={styles.cardField}>
-                                    <span className={styles.cardLabel}>Fecha y hora</span>
-                                    <strong className={styles.date}>
-                                        {formatearFecha(turno.fechaHoraInicio)}
-                                    </strong>
-                                    <span className={styles.muted}>
-                    hasta {formatearFecha(turno.fechaHoraFin)}
-                  </span>
-                                </div>
+                                    <div className={styles.cardField}>
+                                        <span className={styles.cardLabel}>Fecha y hora</span>
+                                        <strong className={styles.date}>
+                                            {formatearFecha(turno.fechaHoraInicio)}
+                                        </strong>
+                                        <span className={styles.muted}>
+                                            hasta {formatearFecha(turno.fechaHoraFin)}
+                                        </span>
+                                    </div>
 
-                                <div className={styles.cardField}>
-                                    <span className={styles.cardLabel}>Servicio</span>
-                                    <strong>{obtenerServicio(turno)}</strong>
-                                    <span className={styles.muted}>{turno.tipoServicio}</span>
-                                </div>
+                                    <div className={styles.cardField}>
+                                        <span className={styles.cardLabel}>Servicio</span>
+                                        <strong>{obtenerServicio(turno)}</strong>
+                                        <span className={styles.muted}>{turno.tipoServicio}</span>
+                                    </div>
 
-                                <div className={styles.cardField}>
-                                    <span className={styles.cardLabel}>Sede</span>
-                                    <strong>{turno.sede?.nombre ?? "Sin sede"}</strong>
-                                    <span className={styles.muted}>
-                    {turno.paciente?.nombre ?? "Sin paciente"}
-                  </span>
-                                </div>
+                                    <div className={styles.cardField}>
+                                        <span className={styles.cardLabel}>Sede</span>
+                                        <strong>{turno.sede?.nombre ?? "Sin sede"}</strong>
+                                        <span className={styles.muted}>
+                                            {turno.paciente?.nombre ?? "Sin paciente"}
+                                        </span>
+                                    </div>
 
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        top: 18,
-                                        right: 18,
-                                    }}
-                                >
-                                    <AccionesTurnoMenu
-                                        turno={turno}
-                                        puedeMarcarRealizado={puedeMarcarRealizado}
-                                        puedeCancelar={puedeCancelar}
-                                        puedeProponer={puedeProponer}
-                                        puedeConfirmar={puedeConfirmar}
-                                        accionCargando={accionCargando}
-                                        onRealizado={handleMarcarRealizado}
-                                        onConfirmar={handleConfirmar}
-                                        onCambiarFecha={(t) => abrirModal(t, "proponer")}
-                                        onCancelar={(t) => abrirModal(t, "cancelar")}
-                                    />
-                                </div>
-                            </article>
-                        );
-                    })}
-                </div>
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: 18,
+                                            right: 18,
+                                        }}
+                                    >
+                                        <AccionesTurnoMenu
+                                            turno={turno}
+                                            puedeMarcarRealizado={puedeMarcarRealizado}
+                                            puedeCancelar={puedeCancelar}
+                                            puedeProponer={puedeProponer}
+                                            puedeConfirmar={puedeConfirmar}
+                                            accionCargando={accionCargando}
+                                            onRealizado={handleMarcarRealizado}
+                                            onConfirmar={handleConfirmar}
+                                            onCambiarFecha={(t) => abrirModal(t, "proponer")}
+                                            onCancelar={(t) => abrirModal(t, "cancelar")}
+                                        />
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: 8,
+                                justifyContent: "center",
+                                marginTop: 24,
+                                alignItems: "center",
+                                flexWrap: "wrap",
+                            }}
+                        >
+                            <button
+                                onClick={() => void buscarAgenda(Math.max(1, page - 1))}
+                                disabled={page === 1 || cargandoAgenda}
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: "50%",
+                                    border: "1.5px solid var(--outline-v)",
+                                    background: "#fff",
+                                    color: page === 1 ? "var(--secondary)" : "var(--p)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: page === 1 ? "not-allowed" : "pointer",
+                                    opacity: page === 1 ? 0.45 : 1,
+                                    transition: "all .15s ease",
+                                }}
+                            >
+                                <FaChevronLeft size={12}/>
+                            </button>
+
+                            {getPaginasVisibles().map((n, index) =>
+                                    n === "..." ? (
+                                        <span
+                                            key={`dots-${index}`}
+                                            style={{
+                                                color: "var(--secondary)",
+                                                fontWeight: 700,
+                                                padding: "0 4px",
+                                            }}
+                                        >
+                                            ...
+                                        </span>
+                                    ) : (
+                                        <button
+                                            key={n}
+                                            onClick={() => void buscarAgenda(n)}
+                                            style={{
+                                                minWidth: 34,
+                                                height: 34,
+                                                padding: "0 10px",
+                                                borderRadius: 999,
+                                                border: "1.5px solid",
+                                                borderColor: n === page ? "var(--p)" : "var(--outline-v)",
+                                                background: n === page ? "var(--p)" : "#fff",
+                                                color: n === page ? "#fff" : "var(--on-surf-v)",
+                                                fontSize: 13,
+                                                fontWeight: 700,
+                                                cursor: "pointer",
+                                                fontFamily: "inherit",
+                                                transition: "all .15s",
+                                            }}
+                                        >
+                                            {n}
+                                        </button>
+                                    )
+                            )}
+
+                            <button
+                                onClick={() => void buscarAgenda(Math.min(totalPages, page + 1))}                                disabled={page === totalPages || cargandoAgenda}
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: "50%",
+                                    border: "1.5px solid var(--outline-v)",
+                                    background: "#fff",
+                                    color: page === totalPages ? "var(--secondary)" : "var(--p)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: page === totalPages ? "not-allowed" : "pointer",
+                                    opacity: page === totalPages ? 0.45 : 1,
+                                    transition: "all .15s ease",
+                                }}
+                            >
+                                <FaChevronRight size={12}/>
+                            </button>
+                        </div>
+                    )}
+                </>
             )}
-
             {modalTurno && (
                 <div className={styles.modalOverlay}>
                     <div className={`wellness-card ${styles.modal}`}>
@@ -580,7 +746,9 @@ export default function AgendaMedicoPage() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
         </div>
-    );
+    )
+        ;
 }

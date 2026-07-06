@@ -22,7 +22,7 @@ import {SedeRepository} from "./src/repositories/SedeRepository.js";
 import {PacienteService} from "./src/services/PacienteService.js";
 import {TurnoService} from "./src/services/TurnoService.js";
 import {AgendaService} from "./src/services/AgendaService.js";
-import {MedicoService} from "./src/services/medicoService.js";
+import {MedicoService} from "./src/services/MedicoService.js";
 import {ServiciosMedicoService} from "./src/services/ServiciosMedicoService.js";
 import {PlanService} from "./src/services/PlanService.js";
 import {NotificacionService} from "./src/services/NotificacionService.js";
@@ -30,7 +30,7 @@ import {AuthService} from "./src/services/AuthService.js";
 import {EspecialidadService} from "./src/services/servicios/EspecialidadService.js";
 import {PracticaService} from "./src/services/servicios/PracticaService.js";
 import {ObraSocialService} from "./src/services/ObraSocialService.js";
-import {SedeService} from "./src/services/sedeService.js";
+import {SedeService} from "./src/services/SedeService.js";
 import {TurnosBatchService} from "./src/services/TurnosBatchService.js";
 
 import {PacienteController} from "./src/controllers/PacienteController.js";
@@ -43,7 +43,7 @@ import {AuthController} from "./src/controllers/AuthController.js";
 import {EspecialidadController} from "./src/controllers/servicios/EspecialidadController.js";
 import {PracticaController} from "./src/controllers/servicios/PracticaController.js";
 import {ObraSocialController} from "./src/controllers/ObraSocialController.js";
-import {SedeController} from "./src/controllers/sedeController.js";
+import {SedeController} from "./src/controllers/SedeController.js";
 import {AdminController} from "./src/controllers/interno/AdminController.js";
 
 

@@ -90,6 +90,248 @@ Donde `archivo.test.js` corresponde al archivo específico que se desea probar.
 
 ---
 
+## 🧪 Tests E2E (Cypress)
+
+El proyecto incluye un test End-to-End desarrollado con **Cypress**, el cual verifica el siguiente flujo de usuario:
+
+1. Inicio de sesión como paciente.
+2. Búsqueda de turnos disponibles.
+3. Agregado de un turno al carrito.
+4. Verificación de que el turno fue agregado correctamente.
+
+### Requisitos
+
+- Backend ejecutándose.
+- Frontend ejecutándose.
+- Base de datos inicializada con datos de prueba.
+
+### Instalación
+
+Desde la carpeta `frontend` instalar Cypress (solo la primera vez):
+
+```bash
+npm install --save-dev cypress
+```
+
+## Ejecutar el entorno de desarrollo
+
+Desde la raíz del proyecto:
+
+```bash
+npm run dev
+```
+
+## Ejecutar Cypress
+
+Desde la carpeta `frontend`:
+
+```bash
+npx cypress open
+```
+
+Se abrirá la interfaz de Cypress. Luego:
+
+1. Seleccionar **E2E Testing**.
+2. Elegir el navegador deseado.
+3. Ejecutar el archivo:
+
+```text
+cypress/e2e/carrito.cy.js
+```
+
+También es posible ejecutar el test desde la terminal:
+
+```bash
+npx cypress run
+```
+
+## Usuario de prueba
+
+El test utiliza el siguiente usuario:
+
+- Usuario: `lisa`
+- Contraseña: `Password_123`
+
+## Escenario probado
+
+El test valida el siguiente flujo:
+
+- Inicio de sesión del paciente.
+- Acceso a la búsqueda de turnos.
+- Búsqueda de turnos disponibles.
+- Agregado de un turno al carrito.
+- Verificación de que el carrito contiene el turno seleccionado.
+
+---
+
+## 🚀 Despliegue y actualización en producción
+
+El proyecto se encuentra desplegado utilizando:
+
+- **Oracle Cloud VPS**
+- **Docker**
+- **Docker Hub**
+- **Portainer**
+- **Nginx Proxy Manager**
+- **DuckDNS**
+
+La aplicación está compuesta por tres contenedores:
+
+- MongoDB
+- Backend (Node.js / Express)
+- Frontend (Next.js)
+
+La base de datos se almacena en un volumen de Docker (`mongo_data`), por lo que los datos persisten aunque los contenedores sean recreados.
+
+---
+
+### Actualizar el Backend
+
+Luego de realizar cambios en el backend y mergearlos a `main`:
+
+#### 1. Obtener la última versión del repositorio
+
+```bash
+git checkout main
+git pull
+```
+
+#### 2. Reconstruir la imagen
+
+Desde la raíz del proyecto:
+
+```bash
+docker build \
+-f backend/Dockerfile \
+-t valenap/sweet-medical-backend:latest \
+./backend
+```
+
+#### 3. Publicar la imagen en Docker Hub
+
+```bash
+docker push valenap/sweet-medical-backend:latest
+```
+
+#### 4. Actualizar el Stack
+
+Ingresar a Portainer:
+
+```
+Stacks
+→ sweet-medical
+→ Update the stack
+```
+
+Marcar la opción:
+
+```
+☑ Re-pull image and redeploy
+```
+
+Luego presionar:
+
+```
+Update
+```
+
+---
+
+### Actualizar el Frontend
+
+Luego de realizar cambios en el frontend y mergearlos a `main`:
+
+#### 1. Obtener la última versión
+
+```bash
+git checkout main
+git pull
+```
+
+#### 2. Reconstruir la imagen
+
+```bash
+docker build \
+-f frontend/Dockerfile \
+--build-arg NEXT_PUBLIC_API_URL=https://api.sweet-medical.duckdns.org/api \
+-t valenap/sweet-medical-frontend:latest \
+./frontend
+```
+
+#### 3. Publicar la imagen
+
+```bash
+docker push valenap/sweet-medical-frontend:latest
+```
+
+#### 4. Actualizar el Stack
+
+Ingresar a Portainer:
+
+```
+Stacks
+→ sweet-medical
+→ Update the stack
+```
+
+Marcar:
+
+```
+☑ Re-pull image and redeploy
+```
+
+Luego presionar:
+
+```
+Update
+```
+
+---
+
+## Base de datos
+
+La base de datos **no se pierde** al actualizar el Stack.
+
+MongoDB utiliza un volumen persistente:
+
+```
+mongo_data
+```
+
+Por lo tanto:
+
+- Actualizar el frontend no afecta la base de datos.
+- Actualizar el backend no afecta la base de datos.
+- Recrear los contenedores no elimina la información almacenada.
+
+Los datos únicamente se perderían si se elimina explícitamente el volumen `mongo_data`.
+
+---
+
+## Actualizar únicamente el Stack
+
+Si no hubo cambios en las imágenes Docker, únicamente es necesario:
+
+1. Ingresar a Portainer.
+2. Abrir el Stack `sweet-medical`.
+3. Presionar **Update the stack**.
+
+No es necesario volver a construir ni publicar imágenes.
+
+---
+
+## Migrar una base de datos local a producción
+
+Si se desea utilizar en producción la misma base de datos utilizada durante el desarrollo:
+
+1. Exportar la base de datos local mediante `mongodump`.
+2. Copiar el dump a la VPS.
+3. Restaurarlo mediante `mongorestore` dentro del contenedor MongoDB.
+
+Este procedimiento reemplaza completamente la base de datos existente en producción.
+
+---
+
 ## GitFlow del proyecto
 
 Para el desarrollo del proyecto, el equipo adoptó un flujo de trabajo basado en GitHub Flow, adaptado a la organización por entregas del trabajo práctico

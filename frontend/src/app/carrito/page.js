@@ -115,7 +115,7 @@ export default function CarritoPage() {
           >
             <FaCalendarAlt size={34}/>
           </div>
-          <div style={{ fontFamily:"'Literata',serif", fontSize:"clamp(18px,3vw,22px)", color:"var(--p)", marginBottom:8 }}>Tu carrito está vacío</div>
+          <div style={{ fontFamily:"'Literata',serif", fontSize:"clamp(18px,3vw,22px)", color:"var(--p)", marginBottom:8 }}>No hay turnos asignados</div>
           <div style={{ fontSize:13, color:"var(--secondary)", marginBottom:24 }}>Buscá turnos y agregálos desde el buscador.</div>
           <Link href="/turnos" style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"13px 28px", background:"var(--p)", color:"#fff", fontWeight:700, borderRadius:999, fontSize:14, textDecoration:"none" }}>
             <>

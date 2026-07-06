@@ -166,8 +166,21 @@ export class AuthService {
             return {
                 nombre: paciente.nombre,
                 dni: paciente.dni,
+
                 obraSocial: paciente.obraSocial?.nombre ?? null,
                 plan: paciente.plan?.nombre       ?? null,
+
+                coberturasEspecialidad:
+                    paciente.plan?.coberturasEspecialidad?.map(c => ({
+                        nombre: c.especialidad?.nombre,
+                        nivel: c.nivel,
+                    })) ?? [],
+
+                coberturasPractica:
+                    paciente.plan?.coberturasPractica?.map(c => ({
+                        nombre: c.practica?.nombre,
+                        nivel: c.nivel,
+                    })) ?? [],
             };
         }
 

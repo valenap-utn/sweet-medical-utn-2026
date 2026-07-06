@@ -1,4 +1,53 @@
+import axios from "axios";
 import { api } from "./api";
+
+const MOCK_AUTH_STORAGE_KEY = "sweet-medical-mock-auth";
+
+function isBrowser() {
+  return typeof window !== "undefined";
+}
+
+function readStoredMockUser() {
+  if (!isBrowser()) return null;
+  try {
+    const raw = window.localStorage.getItem(MOCK_AUTH_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredMockUser(usuario) {
+  if (!isBrowser()) return;
+  window.localStorage.setItem(MOCK_AUTH_STORAGE_KEY, JSON.stringify(usuario));
+}
+
+function clearStoredMockUser() {
+  if (!isBrowser()) return;
+  window.localStorage.removeItem(MOCK_AUTH_STORAGE_KEY);
+}
+
+function shouldUseMockAuth(error) {
+  if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true") return true;
+  if (process.env.NODE_ENV === "production") return false;
+
+  if (!axios.isAxiosError(error)) return false;
+  const status = error.response?.status;
+  if (status && status !== 401) return false;
+
+  return !error.response || error.code === "ERR_NETWORK" || error.message?.includes("Network Error") || error.message?.includes("connect");
+}
+
+function buildMockUser(nombreUsuario) {
+  const esMedico = nombreUsuario.toLowerCase().startsWith("dr_");
+  return {
+    usuarioId: "mock-user-id",
+    rol: esMedico ? "MEDICO" : "PACIENTE",
+    pacienteId: esMedico ? null : "mock-paciente-id",
+    medicoId: esMedico ? "mock-medico-id" : null,
+    nombreUsuario,
+  };
+}
 
 /**
  * Login.
@@ -7,8 +56,20 @@ import { api } from "./api";
  * El backend setea cookies httpOnly: accessToken (15min) y refreshToken (7d)
  */
 export async function login({ nombreUsuario, password }) {
-  const { data } = await api.post("/auth/login", { nombreUsuario, password });
-  return data;
+  try {
+    const { data } = await api.post("/auth/login", { nombreUsuario, password });
+    return data;
+  } catch (error) {
+    if (shouldUseMockAuth(error)) {
+      const usuario = buildMockUser(nombreUsuario);
+      writeStoredMockUser(usuario);
+      return {
+        mensaje: "Login exitoso (modo demo)",
+        usuario,
+      };
+    }
+    throw error;
+  }
 }
 
 /**
@@ -20,10 +81,23 @@ export async function login({ nombreUsuario, password }) {
 export async function registrarPaciente({
   nombreUsuario, password, dni, nombre, obraSocial, plan,
 }) {
-  const { data } = await api.post("/auth/register/paciente", {
-    nombreUsuario, password, dni, nombre, obraSocial, plan,
-  });
-  return data;
+  try {
+    const { data } = await api.post("/auth/register/paciente", {
+      nombreUsuario, password, dni, nombre, obraSocial, plan,
+    });
+    return data;
+  } catch (error) {
+    if (shouldUseMockAuth(error)) {
+      const usuario = buildMockUser(nombreUsuario);
+      writeStoredMockUser(usuario);
+      return {
+        mensaje: "Cuenta creada en modo demo",
+        usuarioId: "mock-user-id",
+        pacienteId: "mock-paciente-id",
+      };
+    }
+    throw error;
+  }
 }
 
 /**
@@ -33,10 +107,23 @@ export async function registrarPaciente({
  * Response: { mensaje, usuarioId, medicoId }
  */
 export async function registrarMedico({ nombreUsuario, password, nombre, matricula }) {
-  const { data } = await api.post("/auth/register/medico", {
-    nombreUsuario, password, nombre, matricula,
-  });
-  return data;
+  try {
+    const { data } = await api.post("/auth/register/medico", {
+      nombreUsuario, password, nombre, matricula,
+    });
+    return data;
+  } catch (error) {
+    if (shouldUseMockAuth(error)) {
+      const usuario = buildMockUser(nombreUsuario);
+      writeStoredMockUser(usuario);
+      return {
+        mensaje: "Cuenta creada en modo demo",
+        usuarioId: "mock-user-id",
+        medicoId: "mock-medico-id",
+      };
+    }
+    throw error;
+  }
 }
 
 /**
@@ -45,8 +132,18 @@ export async function registrarMedico({ nombreUsuario, password, nombre, matricu
  * Response: { usuarioId, pacienteId, medicoId } (payload del JWT, sin nombreUsuario)
  */
 export async function getMe() {
-  const { data } = await api.get("/auth/me");
-  return data;
+  const storedMockUser = readStoredMockUser();
+  if (storedMockUser) return storedMockUser;
+
+  try {
+    const { data } = await api.get("/auth/me");
+    return data;
+  } catch (error) {
+    if (shouldUseMockAuth(error)) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 /**
@@ -54,8 +151,16 @@ export async function getMe() {
  * POST /auth/logout
  */
 export async function logout() {
-  const { data } = await api.post("/auth/logout");
-  return data;
+  clearStoredMockUser();
+  try {
+    const { data } = await api.post("/auth/logout");
+    return data;
+  } catch (error) {
+    if (shouldUseMockAuth(error)) {
+      return { mensaje: "Logout exitoso (modo demo)" };
+    }
+    throw error;
+  }
 }
 
 /**

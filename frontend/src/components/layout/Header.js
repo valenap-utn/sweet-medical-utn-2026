@@ -14,9 +14,15 @@ import {FaXmark} from "react-icons/fa6";
 
 const NAV_PUBLICO = [
     {href: "/", label: "Inicio"},
-    {href: "/turnos", label: "Buscar turnos"},
     {href: "/planes", label: "Planes"},
 ];
+
+const NAV_PACIENTE = [
+    {href: "/", label: "Inicio"},
+    {href: "/turnos", label: "Buscar turnos"},
+    // {href: "/planes", label: "Planes"},
+]
+
 const NAV_MEDICO = [
     // {href: "/", label: "Inicio"},
     {href: "/medico", label: "Panel"},
@@ -34,7 +40,13 @@ export default function Header() {
     const [accountOpen, setAccountOpen] = useState(false);
 
     const esMedico = usuario?.rol === RolUsuario.MEDICO;
-    const navLinks = esMedico ? NAV_MEDICO : NAV_PUBLICO;
+    const esPaciente = usuario?.rol === RolUsuario.PACIENTE;
+
+    const navLinks = esMedico
+        ? NAV_MEDICO
+        : esPaciente
+            ? NAV_PACIENTE
+            : NAV_PUBLICO;
 
     const handleLogout = async () => {
         await logout();
@@ -91,9 +103,9 @@ export default function Header() {
                 </nav>
 
                 <div style={{display: "flex", gap: 8, alignItems: "center"}} className="sm-desktop-nav">
-                    {!esMedico && (
+                    {esPaciente && (
                         <div style={{position: "relative"}}>
-                            <Link href="/carrito" style={{
+                            <Link href="/carrito" data-cy="abrir-carrito" style={{
                                 display: "inline-flex",
                                 alignItems: "center",
                                 justifyContent: "center",
@@ -107,24 +119,25 @@ export default function Header() {
                                 fontSize: 12,
                                 textDecoration: "none"
                             }}>
-                                <FaCalendarAlt size={16} /> Turno
+                                <FaCalendarAlt size={16}/> Turno
                             </Link>
                             {items.length > 0 && (
-                                <span style={{
-                                    position: "absolute",
-                                    top: -5,
-                                    right: -5,
-                                    width: 17,
-                                    height: 17,
-                                    background: "var(--p)",
-                                    color: "#fff",
-                                    borderRadius: "50%",
-                                    fontSize: 9,
-                                    fontWeight: 700,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center"
-                                }}>
+                                <span data-cy="contador-carrito"
+                                      style={{
+                                          position: "absolute",
+                                          top: -5,
+                                          right: -5,
+                                          width: 17,
+                                          height: 17,
+                                          background: "var(--p)",
+                                          color: "#fff",
+                                          borderRadius: "50%",
+                                          fontSize: 9,
+                                          fontWeight: 700,
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center"
+                                      }}>
                   {items.length}
                 </span>
                             )}
@@ -195,7 +208,7 @@ export default function Header() {
                     aria-label="Menú"
                     aria-expanded={menuOpen}
                 >
-                    {menuOpen ? <FaXmark size={22} /> : <FaBars size={20} />}
+                    {menuOpen ? <FaXmark size={22}/> : <FaBars size={20}/>}
                 </button>
 
             </div>
@@ -221,7 +234,7 @@ export default function Header() {
                             {label}
                         </Link>
                     ))}
-                    {!esMedico && (
+                    {esPaciente && (
                         <Link href="/carrito" onClick={() => setMenuOpen(false)}
                               style={{
                                   display: "flex",
@@ -234,7 +247,7 @@ export default function Header() {
                                   textDecoration: "none",
                                   borderBottom: "1px solid var(--outline-v)"
                               }}>
-                            <FaCalendarAlt size={12} /> Turno
+                            <FaCalendarAlt size={12}/> Turno
                             {items.length > 0 && (
                                 <span style={{
                                     padding: "1px 7px",
