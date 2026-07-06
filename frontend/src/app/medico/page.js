@@ -47,6 +47,7 @@ const MODULOS = [
     descripcion:
       "Consultá el historial de un paciente y gestioná sus turnos.",
     detalle: "Cancelar, proponer cambios y marcar turnos realizados.",
+    href: "/medico/pacientes"
   },
 ];
 

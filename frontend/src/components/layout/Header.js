@@ -20,7 +20,7 @@ const NAV_PUBLICO = [
 const NAV_PACIENTE = [
     {href: "/", label: "Inicio"},
     {href: "/turnos", label: "Buscar turnos"},
-    {href: "/planes", label: "Planes"},
+    // {href: "/planes", label: "Planes"},
 ]
 
 const NAV_MEDICO = [

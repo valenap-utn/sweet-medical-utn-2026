@@ -1,9 +1,9 @@
-import {api} from "./api";
+import { api } from "./api";
 
 export async function obtenerHistorialPacienteMedico(pacienteId) {
 
-    const {data} = await api.get(`/medicos/pacientes/${pacienteId}/turnos`);
-    return Array.isArray(data) ? data : [];
+  const { data } = await api.get(`/medicos/pacientes/${pacienteId}/turnos`);
+  return Array.isArray(data) ? data : [];
 
 }
 
@@ -13,19 +13,14 @@ export async function obtenerHistorialPacienteMedico(pacienteId) {
  * GET /medicos/agenda
  */
 export async function obtenerAgendaMedico(params = {}) {
-    const query = {};
+  const query = {};
 
-    if (params.fechaDesde) query.fechaDesde = params.fechaDesde;
-    if (params.fechaHasta) query.fechaHasta = params.fechaHasta;
-    if (params.estado) query.estado = params.estado;
+  if (params.fechaDesde) query.fechaDesde = params.fechaDesde;
+  if (params.fechaHasta) query.fechaHasta = params.fechaHasta;
+  if (params.estado) query.estado = params.estado;
 
-    if (params.page) query.page = params.page;
-    if (params.limit) query.limit = params.limit;
-
-    if (params.sortOrder) query.sortOrder = params.sortOrder;
-
-    const {data} = await api.get("/medicos/agenda", {params: query});
-    return data;
+  const { data } = await api.get("/medicos/agenda", { params: query });
+  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -33,8 +28,8 @@ export async function obtenerAgendaMedico(params = {}) {
  * GET /medicos/especialidades
  */
 export async function obtenerEspecialidadesMedico() {
-    const {data} = await api.get("/medicos/especialidades");
-    return Array.isArray(data) ? data : [];
+  const { data } = await api.get("/medicos/especialidades");
+  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -42,8 +37,8 @@ export async function obtenerEspecialidadesMedico() {
  * GET /medicos/practicas
  */
 export async function obtenerPracticasMedico() {
-    const {data} = await api.get("/medicos/practicas");
-    return Array.isArray(data) ? data : [];
+  const { data } = await api.get("/medicos/practicas");
+  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -51,8 +46,8 @@ export async function obtenerPracticasMedico() {
  * GET /medicos/disponibilidades
  */
 export async function obtenerDisponibilidadesMedico() {
-    const {data} = await api.get("/medicos/disponibilidades");
-    return Array.isArray(data) ? data : [];
+  const { data } = await api.get("/medicos/disponibilidades");
+  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -60,11 +55,11 @@ export async function obtenerDisponibilidadesMedico() {
  * POST /medicos/disponibilidades
  */
 export async function crearDisponibilidadMedico(disponibilidad) {
-    const {data} = await api.post("/medicos/disponibilidades", {
-        disponibilidad,
-    });
+  const { data } = await api.post("/medicos/disponibilidades", {
+    disponibilidad,
+  });
 
-    return data;
+  return data;
 }
 
 /**
@@ -72,11 +67,11 @@ export async function crearDisponibilidadMedico(disponibilidad) {
  * DELETE /medicos/disponibilidades
  */
 export async function eliminarDisponibilidadMedico(disponibilidad) {
-    const {data} = await api.delete("/medicos/disponibilidades", {
-        data: {disponibilidad},
-    });
+  const { data } = await api.delete("/medicos/disponibilidades", {
+    data: { disponibilidad },
+  });
 
-    return data;
+  return data;
 }
 
 /**
@@ -84,8 +79,8 @@ export async function eliminarDisponibilidadMedico(disponibilidad) {
  * GET /medicos/sedes
  */
 export async function obtenerSedesMedico() {
-    const {data} = await api.get("/medicos/sedes");
-    return Array.isArray(data) ? data : [];
+  const { data } = await api.get("/medicos/sedes");
+  return Array.isArray(data) ? data : [];
 }
 
 /**
@@ -93,18 +88,18 @@ export async function obtenerSedesMedico() {
  * POST /medicos/especialidades/:especialidadId
  */
 export async function agregarSedeMedico(sedeId) {
-    const {data} = await api.post(`/medicos/sedes/${sedeId}`);
-    return data;
+  const { data } = await api.post(`/medicos/sedes/${sedeId}`);
+  return data;
 }
 
 export async function quitarSedeMedico(sedeId) {
-    const {data} = await api.delete(`/medicos/sedes/${sedeId}`);
-    return data;
+  const { data } = await api.delete(`/medicos/sedes/${sedeId}`);
+  return data;
 }
 
 export async function agregarEspecialidadMedico(especialidadId) {
-    const {data} = await api.post(`/medicos/especialidades/${especialidadId}`);
-    return data;
+  const { data } = await api.post(`/medicos/especialidades/${especialidadId}`);
+  return data;
 }
 
 /**
@@ -112,8 +107,8 @@ export async function agregarEspecialidadMedico(especialidadId) {
  * DELETE /medicos/especialidades/:especialidadId
  */
 export async function quitarEspecialidadMedico(especialidadId) {
-    const {data} = await api.delete(`/medicos/especialidades/${especialidadId}`);
-    return data;
+  const { data } = await api.delete(`/medicos/especialidades/${especialidadId}`);
+  return data;
 }
 
 /**
@@ -121,8 +116,8 @@ export async function quitarEspecialidadMedico(especialidadId) {
  * POST /medicos/practicas/:practicaId
  */
 export async function agregarPracticaMedico(practicaId) {
-    const {data} = await api.post(`/medicos/practicas/${practicaId}`);
-    return data;
+  const { data } = await api.post(`/medicos/practicas/${practicaId}`);
+  return data;
 }
 
 /**
@@ -130,6 +125,6 @@ export async function agregarPracticaMedico(practicaId) {
  * DELETE /medicos/practicas/:practicaId
  */
 export async function quitarPracticaMedico(practicaId) {
-    const {data} = await api.delete(`/medicos/practicas/${practicaId}`);
-    return data;
+  const { data } = await api.delete(`/medicos/practicas/${practicaId}`);
+  return data;
 }

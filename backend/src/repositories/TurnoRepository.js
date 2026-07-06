@@ -23,7 +23,7 @@ export class TurnoRepository {
             .populate("practica")
     }
 
-    async findByMedicoAndPacienteId({pacienteId, medicoId}) {
+    async findByMedicoAndPacienteId ({pacienteId, medicoId}) {
         return await this.model
             .find({paciente: pacienteId, medico: medicoId})
             .sort({fechaHoraInicio: -1})
@@ -192,9 +192,6 @@ export class TurnoRepository {
                                  fechaDesde,
                                  fechaHasta,
                                  estado,
-                                 page = 1,
-                                 limit = 10,
-                                 sortOrder = "asc",
                              }) {
         const filtros = {
             medico: medicoId,
@@ -216,29 +213,12 @@ export class TurnoRepository {
             }
         }
 
-        // Paginación
-        const skip = (Number(page) - 1) * Number(limit);
-
-        const [turnos, total] = await Promise.all([
-            this.model
-                .find(filtros)
-                .sort({fechaHoraInicio: sortOrder === "desc" ? -1 : 1})
-                .skip(skip)
-                .limit(Number(limit))
-                .populate("paciente", "nombre dni")
-                .populate("sede")
-                .populate("especialidad")
-                .populate("practica"),
-
-            this.model.countDocuments(filtros),
-        ]);
-
-        return {
-            turnos,
-            total,
-            page: Number(page),
-            limit: Number(limit),
-            totalPages: Math.ceil(total / limit)
-        };
+        return await this.model
+            .find(filtros)
+            .sort({fechaHoraInicio: 1})
+            .populate("paciente", "nombre dni")
+            .populate("sede")
+            .populate("especialidad")
+            .populate("practica");
     }
 }
