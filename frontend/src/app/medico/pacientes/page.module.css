@@ -1,0 +1,295 @@
+.loading {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--on-surf-v);
+}
+
+.page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.header {
+    margin-top: 24px;
+    margin-bottom: 28px;
+}
+
+.title {
+    font-family: "Literata", serif;
+    color: var(--p);
+    margin-bottom: 8px;
+    font-size: clamp(24px, 4vw, 32px);
+    line-height: 1.15;
+}
+
+.description {
+    color: var(--secondary);
+    font-size: 14px;
+}
+
+/* Sección de filtros / selectores */
+.filters {
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid var(--outline-v);
+    box-shadow: 0 8px 22px rgba(107, 29, 42, 0.06);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+.field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surf-v);
+}
+
+.field select {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid var(--outline-v);
+    font-size: 14px;
+    background-color: #fff;
+    color: var(--on-surf);
+    outline: none;
+    cursor: pointer;
+}
+
+/* Spinner indicador dentro del select */
+.selectLoading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    font-size: 13px;
+    color: var(--secondary);
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    padding: 60px 40px;
+}
+
+.resultCount {
+    font-size: 14px;
+    color: var(--on-surf);
+    margin-bottom: 16px;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 48px;
+    border: 1px solid var(--outline-v);
+    border-radius: 18px;
+    background: #fff;
+}
+
+.emptyState h2 {
+    color: var(--p);
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.emptyState p {
+    color: var(--secondary);
+    font-size: 13px;
+}
+
+.list {
+    display: grid;
+    gap: 12px;
+}
+
+/* Card — Fila única horizontal */
+.card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--outline-v);
+    background: #fff;
+    width: 100%;
+}
+
+.cardField {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.cardLabel {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surf-v);
+}
+
+.date {
+    color: var(--p);
+}
+
+.muted {
+    font-size: 12px;
+    color: var(--secondary);
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.modal {
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+}
+
+.modalTitle {
+    font-family: "Literata", serif;
+    font-size: 18px;
+    color: var(--p);
+    margin-bottom: 6px;
+}
+
+.modalSubtitle {
+    font-size: 12px;
+    color: var(--secondary);
+    margin-bottom: 18px;
+}
+
+.modalLabel {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surf-v);
+    margin-bottom: 6px;
+}
+
+.modalTextarea {
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--outline-v);
+    font-size: 13px;
+    resize: none;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.modalInput {
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--outline-v);
+    font-size: 13px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modalBtnSecondary {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--outline-v);
+    background: transparent;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.modalBtnSecondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modalBtnPrimary {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+}
+
+.modalBtnPrimary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .page {
+        padding: 32px 24px;
+    }
+
+    .card {
+        flex-wrap: wrap;
+        padding-right: 48px; /* Espacio de sobra para las acciones absolute */
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 28px 16px;
+    }
+
+    .filters {
+        padding: 18px;
+    }
+
+    .card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding-right: 18px;
+    }
+
+    .cardField {
+        width: 100%;
+    }
+
+    .emptyState {
+        padding: 32px 20px;
+    }
+}

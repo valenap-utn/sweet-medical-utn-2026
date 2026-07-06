@@ -1,5 +1,13 @@
 import { api } from "./api";
 
+export async function obtenerHistorialPacienteMedico(pacienteId) {
+
+  const { data } = await api.get(`/medicos/pacientes/${pacienteId}/turnos`);
+  return Array.isArray(data) ? data : [];
+
+}
+
+
 /**
  * Obtiene la agenda del médico autenticado.
  * GET /medicos/agenda
