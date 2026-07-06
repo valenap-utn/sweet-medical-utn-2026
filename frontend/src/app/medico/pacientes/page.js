@@ -218,16 +218,17 @@ export default function PacientesTurnosPage() {
     useEffect(() => {
         // Si no hay id o el id es literalmente el string "undefined", cancelamos la petición
         if (!pacienteId || pacienteId === "undefined") {
-            setHistorial([]);
+            // setHistorial([]);
             return;
         }
 
         let cancelado = false;
-        setCargandoHistorial(true);
-        setErrorHistorial("");
-        setHistorial([]);
 
         (async () => {
+            setCargandoHistorial(true);
+            setErrorHistorial("");
+            setHistorial([]);
+
             try {
                 const data = await obtenerHistorialPacienteMedico(pacienteId);
                 if (!cancelado) setHistorial(data);
@@ -341,7 +342,14 @@ export default function PacientesTurnosPage() {
                         <select
                             value={pacienteId}
                             onChange={(e) => {
-                                setPacienteId(e.target.value)
+                                const value = e.target.value;
+                                setPacienteId(value);
+
+                                if (!value || value === "undefined") {
+                                    setHistorial([]);
+                                    setErrorHistorial("");
+                                    setCargandoHistorial(false);
+                                }
                             }}
                         >
                             <option value="">

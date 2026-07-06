@@ -69,11 +69,18 @@
 .searchButton {
     padding: 11px 18px;
     border-radius: 11px;
-    border: none;
+    border: 2px solid var(--p);
     background: var(--p);
     color: #fff;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.searchButton:hover:not(:disabled) {
+    background: #fff;
+    color: var(--p);
+    border-color: var(--p);
 }
 
 .searchButton:disabled {

@@ -41,7 +41,7 @@ const ACCIONES_PACIENTE = [
         href: "/turnos",
     },
     {
-        titulo: "Carrito de turnos",
+        titulo: "Mis turnos",
         descripcion: "Revisá los turnos que preseleccionaste antes de confirmar la reserva.",
         href: "/carrito",
     },
@@ -247,12 +247,13 @@ function InicioPublico() {
             <section style={{
                 position: "relative",
                 overflow: "hidden",
-                padding: "clamp(40px,6vw,72px) 0 clamp(32px,4vw,48px)"
+                padding: "clamp(40px,6vw,72px) 0 clamp(32px,4vw,48px)",
+                background: "#6b1d2a"
             }}>
                 <div style={{
                     position: "absolute",
                     inset: 0,
-                    background: "linear-gradient(135deg,#fdfaf8 0%,#f9eef0 45%,#f5e4e8 70%,#fdfaf8 100%)"
+                    background: "linear-gradient(135deg, #6b1d2a 0%, #5a172a 50%, #4a1524 100%)"
                 }}/>
 
                 <div style={{
@@ -260,7 +261,7 @@ function InicioPublico() {
                     width: 500,
                     height: 500,
                     borderRadius: "50%",
-                    background: "radial-gradient(circle,rgba(107,29,42,.12) 0%,transparent 70%)",
+                    background: "radial-gradient(circle,rgba(255,255,255,.04) 0%,transparent 70%)",
                     top: -120,
                     right: -80,
                     pointerEvents: "none"
@@ -271,7 +272,7 @@ function InicioPublico() {
                     width: 340,
                     height: 340,
                     borderRadius: "50%",
-                    background: "radial-gradient(circle,rgba(107,29,42,.07) 0%,transparent 70%)",
+                    background: "radial-gradient(circle,rgba(255,255,255,.02) 0%,transparent 70%)",
                     bottom: -80,
                     left: 20,
                     pointerEvents: "none"
@@ -293,14 +294,16 @@ function InicioPublico() {
                             display: "inline-flex",
                             alignItems: "center",
                             gap: 6,
-                            padding: "6px 14px",
+                            padding: "8px 16px",
                             borderRadius: 999,
                             fontSize: 11,
                             fontWeight: 700,
-                            letterSpacing: ".07em",
+                            letterSpacing: ".08em",
                             textTransform: "uppercase",
-                            color: "var(--p)",
-                            marginBottom: 20
+                            color: "#fff",
+                            marginBottom: 20,
+                            border: "1.5px solid rgba(255,255,255,.4)",
+                            background: "rgba(255,255,255,.08)"
                         }}>
                             Tu salud, sin vueltas
                         </span>
@@ -309,19 +312,19 @@ function InicioPublico() {
                             fontFamily: "'Literata', serif",
                             fontSize: "clamp(32px,5vw,52px)",
                             fontWeight: 700,
-                            color: "var(--p)",
+                            color: "#fff",
                             lineHeight: 1.05,
                             letterSpacing: "-.025em",
                             marginBottom: 16
                         }}>
                             Gestioná tu atención<br/>
-                            <span style={{color: "var(--p-mid)"}}>médica</span> en<br/>
+                            médica en<br/>
                             un solo lugar
                         </h1>
 
                         <p style={{
                             fontSize: 16,
-                            color: "var(--secondary)",
+                            color: "rgba(255,255,255,.85)",
                             lineHeight: 1.65,
                             maxWidth: 430,
                             marginBottom: 28
@@ -332,20 +335,22 @@ function InicioPublico() {
                         <div style={{display: "flex", gap: 12, flexWrap: "wrap"}}>
                             <Link
                                 href="/login"
+                                className="hero-btn-primary"
                                 style={{
                                     display: "inline-flex",
                                     alignItems: "center",
                                     gap: 8,
                                     padding: "14px 32px",
-                                    background: "var(--p)",
-                                    color: "#fff",
+                                    background: "#fff",
+                                    color: "#6b1d2a",
                                     fontWeight: 700,
                                     borderRadius: 999,
                                     fontSize: 15,
                                     textDecoration: "none",
-                                    border: "2px solid var(--p)",
-                                    boxShadow: "0 8px 28px rgba(107,29,42,.25)",
-                                    transition: "all .2s"
+                                    border: "2px solid #fff",
+                                    boxShadow: "0 8px 28px rgba(0,0,0,.2)",
+                                    transition: "all .3s ease",
+                                    cursor: "pointer"
                                 }}
                             >
                                 <FaArrowRight size={14}/>
@@ -357,12 +362,15 @@ function InicioPublico() {
                     <div className="glass" style={{
                         borderRadius: 24,
                         padding: 24,
-                        boxShadow: "0 20px 60px rgba(107,29,42,.13)"
+                        boxShadow: "0 20px 60px rgba(0,0,0,.15)",
+                        background: "rgba(255,255,255,.92)",
+                        backdropFilter: "blur(16px)",
+                        border: "1.5px solid rgba(255,255,255,.6)"
                     }}>
                         <div style={{
                             fontSize: 11,
                             fontWeight: 800,
-                            color: "var(--secondary)",
+                            color: "#8a8a8a",
                             textTransform: "uppercase",
                             letterSpacing: ".08em",
                             marginBottom: 10
@@ -373,7 +381,7 @@ function InicioPublico() {
                         <h2 style={{
                             fontFamily: "'Literata', serif",
                             fontSize: 24,
-                            color: "var(--p)",
+                            color: "#6b1d2a",
                             margin: "0 0 8px"
                         }}>
                             Accesos rápidos
@@ -381,7 +389,7 @@ function InicioPublico() {
 
                         <p style={{
                             fontSize: 13,
-                            color: "var(--secondary)",
+                            color: "#999",
                             lineHeight: 1.5,
                             margin: "0 0 18px"
                         }}>
@@ -470,10 +478,12 @@ function InicioPublico() {
                             ["2", "Elegí", "Revisá horarios disponibles y costo estimado según tu cobertura."],
                             ["3", "Reservá", "Confirmá el turno y consultalo luego desde tu perfil."],
                         ].map(([number, title, desc]) => (
-                            <div key={number} className="glass wellness-card step-card">
+                            <div key={number} className="step-card">
                                 <span>{number}</span>
-                                <strong>{title}</strong>
-                                <p>{desc}</p>
+                                <div>
+                                    <strong>{title}</strong>
+                                    <p>{desc}</p>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -574,13 +584,14 @@ function InicioPublico() {
                     border: 1px solid rgba(107,29,42,.12);
                     color: var(--p);
                     text-decoration: none;
-                    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+                    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
                 }
 
                 .quick-action:hover {
-                    transform: translateY(-1px);
+                    transform: translateY(-2px);
                     border-color: rgba(107,29,42,.22);
-                    box-shadow: 0 10px 24px rgba(107,29,42,.10);
+                    box-shadow: 0 12px 32px rgba(107,29,42,.12);
+                    background: rgba(255,255,255,.9);
                 }
 
                 .quick-action strong {
@@ -597,47 +608,40 @@ function InicioPublico() {
                     line-height: 1.35;
                 }
 
-                .how-it-works {
-                    position: relative;
-                    margin-top: 28px;
-                    padding: clamp(52px, 6vw, 72px) var(--page-px);
-                    background: linear-gradient(
-                        180deg,
-                        rgba(107,29,42,.035) 0%,
-                        rgba(107,29,42,.06) 100%
-                    );
-                    border-top: 1px solid rgba(107,29,42,.08);
-                    overflow: hidden;
+                .hero-btn-primary {
+                    background: #fff !important;
+                    color: #6b1d2a !important;
+                    border: 2px solid #fff !important;
+                    box-shadow: 0 8px 28px rgba(0,0,0,.2) !important;
+                    transition: all .3s ease !important;
                 }
 
-                .how-it-works::before {
-                    content: "";
-                    position: absolute;
-                    width: 420px;
-                    height: 420px;
-                    border-radius: 50%;
-                    background: radial-gradient(
-                        circle,
-                        rgba(107,29,42,.06) 0%,
-                        transparent 72%
-                    );
-                    right: -120px;
-                    top: -150px;
-                    pointer-events: none;
+                .hero-btn-primary:hover {
+                    background: rgba(255,255,255,.95) !important;
+                    box-shadow: 0 12px 36px rgba(0,0,0,.25) !important;
+                    transform: translateY(-2px) !important;
+                }
+
+                .hero-btn-primary:active {
+                    transform: translateY(0) !important;
+                }
+
+                .how-it-works {
+                    position: relative;
+                    background:
+                        linear-gradient(135deg, #fdfaf8 0%, #f9eef0 50%, #f5e4e8 100%);
                 }
 
                 .how-it-works-container {
                     max-width: 1200px;
                     margin: 0 auto;
-                    padding: 0 clamp(32px, 5vw, 60px);
-                    box-sizing: border-box;
-                    position: relative;
-                    z-index: 1;
+                    padding: clamp(48px, 6vw, 80px) var(--page-px);
                 }
 
                 .how-it-works-header {
+                    text-align: left;
+                    margin-bottom: 64px;
                     max-width: 560px;
-                    margin-bottom: 28px;
                 }
 
                 .section-eyebrow {
@@ -646,56 +650,154 @@ function InicioPublico() {
                     font-weight: 800;
                     color: var(--p);
                     text-transform: uppercase;
-                    letter-spacing: .08em;
-                    margin-bottom: 8px;
+                    letter-spacing: .12em;
+                    margin-bottom: 12px;
+                    opacity: 0.75;
                 }
 
                 .how-it-works h2 {
                     font-family: 'Literata', serif;
-                    font-size: clamp(24px, 3.2vw, 32px);
+                    font-size: clamp(32px, 3.5vw, 40px);
                     color: var(--p);
-                    margin: 0 0 8px;
+                    margin: 0 0 16px;
+                    font-weight: 700;
+                    line-height: 1.1;
                 }
 
-                .how-it-works p {
+                .how-it-works > div > p {
                     color: var(--secondary);
-                    line-height: 1.6;
+                    line-height: 1.7;
                     margin: 0;
+                    font-size: 16px;
                 }
 
                 .steps-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                    gap: 18px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
+                    max-width: 620px;
+                    position: relative;
+                }
+
+                .steps-grid::before {
+                    content: '';
+                    position: absolute;
+                    left: 23px;
+                    top: 60px;
+                    bottom: 60px;
+                    width: 1px;
+                    background: linear-gradient(to bottom, var(--p), rgba(107, 29, 42, 0.1));
                 }
 
                 .step-card {
-                    border-radius: 18px;
-                    padding: 22px;
+                    border-radius: 0;
+                    padding: 48px 0;
+                    display: flex;
+                    gap: 28px;
+                    align-items: flex-start;
+                    background: none;
+                    border: none;
+                    box-shadow: none;
+                    position: relative;
+                }
+
+                .step-card:first-child {
+                    padding-top: 0;
+                }
+
+                .step-card:last-child {
+                    padding-bottom: 0;
                 }
 
                 .step-card span {
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: 34px;
-                    height: 34px;
-                    border-radius: 999px;
-                    background: var(--p);
+                    width: 52px;
+                    height: 52px;
+                    min-width: 52px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--p) 0%, #6b1d2a 100%);
                     color: #fff;
                     font-weight: 800;
-                    margin-bottom: 14px;
+                    font-size: 20px;
+                    flex-shrink: 0;
+                    position: relative;
+                    z-index: 2;
+                    box-shadow: 0 8px 24px rgba(107, 29, 42, 0.18);
+                }
+
+                .step-card > div {
+                    padding-top: 4px;
                 }
 
                 .step-card strong {
                     display: block;
                     color: var(--p);
-                    font-size: 15px;
+                    font-size: 17px;
                     margin-bottom: 6px;
+                    font-weight: 700;
                 }
 
                 .step-card p {
-                    font-size: 13px;
+                    font-size: 15px;
+                    color: var(--secondary);
+                    margin: 0;
+                    line-height: 1.6;
+                    font-weight: 400;
+                }
+
+                @media (max-width: 640px) {
+                    .how-it-works-container {
+                        padding: clamp(32px, 4vw, 48px) var(--page-px);
+                    }
+
+                    .how-it-works-header {
+                        margin-bottom: 40px;
+                    }
+
+                    .how-it-works h2 {
+                        font-size: clamp(24px, 4vw, 32px);
+                        margin: 0 0 12px;
+                    }
+
+                    .how-it-works > div > p {
+                        font-size: 14px;
+                    }
+
+                    .steps-grid::before {
+                        left: 19px;
+                        top: 52px;
+                        bottom: 52px;
+                    }
+
+                    .step-card {
+                        padding: 36px 0;
+                        gap: 20px;
+                    }
+
+                    .step-card:first-child {
+                        padding-top: 0;
+                    }
+
+                    .step-card:last-child {
+                        padding-bottom: 0;
+                    }
+
+                    .step-card span {
+                        width: 44px;
+                        height: 44px;
+                        min-width: 44px;
+                        font-size: 18px;
+                    }
+
+                    .step-card strong {
+                        font-size: 15px;
+                    }
+
+                    .step-card p {
+                        font-size: 13px;
+                    }
                 }
             `}</style>
         </div>

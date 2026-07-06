@@ -12,7 +12,7 @@ const LABELS = {
     servicios: "Servicios",
     sedes: "Sedes",
     turnos: "Buscar turnos",
-    carrito: "Turnos seleccionados",
+    carrito: "Mis turnos",
     perfil: "Mi cuenta",
     planes: "Planes",
 };

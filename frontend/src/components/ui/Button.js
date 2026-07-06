@@ -1,5 +1,6 @@
 "use client";
 import Spinner from "./Spinner";
+import { useState } from "react";
 
 const VARIANTS = {
   primary:   { bg: "var(--p)",      color: "#fff",          border: "var(--p)" },
@@ -12,19 +13,41 @@ export default function Button({
   children, variant = "primary", loading = false,
   className = "", type = "button", disabled, fullWidth, style, ...props
 }) {
+  const [isHovered, setIsHovered] = useState(false);
   const v = VARIANTS[variant] ?? VARIANTS.primary;
+  
+  const getHoverStyle = () => {
+    if (variant === "primary") {
+      return isHovered ? {
+        background: "#fff",
+        color: "var(--p)",
+        borderColor: "var(--p)",
+      } : {};
+    }
+    if (variant === "secondary") {
+      return isHovered ? {
+        background: "rgba(138, 33, 70, 0.08)",
+        borderColor: "var(--p)",
+      } : {};
+    }
+    return {};
+  };
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
+      onMouseEnter={() => !disabled && !loading && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         gap: "7px", padding: "10px 22px", borderRadius: "999px",
         fontFamily: "'Hanken Grotesk', system-ui, sans-serif",
         fontSize: "13px", fontWeight: 700, cursor: disabled || loading ? "not-allowed" : "pointer",
-        opacity: disabled || loading ? 0.6 : 1, transition: "all .2s",
+        opacity: disabled || loading ? 0.6 : 1, transition: "all .2s ease",
         border: `2px solid ${v.border}`, background: v.bg, color: v.color,
         width: fullWidth ? "100%" : undefined,
+        ...getHoverStyle(),
         ...style,
       }}
       className={className}
