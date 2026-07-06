@@ -119,7 +119,7 @@ function TurnoDetalle({turno, onClose, onSolicitarCambio}) {
                     {[
                         [{icon: FaStethoscope, label: "Médico"}, turno.medico?.nombre ?? "–"],
                         [
-                            { icon: FaMapMarkerAlt, label: "Sede" },
+                            {icon: FaMapMarkerAlt, label: "Sede"},
                             (
                                 <>
                                     <div>{turno.sede?.nombre ?? "–"}</div>
@@ -139,7 +139,7 @@ function TurnoDetalle({turno, onClose, onSolicitarCambio}) {
                         [{icon: FaCalendarAlt, label: "Fecha"}, fmtFecha(turno.fechaHoraInicio)],
                         [{icon: FaClock, label: "Duración"}, duracion ? `${duracion} min` : "–"],
                         [
-                            { icon: FaMoneyBillWave, label: "Costo" },
+                            {icon: FaMoneyBillWave, label: "Costo"},
                             turno.costo !== null && turno.costo !== undefined
                                 ? `$${Number(turno.costo).toLocaleString("es-AR")}`
                                 : turno.precio !== null && turno.precio !== undefined
@@ -469,6 +469,80 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
     );
 }
 
+// Card de turnos
+function TurnoSection({ titulo, vacio, turnos, total, onVerDetalle }) {
+    return (
+        <section className="turno-section">
+            <div className="turno-section-header">
+                <h3>{titulo}</h3>
+                <span>{total ?? turnos.length}</span>
+            </div>
+
+            {turnos.length === 0 && (
+                <div className="turno-empty">{vacio}</div>
+            )}
+
+            {turnos.map(t => {
+                const es = t.tipoServicio === "ESPECIALIDAD";
+                const nombre = es ? t.especialidad?.nombre : t.practica?.nombre;
+                const ss = STATUS_STYLE[t.estado] ?? STATUS_STYLE.Disponible;
+                const clickeable = ["Reservado", "Confirmado"].includes(t.estado);
+
+                const fecha = new Date(t.fechaHoraInicio);
+                const dia = fecha.toLocaleDateString("es-AR", { day: "2-digit" });
+                const mes = fecha.toLocaleDateString("es-AR", { month: "short" });
+                const hora = fecha.toLocaleTimeString("es-AR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+
+                return (
+                    <div
+                        key={t._id}
+                        className={`wellness-card turno-card ${clickeable ? "turno-card-clickable" : ""}`}
+                        onClick={() => clickeable && onVerDetalle(t)}
+                    >
+                        <div className="turno-fecha">
+                            <strong>{dia}</strong>
+                            <span>{mes}</span>
+                            <small>{hora}</small>
+                        </div>
+
+                        <div className="turno-info">
+                            <div className="turno-titulo">
+                                {nombre ?? "Servicio no disponible"}
+                            </div>
+
+                            <div className="turno-medico">
+                                {t.medico?.nombre ?? "Médico no disponible"}
+                            </div>
+
+                            <div className="turno-meta">
+                                <span>{t.sede?.nombre ?? "Sede no disponible"}</span>
+                                <span>•</span>
+                                <span>{es ? "Especialidad" : "Práctica"}</span>
+                            </div>
+                        </div>
+
+                        <div className="turno-acciones">
+                            <span
+                                className="turno-estado"
+                                style={{ background: ss.bg, color: ss.color }}
+                            >
+                                {t.estado}
+                            </span>
+
+                            {clickeable && (
+                                <span className="turno-ver">Ver detalle →</span>
+                            )}
+                        </div>
+                    </div>
+                );
+            })}
+        </section>
+    );
+}
+
 export default function PerfilPage() {
     const {usuario, cargando: authCargando, logout} = useAuth();
     const router = useRouter();
@@ -492,6 +566,10 @@ export default function PerfilPage() {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
     const [confirmLogout, setConfirmLogout] = useState(false);
+
+    // Paginación
+    const [paginaHistorial, setPaginaHistorial] = useState(1);
+    const turnosPorPagina = 5;
 
     useEffect(() => {
         function handleClick(e) {
@@ -576,6 +654,35 @@ export default function PerfilPage() {
     if (!usuario) return null;
 
     const menuItems = esPaciente ? MENU : MENU.filter(m => m.id === "datos");
+
+    const ahora = new Date();
+
+    const turnosOrdenados = [...historial].sort(
+        (a, b) => new Date(a.fechaHoraInicio) - new Date(b.fechaHoraInicio)
+    );
+
+    const proximosTurnos = turnosOrdenados.filter(t =>
+        new Date(t.fechaHoraInicio) >= ahora &&
+        !["Cancelado", "Realizado"].includes(t.estado)
+    );
+
+    const turnosHistorial = turnosOrdenados.filter(t =>
+        new Date(t.fechaHoraInicio) < ahora ||
+        ["Cancelado", "Realizado"].includes(t.estado)
+    );
+
+    // Paginación
+    const totalPaginasHistorial = Math.ceil(turnosHistorial.length / turnosPorPagina);
+
+    const paginaHistorialSegura = Math.min(
+        paginaHistorial,
+        totalPaginasHistorial || 1
+    );
+
+    const historialPaginado = turnosHistorial.slice(
+        (paginaHistorialSegura - 1) * turnosPorPagina,
+        paginaHistorialSegura * turnosPorPagina
+    );
 
     return (
         <>
@@ -671,7 +778,7 @@ export default function PerfilPage() {
                                     color: "var(--p)",
                                     marginBottom: 18
                                 }}>
-                                    Historial de turnos
+                                    Mis turnos
                                 </h2>
                                 {error && <Alert type="error" style={{marginBottom: 16}}>{error}</Alert>}
                                 {cargando && (
@@ -703,71 +810,44 @@ export default function PerfilPage() {
                                     </div>
                                 )}
 
-                                {historial.map(t => {
-                                    const es = t.tipoServicio === "ESPECIALIDAD";
-                                    const nombre = es ? t.especialidad?.nombre : t.practica?.nombre;
-                                    const ss = STATUS_STYLE[t.estado] ?? STATUS_STYLE.Disponible;
-                                    const clickeable = ["Reservado", "Confirmado"].includes(t.estado);
+                                <TurnoSection
+                                    titulo="Próximos turnos"
+                                    vacio="No tenés próximos turnos."
+                                    turnos={proximosTurnos}
+                                    onVerDetalle={setTurnoDetalle}
+                                />
 
-                                    return (
-                                        <div key={t._id} className="wellness-card"
-                                             onClick={() => clickeable && setTurnoDetalle(t)}
-                                             style={{
-                                                 borderRadius: 14,
-                                                 padding: "14px 18px",
-                                                 display: "flex",
-                                                 alignItems: "center",
-                                                 gap: 12,
-                                                 marginBottom: 10,
-                                                 cursor: clickeable ? "pointer" : "default",
-                                                 flexWrap: "wrap"
-                                             }}>
-                                            <div style={{
-                                                width: 38,
-                                                height: 38,
-                                                borderRadius: 10,
-                                                background: es ? "var(--p-fixed)" : "#f5e8ec",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                flexShrink: 0,
-                                                fontSize: 18
-                                            }}>
-                                                {/*{es ? "🩺" : "🔬"}*/}
-                                                {es ? <FaStethoscope size={18}/> : <FaFlask size={18}/>}
-                                            </div>
-                                            <div style={{flex: 1, minWidth: 150}}>
-                                                <div style={{fontSize: 13, fontWeight: 700, color: "var(--p)"}}>
-                                                    {nombre ?? "–"} · {t.medico?.nombre ?? "–"}
-                                                </div>
-                                                <div style={{fontSize: 11, color: "var(--secondary)", marginTop: 2}}>
-                                                    {fmtCorta(t.fechaHoraInicio)} · {t.sede?.nombre ?? "–"}
-                                                </div>
-                                            </div>
-                                            <div style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: 8,
-                                                flexShrink: 0,
-                                                flexWrap: "wrap"
-                                            }}>
-                      <span style={{
-                          padding: "3px 11px",
-                          borderRadius: 999,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          background: ss.bg,
-                          color: ss.color
-                      }}>
-                        {t.estado}
-                      </span>
-                                                {clickeable && (
-                                                    <span style={{fontSize: 11, color: "var(--p)", fontWeight: 600}}>Ver →</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                <TurnoSection
+                                    titulo="Historial"
+                                    vacio="Todavía no hay turnos en el historial."
+                                    turnos={historialPaginado}
+                                    total={turnosHistorial.length}
+                                    onVerDetalle={setTurnoDetalle}
+                                />
+
+                                {totalPaginasHistorial > 1 && (
+                                    <div className="turno-pagination">
+                                        <button
+                                            aria-label="Página anterior"
+                                            disabled={paginaHistorialSegura === 1}
+                                            onClick={() => setPaginaHistorial(p => p - 1)}
+                                        >
+                                            ←
+                                        </button>
+
+                                        <span>
+                                            {paginaHistorialSegura} / {totalPaginasHistorial}
+                                        </span>
+
+                                        <button
+                                            aria-label="Página siguiente"
+                                            disabled={paginaHistorialSegura === totalPaginasHistorial}
+                                            onClick={() => setPaginaHistorial(p => p + 1)}
+                                        >
+                                            →
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         )}
 
@@ -887,6 +967,199 @@ export default function PerfilPage() {
                 <style>{`
                     @media (max-width: 700px) {
                       .perfil-grid { grid-template-columns: 1fr !important; }
+                    }
+                    
+                    
+                    .turno-section {
+                      margin-bottom: 28px;
+                    }
+                    
+                    .turno-section-header {
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      margin-bottom: 12px;
+                    }
+                    
+                    .turno-section-header h3 {
+                      font-family: 'Literata', serif;
+                      font-size: 18px;
+                      color: var(--p);
+                      margin: 0;
+                    }
+                    
+                    .turno-section-header span {
+                      background: var(--p-fixed);
+                      color: var(--p);
+                      font-size: 12px;
+                      font-weight: 800;
+                      padding: 4px 10px;
+                      border-radius: 999px;
+                    }
+                    
+                    .turno-empty {
+                      border: 1px dashed var(--outline-v);
+                      border-radius: 16px;
+                      padding: 18px;
+                      font-size: 13px;
+                      color: var(--secondary);
+                      margin-bottom: 16px;
+                    }
+                    
+                    .turno-card {
+                      border-radius: 18px;
+                      padding: 16px 18px;
+                      display: grid;
+                      grid-template-columns: 72px 1fr auto;
+                      gap: 14px;
+                      align-items: center;
+                      margin-bottom: 12px;
+                      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+                    }
+                    
+                    .turno-card-clickable {
+                      cursor: pointer;
+                    }
+                    
+                    .turno-card-clickable:hover {
+                      transform: translateY(-1px);
+                      border-color: rgba(125, 27, 50, .28);
+                      box-shadow: 0 14px 32px rgba(125, 27, 50, .08);
+                    }
+                    
+                    .turno-fecha {
+                      min-height: 64px;
+                      border-radius: 14px;
+                      background: var(--p-fixed);
+                      color: var(--p);
+                      display: flex;
+                      flex-direction: column;
+                      justify-content: center;
+                      align-items: center;
+                      line-height: 1.1;
+                    }
+                    
+                    .turno-fecha strong {
+                      font-size: 22px;
+                      font-weight: 800;
+                    }
+                    
+                    .turno-fecha span {
+                      font-size: 11px;
+                      font-weight: 700;
+                      text-transform: uppercase;
+                    }
+                    
+                    .turno-fecha small {
+                      margin-top: 5px;
+                      font-size: 11px;
+                      color: var(--secondary);
+                      font-weight: 600;
+                    }
+                    
+                    .turno-titulo {
+                      font-size: 15px;
+                      font-weight: 800;
+                      color: var(--p);
+                      margin-bottom: 3px;
+                    }
+                    
+                    .turno-medico {
+                      font-size: 13px;
+                      font-weight: 600;
+                      color: var(--on-surf);
+                      margin-bottom: 4px;
+                    }
+                    
+                    .turno-meta {
+                      display: flex;
+                      gap: 6px;
+                      flex-wrap: wrap;
+                      font-size: 12px;
+                      color: var(--secondary);
+                    }
+                    
+                    .turno-acciones {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: flex-end;
+                      gap: 8px;
+                    }
+                    
+                    .turno-estado {
+                      padding: 5px 12px;
+                      border-radius: 999px;
+                      font-size: 11px;
+                      font-weight: 800;
+                    }
+                    
+                    .turno-ver {
+                      font-size: 12px;
+                      color: var(--p);
+                      font-weight: 700;
+                    }
+                    
+                    @media (max-width: 760px) {
+                      .turno-card {
+                        grid-template-columns: 62px 1fr;
+                        gap: 12px;
+                      }
+                    
+                      .turno-acciones {
+                        grid-column: 1 / -1;
+                        flex-direction: row;
+                        justify-content: space-between;
+                        align-items: center;
+                      }
+                    }
+                    
+                    .turno-pagination {
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 12px;
+                      margin-top: -6px;
+                      margin-bottom: 28px;
+                      flex-wrap: wrap;
+                    }
+                    
+                    .turno-pagination button {
+                      width: 42px;
+                      height: 42px;
+                      border-radius: 50%;
+                      border: 2px solid var(--p);
+                      background: #fff;
+                      color: var(--p);
+                      font-size: 18px;
+                      font-weight: 700;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      cursor: pointer;
+                      transition: all .18s ease;
+                    }
+                    
+                    .turno-pagination button:hover:not(:disabled) {
+                      background: var(--p);
+                      color: #fff;
+                      transform: translateY(-1px);
+                      box-shadow: 0 8px 22px rgba(107,29,42,.18);
+                    }
+                    
+                    .turno-pagination button:disabled {
+                      border-color: var(--outline-v);
+                      color: var(--secondary);
+                      background: #fdfaf8;
+                      opacity: .45;
+                      cursor: not-allowed;
+                    }
+                    
+                    .turno-pagination span {
+                      min-width: 70px;
+                      text-align: center;
+                      font-size: 13px;
+                      font-weight: 700;
+                      color: var(--secondary);
                     }
                 `}</style>
             </div>
