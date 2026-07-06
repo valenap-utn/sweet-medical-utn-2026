@@ -215,8 +215,8 @@ export default function PlanesPage() {
                                             )}
                                         </div>
 
-                                        <Link href="/registro" className="plan-button">
-                                            Seleccionar plan
+                                        <Link href={`/planes/${plan._id}`} className="plan-button plan-button-info">
+                                            Más info
                                         </Link>
                                     </div>
                                 );
