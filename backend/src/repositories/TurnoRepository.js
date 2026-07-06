@@ -23,6 +23,15 @@ export class TurnoRepository {
             .populate("practica")
     }
 
+    async findByMedicoAndPacienteId ({pacienteId, medicoId}) {
+        return await this.model
+            .find({paciente: pacienteId, medico: medicoId})
+            .sort({fechaHoraInicio: -1})
+            .populate("sede")
+            .populate("especialidad")
+            .populate("practica")
+    }
+
     async save(turno) {
         return await turno.save();
     }
