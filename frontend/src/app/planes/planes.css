@@ -343,3 +343,38 @@
 .coverage-table-wrap::-webkit-scrollbar-thumb:hover {
     background: rgba(107, 29, 42, 0.45);
 }
+
+/* ── AGREGADO: botón Más info (navega a detalle del plan) ── */
+.plan-button-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    width: 100%;
+    background: transparent;
+    color: var(--p);
+    border: 2px solid var(--p);
+    font-weight: 700;
+    border-radius: 13px;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+    transition: all .2s;
+}
+
+.plan-button-info:hover {
+    background: var(--p);
+    color: #fff;
+}
+
+.plan-card.highlight .plan-button-info {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border-color: rgba(255,255,255,.4);
+}
+
+.plan-card.highlight .plan-button-info:hover {
+    background: rgba(255,255,255,.25);
+}
+/* ─────────────────────────────────────────────────────────── */
