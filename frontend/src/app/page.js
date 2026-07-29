@@ -41,8 +41,8 @@ const ACCIONES_PACIENTE = [
         href: "/turnos",
     },
     {
-        titulo: "Mis turnos",
-        descripcion: "Revisá los turnos que preseleccionaste antes de confirmar la reserva.",
+        titulo: "Mis turnos seleccionados",
+        descripcion: "Revisá los turnos que seleccionados antes de confirmar la reserva.",
         href: "/carrito",
     },
     {

@@ -10,7 +10,6 @@ import styles from "./page.module.css";
 
 const MODULOS = [
   {
-    numero: "01",
     titulo: "Servicios",
     descripcion:
         "Administrá las especialidades y prácticas que ofrecés a pacientes.",
@@ -18,7 +17,6 @@ const MODULOS = [
     href: "/medico/servicios",
   },
   {
-    numero: "02",
     titulo: "Sedes",
     descripcion:
         "Indicá en qué centros de atención brindás cada servicio.",
@@ -26,7 +24,6 @@ const MODULOS = [
     href: "/medico/sedes",
   },
   {
-    numero: "03",
     titulo: "Disponibilidades",
     descripcion:
       "Definí los días, horarios, sedes y servicios en los que atendés.",
@@ -34,7 +31,6 @@ const MODULOS = [
     href: "/medico/disponibilidades",
   },
   {
-    numero: "04",
     titulo: "Agenda",
     descripcion:
       "Consultá los turnos generados a partir de tus disponibilidades.",
@@ -42,7 +38,6 @@ const MODULOS = [
     href: "/medico/agenda",
   },
   {
-    numero: "05",
     titulo: "Pacientes y turnos",
     descripcion:
       "Consultá el historial de un paciente y gestioná sus turnos.",
@@ -105,24 +100,18 @@ export default function PanelMedicoPage() {
         <div className={styles.sectionHeading}>
           <div>
             <span className={styles.eyebrow}>Gestión médica</span>
-            <h2>¿Qué vas a poder administrar?</h2>
+            <h2>Accesos principales</h2>
           </div>
         </div>
 
         <section className={styles.modules} aria-label="Módulos del panel médico">
           {MODULOS.map((modulo) => (
               <Link
-                  key={modulo.numero}
+                  key={modulo.titulo}
                   href={modulo.href ?? "/medico"}
-                  className={`${styles.moduleCard} ${
-                      modulo.siguiente ? styles.featuredCard : ""
-                  }`}
+                  className={styles.moduleCard}
                   style={{ textDecoration: "none" }}
               >
-                <div className={styles.cardTop}>
-                  <span className={styles.number}>{modulo.numero}</span>
-                </div>
-
                 <h3>{modulo.titulo}</h3>
                 <p>{modulo.descripcion}</p>
                 <div className={styles.detail}>{modulo.detalle}</div>

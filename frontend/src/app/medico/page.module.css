@@ -19,8 +19,8 @@
   overflow: hidden;
   padding: 52px 40px;
   background:
-    linear-gradient(125deg, rgba(107, 29, 42, 0.98), rgba(78, 21, 32, 0.94)),
-    var(--p);
+          linear-gradient(125deg, rgba(107, 29, 42, 0.98), rgba(78, 21, 32, 0.94)),
+          var(--p);
   color: white;
 }
 
@@ -118,10 +118,10 @@
 }
 
 .moduleCard {
-  min-height: 225px;
+  min-height: 165px;
   display: flex;
   flex-direction: column;
-  padding: 21px;
+  padding: 24px 21px;
   border: 1px solid var(--outline-v);
   border-radius: 18px;
   background: white;
@@ -134,28 +134,8 @@
   box-shadow: 0 12px 28px rgba(107, 29, 42, 0.09);
 }
 
-.featuredCard {
-  border-color: var(--p-fixed-dim);
-  background: linear-gradient(145deg, white, var(--p-fixed));
-}
-
-.cardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 22px;
-}
-
-.number {
-  color: var(--p);
-  font-family: "Literata", Georgia, serif;
-  font-size: 24px;
-  font-weight: 700;
-}
-
 .moduleCard h3 {
-  margin: 0 0 7px;
+  margin: 0 0 10px;
   color: var(--p);
   font-family: "Literata", Georgia, serif;
   font-size: clamp(16px, 2.4vw, 18px);
@@ -258,7 +238,7 @@
   }
 
   .moduleCard {
-    min-height: 205px;
+    min-height: 145px;
   }
 
   .flow {

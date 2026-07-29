@@ -20,7 +20,20 @@ export async function obtenerAgendaMedico(params = {}) {
   if (params.estado) query.estado = params.estado;
 
   const { data } = await api.get("/medicos/agenda", { params: query });
-  return Array.isArray(data) ? data : [];
+
+  if (Array.isArray(data)) {
+    return {
+      turnos: data,
+      totalPages: 1,
+      total: data.length,
+    };
+  }
+
+  return {
+    turnos: data.turnos ?? [],
+    totalPages: data.totalPages ?? 1,
+    total: data.total ?? 0,
+  };
 }
 
 /**
