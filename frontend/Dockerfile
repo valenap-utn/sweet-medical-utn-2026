@@ -1,33 +1,41 @@
+# ─────────────────────────────────────────────
+# Stage 1 - BUILD
+# Compila Next en archivos estáticos
+# ─────────────────────────────────────────────
 FROM node:24-alpine AS build
 
 WORKDIR /app
 
+# Copiar manifiestos primero para aprovechar cache
 COPY package*.json ./
 
+# Instalar dependencias necesarias para compilar
 RUN npm install
 
+# Copiar código fuente
 COPY . .
 
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
 RUN npm run build
 
-FROM node:24-alpine AS runner
 
-WORKDIR /app
+# ─────────────────────────────────────────────
+# Stage 2 - SERVE
+# Sirve los archivos estáticos con Nginx
+# ─────────────────────────────────────────────
+FROM nginx:alpine AS runner
 
-ENV NODE_ENV=production
-ENV PORT=3000
+# Copiar resultado del build al directorio web de Nginx
+COPY --from=build /app/out /usr/share/nginx/html
 
-COPY package*.json ./
+# Configuración de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN npm install --omit=dev
+EXPOSE 80
 
-COPY --from=build /app/.next ./.next
-COPY --from=build /app/public ./public
-COPY --from=build /app/package.json ./package.json
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]

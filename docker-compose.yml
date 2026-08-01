@@ -2,6 +2,7 @@ services:
   mongo:
     image: mongo:7
     container_name: sweet-medical-mongo
+    restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
@@ -9,6 +10,46 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
       - mongo_data:/data/db
+    networks:
+      - sweet-medical-net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: sweet-medical-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+      MONGODB_URI: mongodb://root:secret@mongo:27017/sweet-medical?authSource=admin
+      JWT_ACCESS_SECRET: super_secret_access
+      JWT_REFRESH_SECRET: super_secret_refresh
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - mongo
+    networks:
+      - sweet-medical-net
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api
+    container_name: sweet-medical-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - sweet-medical-net
 
 volumes:
   mongo_data:
+
+networks:
+  sweet-medical-net:
+    driver: bridge

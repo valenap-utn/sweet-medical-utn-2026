@@ -1,13 +1,18 @@
 "use client";
 
 import {useEffect, useState} from "react";
+import Link from "next/link";
 import {getPlanes} from "@/lib/serviciosApi";
 import {getApiErrorMessage} from "@/lib/api";
+import {useAuth} from "@/context/AuthContext";
 import Spinner from "@/components/ui/Spinner";
 import Alert from "@/components/ui/Alert";
-import Link from "next/link";
 import "./planes.css";
-import {LuCircleCheck, LuCircleDashed, LuCircleX,} from "react-icons/lu";
+import {
+    LuCircleCheck,
+    LuCircleDashed,
+    LuCircleX,
+} from "react-icons/lu";
 
 const FALLBACK_PLANES = [
     {
@@ -143,6 +148,7 @@ function generarFilasCobertura(planes) {
 }
 
 export default function PlanesPage() {
+    const {usuario} = useAuth();
     const [planes, setPlanes] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState("");
@@ -153,14 +159,19 @@ export default function PlanesPage() {
         (async () => {
             try {
                 const data = await getPlanes();
-                if (activo) setPlanes(data.length ? data : FALLBACK_PLANES);
+
+                if (activo) {
+                    setPlanes(data.length ? data : FALLBACK_PLANES);
+                }
             } catch (e) {
                 if (activo) {
                     setError(getApiErrorMessage(e, "No pudimos cargar los planes."));
                     setPlanes(FALLBACK_PLANES);
                 }
             } finally {
-                if (activo) setCargando(false);
+                if (activo) {
+                    setCargando(false);
+                }
             }
         })();
 
@@ -224,15 +235,15 @@ export default function PlanesPage() {
                                                 (feature, fi) => (
                                                     <div key={fi} className="plan-feature">
                                                         <span className="plan-feature-check">✓</span>
-                                                        <span>{typeof feature === "string" ? feature : feature.nombre ?? "Cobertura médica"}</span>
+                                                        <span>
+                                                            {typeof feature === "string"
+                                                                ? feature
+                                                                : feature.nombre ?? "Cobertura médica"}
+                                                        </span>
                                                     </div>
                                                 )
                                             )}
                                         </div>
-
-                                        <Link href={`/planes/${plan._id}`} className="plan-button plan-button-info">
-                                            Más info
-                                        </Link>
                                     </div>
                                 );
                             })}
@@ -267,10 +278,10 @@ export default function PlanesPage() {
 
                                                 return (
                                                     <td key={plan._id}>
-                                                        <span className={`coverage-badge ${claseNivel(nivel)}`}>
-                                                            <IconoNivel nivel={nivel}/>
-                                                            {textoNivel(nivel)}
-                                                        </span>
+                                                            <span className={`coverage-badge ${claseNivel(nivel)}`}>
+                                                                <IconoNivel nivel={nivel}/>
+                                                                {textoNivel(nivel)}
+                                                            </span>
                                                     </td>
                                                 );
                                             })}
@@ -296,24 +307,25 @@ export default function PlanesPage() {
                                     No cubierta
                                 </span>
                             </div>
-
                         </section>
                     </>
                 )}
 
-                <div className="glass-rose planes-cta">
-                    <div>
-                        <div className="planes-cta-title">¿Tenés obra social?</div>
-                        <div className="planes-cta-text">
-                            Podés asociar tu obra social y plan al crear tu cuenta. Accedés a descuentos automáticos en
-                            cada turno.
+                {!usuario && (
+                    <div className="glass-rose planes-cta">
+                        <div>
+                            <div className="planes-cta-title">¿Tenés obra social?</div>
+                            <div className="planes-cta-text">
+                                Podés asociar tu obra social y plan al crear tu cuenta. Accedés a descuentos automáticos en
+                                cada turno.
+                            </div>
                         </div>
-                    </div>
 
-                    <Link href="/registro" className="planes-cta-button">
-                        Crear cuenta gratis
-                    </Link>
-                </div>
+                        <Link href="/registro" className="planes-cta-button">
+                            Crear cuenta gratis
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );
