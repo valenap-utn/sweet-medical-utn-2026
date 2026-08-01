@@ -2,11 +2,13 @@ import {addMinutes, isAfter, isValid, parseISO, subHours} from "date-fns";
 import {NivelCobertura} from "../domain/enums/NivelCobertura.js";
 import {EstadoTurno} from "../domain/enums/EstadoTurno.js";
 import {BadRequestError, ConflictError, ForbiddenError, NotFoundError} from "../error/AppError.js";
+import {TipoNotificacion} from "../domain/Notificacion.js";
 
 export class TurnoService {
-    constructor(turnoRepository, pacienteRepository) {
+    constructor(turnoRepository, pacienteRepository, notificacionService) {
         this.turnoRepository = turnoRepository;
         this.pacienteRepository = pacienteRepository;
+        this.notificacionService = notificacionService;
     }
 
     // POST /api/turnos
@@ -55,6 +57,19 @@ export class TurnoService {
             usuario: usuario.usuarioId,
             motivo: "Turno liberado luego de cancelación.",
             turnoId: turno._id,
+        });
+
+        const esMedicoQuienCancela = usuario.medicoId?.toString() === (turno.medico?._id ?? turno.medico)?.toString();
+        const destinatarioId = esMedicoQuienCancela
+            ? turno.paciente.usuario.toString()
+            : turno.medico.usuario.toString();
+
+        await this.notificacionService.crearNotificacion({
+            destinatarioId,
+            remitenteId: usuario.usuarioId,
+            turnoId: turno._id,
+            mensaje: `El turno del ${turno.fechaHoraInicio.toLocaleString("es-AR")} fue cancelado. Motivo: ${motivo}`,
+            tipo: TipoNotificacion.TURNO_CANCELADO,
         });
 
         return await this.turnoRepository.save(turno);
@@ -244,6 +259,20 @@ export class TurnoService {
             motivo: "Turno realizado",
             turnoId: turno._id,
         })
+
+        const esMedicoQuienCancela = usuario.medicoId?.toString() === (turno.medico?._id ?? turno.medico)?.toString();
+        const destinatarioId = esMedicoQuienCancela
+            ? turno.paciente.usuario.toString()
+            : turno.medico.usuario.toString();
+
+        await this.notificacionService.crearNotificacion({
+            destinatarioId,
+            remitenteId: usuario.usuarioId,
+            turnoId: turno._id,
+            mensaje: `El turno del ${turno.fechaHoraInicio.toLocaleString("es-AR")} fue realizado.`,
+            tipo: TipoNotificacion.TURNO_CONFIRMADO,
+        });
+
         return await this.turnoRepository.save(turno);
     }
 
@@ -262,6 +291,15 @@ export class TurnoService {
             motivo: "Turno confirmado",
             turnoId: turno._id,
         })
+
+        await this.notificacionService.crearNotificacion({
+            destinatarioId: turno.paciente.usuario.toString(),
+            remitenteId: usuario.usuarioId,
+            turnoId: turno._id,
+            mensaje: `Tu turno del ${turno.fechaHoraInicio.toLocaleString("es-AR")} fue confirmado.`,
+            tipo: TipoNotificacion.TURNO_CONFIRMADO,
+        });
+
         return await this.turnoRepository.save(turno);
     }
 
@@ -288,6 +326,20 @@ export class TurnoService {
             motivo: "Nueva fecha propuesta para el turno.",
             turnoId: turnoId
         });
+
+        const esMedicoQuienCancela = usuario.medicoId?.toString() === (turno.medico?._id ?? turno.medico)?.toString();
+        const destinatarioId = esMedicoQuienCancela
+            ? turno.paciente.usuario.toString()
+            : turno.medico.usuario.toString();
+
+        await this.notificacionService.crearNotificacion({
+            destinatarioId,
+            remitenteId: usuario.usuarioId,
+            turnoId: turno._id,
+            mensaje: `Propuesta de cambio de fecha del turno del ${turno.fechaHoraInicio.toLocaleString("es-AR")} a  ${nuevaFechaHora.toLocaleString("es-AR")}.`,
+            tipo: TipoNotificacion.CAMBIO_FECHA_PROPUESTO,
+        });
+
         return await this.turnoRepository.save(turno);
     }
 
@@ -322,6 +374,14 @@ export class TurnoService {
             motivo: "Reserva de turno",
             turnoId: turno._id,
         })
+
+        await this.notificacionService.crearNotificacion({
+            destinatarioId: turno.medico.usuario.toString(),
+            remitenteId: usuario.usuarioId,
+            turnoId: turno._id,
+            mensaje: `Un paciente reservó un turno para el ${turno.fechaHoraInicio.toLocaleString("es-AR")}.`,
+            tipo: TipoNotificacion.TURNO_RESERVADO,
+        });
 
         return await this.turnoRepository.save(turno);
     }

@@ -10,14 +10,15 @@ export class NotificacionService {
 
     // Crea y persiste una notificación.
     // Usado internamente por otros servicios (TurnoService, etc.) al disparar eventos.
-    async crearNotificacion({destinatarioId, remitenteId, mensaje, tipo}) {
+    async crearNotificacion({destinatarioId, remitenteId, mensaje, tipo, turnoId = null}) {
         try {
             const notificacion = new Notificacion({
                 id: randomUUID(),
                 destinatario: destinatarioId,
                 remitente: remitenteId,
                 mensaje,
-                tipo
+                tipo,
+                turnoId,
             });
             return await this.notificacionRepository.guardar({notificacion});
         } catch (e) {
@@ -47,7 +48,7 @@ export class NotificacionService {
         if (!notificacionId) throw new BadRequestError("El id de la notificación es obligatorio.");
         this.#validarUsuarioId(usuarioId);
 
-        const notificacion = await this.notificacionRepository.obtenerPorId({notificacionId});
+        const notificacion = await this.notificacionRepository.obtenerPorId({id: notificacionId});
 
         if (!notificacion) {
             throw new NotFoundError(`Notificación con id "${notificacionId}" no encontrada.`);
@@ -59,7 +60,7 @@ export class NotificacionService {
             return notificacion; // ya estaba leída, no se modifica
         }
 
-        return this.notificacionRepository.marcarComoLeida({notificacionId});
+        return this.notificacionRepository.marcarComoLeida({id: notificacionId});
     }
 
     // ─── private ──────────────────────────────────────────────────────────────

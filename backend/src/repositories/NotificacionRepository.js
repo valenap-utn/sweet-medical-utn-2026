@@ -8,6 +8,7 @@ export class NotificacionRepository {
             remitente:         notificacion.remitente,
             mensaje:           notificacion.mensaje,
             tipo:              notificacion.tipo,
+            turnoId:           notificacion.turnoId,
             leida:             notificacion.leida,
             fechaHoraCreacion: new Date(notificacion.fechaHoraCreacion.toString()),
             fechaHoraLeida:    notificacion.fechaHoraLeida

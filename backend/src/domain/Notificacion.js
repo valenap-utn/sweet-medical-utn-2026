@@ -16,17 +16,19 @@ export class Notificacion {
     remitente;      // Usuario (quien origina el evento)
     mensaje;
     tipo;
+    turnoId;        // Turno relacionado (para poder navegar desde el frontend)
     fechaHoraCreacion;
     fechaHoraLeida;
     leida;
 
-    constructor({id, destinatario, remitente, mensaje, tipo}) {
+    constructor({id, destinatario, remitente, mensaje, tipo, turnoId = null}) {
         this.validarParametros({id, destinatario, remitente, mensaje, tipo});
         this.id = id;
         this.destinatario = destinatario;
         this.remitente = remitente;
         this.mensaje = mensaje;
         this.tipo = tipo;
+        this.turnoId = turnoId;
         this.fechaHoraCreacion = new Date();
         this.leida = false;
         this.fechaHoraLeida = null;

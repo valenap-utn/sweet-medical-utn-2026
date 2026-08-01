@@ -93,12 +93,12 @@ const sedeRepository = new SedeRepository();
 
 // Services
 const pacienteService = new PacienteService({pacienteRepository, turnoRepository});
-const turnoService = new TurnoService(turnoRepository,pacienteRepository);
 const serviciosMedicoService = new ServiciosMedicoService({especialidadRepository, practicaRepository});
 const agendaService = new AgendaService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository});
 const medicoService = new MedicoService({medicoRepository, turnoRepository, especialidadRepository, practicaRepository, agendaService, sedeRepository});
 const planService = new PlanService({planRepository});
 const notificacionService = new NotificacionService(notificacionRepository);
+const turnoService = new TurnoService(turnoRepository,pacienteRepository,notificacionService);
 const authService = new AuthService(usuarioRepository,pacienteRepository,medicoRepository);
 const especialidadService = new EspecialidadService(especialidadRepository);
 const practicaService = new PracticaService(practicaRepository);

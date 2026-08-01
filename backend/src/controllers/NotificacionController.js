@@ -28,9 +28,9 @@ export class NotificacionController {
 // Marca una notificación como leída. Idempotente.
     marcarComoLeida = async (req, res, next) => {
         try {
-            const {id} = req.params;
+            const {id: notificacionId} = req.params;
             const {usuarioId} = req.body;
-            const notificacion = await this.notificacionService.marcarComoLeida({id, usuarioId});
+            const notificacion = await this.notificacionService.marcarComoLeida({notificacionId, usuarioId});
             res.status(200).json({data: notificacion});
         } catch (e) {
             next(e);

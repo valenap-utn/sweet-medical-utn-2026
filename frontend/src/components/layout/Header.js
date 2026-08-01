@@ -10,6 +10,7 @@ import ConfirmLogoutModal from "@/components/common/ConfirmLogout";
 import {FaBars, FaChevronDown} from "react-icons/fa";
 import {FaCalendarAlt} from "@/lib/icons";
 import {FaXmark} from "react-icons/fa6";
+import NotificationBell from "@/components/layout/CampanaNotificacion";
 
 
 const NAV_PUBLICO = [
@@ -152,6 +153,7 @@ export default function Header() {
                             {/*<button onClick={handleLogout} style={{ padding: "8px 14px", borderRadius: 999, background: "transparent", color: "var(--on-surf-v)", fontWeight: 600, fontSize: 12, border: "2px solid var(--outline-v)", cursor: "pointer", fontFamily: "inherit" }}>
                 Salir
               </button>*/}
+                            <NotificationBell />
                             <UserMenu username={usuario.nombreUsuario} onLogout={handleLogout}/>
                         </>
                     ) : (

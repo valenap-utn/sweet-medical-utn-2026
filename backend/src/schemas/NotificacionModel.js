@@ -22,6 +22,11 @@ const notificacionSchema = new mongoose.Schema(
             enum: Object.values(TipoNotificacion),
             required: true,
         },
+        turnoId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Turno",
+            default: null,
+        },
         leida: {
             type: Boolean,
             default: false,
