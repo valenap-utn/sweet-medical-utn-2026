@@ -228,7 +228,7 @@ export default function CarritoPage() {
               </p>
             )}
             <button onClick={handleConfirmar} disabled={confirmando||!usuario||!esPaciente}
-              style={{ width:"100%", marginTop:14, padding:"13px 0", background:"var(--p)", color:"#fff", fontWeight:700, borderRadius:13, fontSize:13, border:"none", cursor:confirmando||!usuario||!esPaciente?"not-allowed":"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8, fontFamily:"inherit", opacity:confirmando||!usuario||!esPaciente?0.7:1 }}>
+              style={{ width:"100%", marginTop:14, padding:"13px 0", background:"var(--accent)", color:"#fff", fontWeight:700, borderRadius:13, fontSize:13, border:"none", cursor:confirmando||!usuario||!esPaciente?"not-allowed":"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8, fontFamily:"inherit", opacity:confirmando||!usuario||!esPaciente?0.7:1 }}>
                 {confirmando
                     ? <Spinner size={16}/>
                     : <FaCheck size={14}/>

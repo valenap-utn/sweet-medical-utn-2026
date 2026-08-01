@@ -4,6 +4,7 @@ import { useState } from "react";
 
 const VARIANTS = {
   primary:   { bg: "var(--p)",      color: "#fff",          border: "var(--p)" },
+  accent:    { bg: "var(--accent)", color: "#fff",          border: "var(--accent)" },
   secondary: { bg: "transparent",   color: "var(--p)",      border: "var(--p)" },
   ghost:     { bg: "transparent",   color: "var(--on-surf-v)", border: "var(--outline-v)" },
   danger:    { bg: "#991b1b",        color: "#fff",          border: "#991b1b" },
@@ -28,6 +29,13 @@ export default function Button({
       return isHovered ? {
         background: "rgba(138, 33, 70, 0.08)",
         borderColor: "var(--p)",
+      } : {};
+    }
+    if (variant === "accent") {
+      return isHovered ? {
+        background: "#fff",
+        color: "var(--accent)",
+        borderColor: "var(--accent)",
       } : {};
     }
     return {};

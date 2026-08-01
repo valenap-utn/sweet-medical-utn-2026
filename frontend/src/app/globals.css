@@ -7,6 +7,10 @@
     --p-mid: #8B2535;
     --p-fixed: #F9EEF0;
     --p-fixed-dim: #F0D4D9;
+    --accent: #1D6B5E;
+    --accent-dark: #134C43;
+    --accent-soft: #E7F3F1;
+    --accent-border: #B7DCD6;
     --surf: #FDFAF8;
     --surf-card: #FFFFFF;
     --on-surf: #1A1214;
@@ -28,6 +32,10 @@
     --color-p-dark: var(--p-dark);
     --color-p-fixed: var(--p-fixed);
     --color-p-fixed-dim: var(--p-fixed-dim);
+    --color-accent: var(--accent);
+    --color-accent-dark: var(--accent-dark);
+    --color-accent-soft: var(--accent-soft);
+    --color-accent-border: var(--accent-border);
     --color-surf: var(--surf);
     --color-surf-card: var(--surf-card);
     --color-on-surf: var(--on-surf);
@@ -261,7 +269,7 @@ input:not([type="checkbox"]):not([type="radio"]) {
 }
 
 .Toastify__progress-bar--success {
-    background: var(--p);
+    background: var(--accent);
 }
 
 .Toastify__progress-bar--error {

@@ -1,6 +1,6 @@
 const STYLES = {
   error:   { bg: "#fce8e8", color: "#991b1b", border: "rgba(153,27,27,.2)" },
-  success: { bg: "#e6f4eb", color: "#166534", border: "rgba(22,101,52,.2)"  },
+  success: { bg: "var(--accent-soft)", color: "var(--accent)", border: "var(--accent-border)" },
   info:    { bg: "var(--p-fixed)", color: "var(--p)", border: "var(--outline-v)" },
 };
 export default function Alert({ type = "info", children, style }) {

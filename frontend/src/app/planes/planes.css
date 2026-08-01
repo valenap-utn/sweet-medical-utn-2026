@@ -218,8 +218,8 @@
 }
 
 .coverage-badge.total {
-    background: #e7f8ee;
-    color: #177245;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
 .coverage-badge.partial {
@@ -412,7 +412,7 @@
 }
 
 .coverage-icon.total {
-    color: #177245;
+    color: var(--accent);
 }
 
 .coverage-icon.partial {

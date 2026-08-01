@@ -74,8 +74,8 @@
 .submitButton {
     padding: 11px 18px;
     border-radius: 11px;
-    border: 2px solid var(--p);
-    background: var(--p);
+    border: 2px solid var(--accent);
+    background: var(--accent);
     color: #fff;
     font-weight: 700;
     cursor: pointer;
@@ -84,8 +84,8 @@
 
 .submitButton:hover:not(:disabled) {
     background: #fff;
-    color: var(--p);
-    border-color: var(--p);
+    color: var(--accent);
+    border-color: var(--accent);
 }
 
 .submitButton:disabled {

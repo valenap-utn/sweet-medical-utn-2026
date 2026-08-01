@@ -43,8 +43,8 @@ function accionesDisponibles(estado) {
 const STATUS_STYLE = {
     Disponible: {bg: "#f0eded", color: "var(--on-surf-v)"},
     Reservado: {bg: "var(--p-fixed)", color: "var(--p)"},
-    Confirmado: {bg: "#e6f0fb", color: "#1a4f91"},
-    Realizado: {bg: "#e6f4eb", color: "#166534"},
+    Confirmado: {bg: "var(--accent-soft)", color: "var(--accent)"},
+    Realizado: {bg: "var(--accent-soft)", color: "var(--accent-dark)"},
     Cancelado: {bg: "#fce8e8", color: "#991b1b"},
 };
 
@@ -128,7 +128,7 @@ function AccionesTurnoMenu({
                     {puedeConfirmar && (
                         <DropdownMenu.Item asChild>
                             <button style={itemStyle} onClick={() => onConfirmar(turno._id)}>
-                                <FaUserCheck size={14} color="var(--p)"/> Confirmar turno
+                                <FaUserCheck size={14} color="var(--accent)"/> Confirmar turno
                             </button>
                         </DropdownMenu.Item>
                     )}

@@ -34,10 +34,10 @@ const MENU = [
 
 const STATUS_STYLE = {
     Reservado: {bg: "var(--p-fixed)", color: "var(--p)"},
-    Realizado: {bg: "#e6f4eb", color: "#166534"},
+    Realizado: {bg: "var(--accent-soft)", color: "var(--accent-dark)"},
     Cancelado: {bg: "#fce8e8", color: "#991b1b"},
     Disponible: {bg: "#f0eded", color: "var(--on-surf-v)"},
-    Confirmado: {bg: "#e6f0fb", color: "#1a4f91"},
+    Confirmado: {bg: "var(--accent-soft)", color: "var(--accent)"},
 };
 
 const fmtFecha = (d) =>
@@ -414,12 +414,12 @@ function CambioFechaModal({turno, onClose, onConfirm}) {
 
                 {turnoElegido && (
                     <div style={{
-                        background: "#e6f4eb",
+                        background: "var(--accent-soft)",
                         borderRadius: 10,
                         padding: "10px 14px",
                         marginBottom: 12,
                         fontSize: 12,
-                        color: "#166534"
+                        color: "var(--accent)"
                     }}>
                         ✅ Nuevo turno seleccionado: <strong>{fmtFecha(turnoElegido.fechaHoraInicio)}</strong>
                     </div>
@@ -1362,8 +1362,8 @@ export default function PerfilPage() {
                     }
                     
                     .nivel-TOTAL {
-                      background: #e6f4eb;
-                      color: #166534;
+                      background: var(--accent-soft);
+                      color: var(--accent);
                     }
                     
                     .nivel-PARCIAL {

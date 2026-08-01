@@ -168,7 +168,7 @@
 }
 
 .carnet-cob-item.nivel-total {
-    background: #e7f8ee;
+    background: var(--accent-soft);
 }
 
 .carnet-cob-item.nivel-partial {
@@ -226,7 +226,7 @@
 }
 
 .incluye-eyebrow {
-    color: #177245;
+    color: var(--accent);
 }
 
 .no-incluye-eyebrow {
@@ -293,7 +293,7 @@
 }
 
 .incluye-item.nivel-total {
-    background: #e7f8ee;
+    background: var(--accent-soft);
 }
 
 .incluye-item.nivel-partial {
@@ -477,8 +477,8 @@
 }
 
 .comp-badge.nivel-total {
-    background: #e7f8ee;
-    color: #177245;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
 .comp-badge.nivel-partial {
@@ -851,7 +851,7 @@
 }
 
 .nivel-icon.total {
-    color: #177245;
+    color: var(--accent);
 }
 
 .nivel-icon.partial {

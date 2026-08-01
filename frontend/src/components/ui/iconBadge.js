@@ -34,6 +34,11 @@ export default function IconBadge({
             color: "#fff",
             border: "1px solid var(--p)",
         },
+        accent: {
+            background: "var(--accent-soft)",
+            color: "var(--accent)",
+            border: "1px solid var(--accent-border)",
+        },
         muted: {
             background: "rgba(123, 26, 48, .08)",
             color: "var(--p)",
